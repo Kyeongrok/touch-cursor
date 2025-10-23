@@ -207,23 +207,10 @@ public partial class MainWindow : Window
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        var settingsWindow = new SettingsWindow(_options)
-        {
-            Owner = this
-        };
-
-        if (settingsWindow.ShowDialog() == true)
-        {
-            // Settings were saved, reload UI to reflect any changes
-            LoadOptionsToUI();
-
-            // Update hook service if activation key changed or enabled state changed
-            if (_options.Enabled)
-            {
-                _hookService.StopHook();
-                _hookService.StartHook();
-            }
-        }
+        // MainWindow is no longer used - SettingsWindow is now the main window
+        // This code is kept for compatibility but should not be called
+        MessageBox.Show("SettingsWindow is now the main window. This button should not be visible.",
+            "Information", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)

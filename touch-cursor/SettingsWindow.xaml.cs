@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using touch_cursor.Models;
 using touch_cursor.Services;
 using MessageBox = System.Windows.MessageBox;
@@ -11,22 +13,45 @@ public partial class SettingsWindow : Window
 {
     private readonly TouchCursorOptions _options;
     private readonly TouchCursorOptions _originalOptions;
+    private readonly KeyboardHookService _hookService;
+    private readonly KeyMappingService _mappingService;
+    private NotifyIcon? _notifyIcon;
+    private bool _isClosing = false;
     private bool _hasChanges = false;
     private int _selectedActivationKey = 0; // Currently selected activation key for editing mappings
 
-    public SettingsWindow(TouchCursorOptions options)
+    public SettingsWindow()
     {
         InitializeComponent();
 
-        _options = options;
-        // Create a backup of original options
-        _originalOptions = LoadBackup(options);
+        // Load options
+        _options = TouchCursorOptions.Load(TouchCursorOptions.GetDefaultConfigPath());
 
-        // Subscribe to language change events
+        // Create a backup of original options
+        _originalOptions = LoadBackup(_options);
+
+        // Load language
+        LocalizationManager.Instance.LoadLanguage(_options.Language);
         LocalizationManager.Instance.LanguageChanged += UpdateUI;
+
+        // Initialize services
+        _mappingService = new KeyMappingService(_options);
+        _hookService = new KeyboardHookService(_mappingService);
+
+        // Wire up the SendKey event
+        _mappingService.SendKeyRequested += _hookService.SendKey;
+
+        // Setup system tray
+        SetupNotifyIcon();
 
         LoadOptionsToUI();
         UpdateUI();
+
+        // Start keyboard hook if enabled
+        if (_options.Enabled)
+        {
+            _hookService.StartHook();
+        }
     }
 
     private TouchCursorOptions LoadBackup(TouchCursorOptions options)
@@ -49,13 +74,77 @@ public partial class SettingsWindow : Window
         return backup;
     }
 
+    private void SetupNotifyIcon()
+    {
+        // Load custom icon if available, otherwise use system icon
+        System.Drawing.Icon? appIcon = null;
+        try
+        {
+            var iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                appIcon = new System.Drawing.Icon(iconPath);
+            }
+        }
+        catch
+        {
+            // Fallback to system icon if custom icon fails to load
+        }
+
+        _notifyIcon = new NotifyIcon
+        {
+            Icon = appIcon ?? System.Drawing.SystemIcons.Application,
+            Visible = true,
+            Text = "TouchCursor"
+        };
+
+        _notifyIcon.DoubleClick += (s, e) =>
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        };
+
+        var contextMenu = new ContextMenuStrip();
+        contextMenu.Items.Add("Show Settings", null, (s, e) =>
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        });
+        contextMenu.Items.Add(new ToolStripSeparator());
+        contextMenu.Items.Add("Enable/Disable", null, (s, e) =>
+        {
+            _options.Enabled = !_options.Enabled;
+            EnabledCheckBox.IsChecked = _options.Enabled;
+            if (_options.Enabled)
+                _hookService.StartHook();
+            else
+                _hookService.StopHook();
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        });
+        contextMenu.Items.Add(new ToolStripSeparator());
+        contextMenu.Items.Add("Exit", null, (s, e) =>
+        {
+            _isClosing = true;
+            Close();
+        });
+
+        _notifyIcon.ContextMenuStrip = contextMenu;
+    }
+
     private void LoadOptionsToUI()
     {
-        // General Tab - Activation Key Profiles
-        LoadActivationKeyProfiles();
+        // General Tab - Behavior
+        EnabledCheckBox.IsChecked = _options.Enabled;
+        TrainingModeCheckBox.IsChecked = _options.TrainingMode;
+        RunAtStartupCheckBox.IsChecked = _options.RunAtStartup;
         ShowInTrayCheckBox.IsChecked = _options.ShowInNotificationArea;
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
+
+        // General Tab - Activation Key Profiles
+        LoadActivationKeyProfiles();
 
         // Language
         LanguageComboBox.ItemsSource = LocalizationManager.Instance.GetAvailableLanguages();
@@ -313,6 +402,61 @@ public partial class SettingsWindow : Window
     //{
     //    // Removed - using ActivationKeyProfiles instead
     //}
+
+    private void EnabledCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null || _hookService == null) return;
+
+        _options.Enabled = EnabledCheckBox.IsChecked == true;
+        if (_options.Enabled)
+            _hookService.StartHook();
+        else
+            _hookService.StopHook();
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+    }
+
+    private void TrainingModeCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null) return;
+
+        _options.TrainingMode = TrainingModeCheckBox.IsChecked == true;
+        _options.BeepForMistakes = _options.TrainingMode;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+    }
+
+    private void RunAtStartupCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null) return;
+
+        _options.RunAtStartup = RunAtStartupCheckBox.IsChecked == true;
+        SetStartupRegistry(_options.RunAtStartup);
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+    }
+
+    private void SetStartupRegistry(bool enable)
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+
+            if (enable)
+            {
+                var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+                if (exePath != null)
+                    key?.SetValue("TouchCursor", exePath);
+            }
+            else
+            {
+                key?.DeleteValue("TouchCursor", false);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to update startup settings: {ex.Message}", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 
     private void ShowInTrayCheckBox_Changed(object sender, RoutedEventArgs e)
     {
@@ -689,8 +833,7 @@ public partial class SettingsWindow : Window
         {
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
-        DialogResult = true;
-        Close();
+        Hide(); // Hide to tray instead of closing
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -713,8 +856,29 @@ public partial class SettingsWindow : Window
             RestoreOriginalOptions();
         }
 
-        DialogResult = false;
-        Close();
+        Hide(); // Hide to tray instead of closing
+    }
+
+    private void Window_StateChanged(object sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Minimized)
+        {
+            Hide();
+        }
+    }
+
+    private void Window_Closing(object sender, CancelEventArgs e)
+    {
+        if (!_isClosing)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+        else
+        {
+            _hookService?.Dispose();
+            _notifyIcon?.Dispose();
+        }
     }
 
     private void RestoreOriginalOptions()

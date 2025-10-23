@@ -68,6 +68,9 @@ public partial class KeyMappingEditorDialog : Window
         SourceKeyTextBlock.Text = GetKeyName(sourceVk);
         TargetKeyTextBlock.Text = GetKeyNameWithModifiers(targetVk, modifiers);
         DescriptionTextBox.Text = description;
+
+        // Load modifier checkboxes from modifiers
+        UpdateModifierCheckboxes();
     }
 
     private void CaptureSourceKeyButton_Click(object sender, RoutedEventArgs e)
@@ -128,10 +131,39 @@ public partial class KeyMappingEditorDialog : Window
             if ((GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0)
                 _targetModifiers |= (int)ModifierFlags.Win;
 
+            UpdateModifierCheckboxes();
             TargetKeyTextBlock.Text = GetKeyNameWithModifiers(vkCode, _targetModifiers);
             CaptureTargetKeyButton.Content = "Capture Key...";
             CaptureTargetKeyButton.IsEnabled = true;
             _capturingTarget = false;
+        }
+    }
+
+    private void UpdateModifierCheckboxes()
+    {
+        CtrlCheckBox.IsChecked = (_targetModifiers & (int)ModifierFlags.Ctrl) != 0;
+        AltCheckBox.IsChecked = (_targetModifiers & (int)ModifierFlags.Alt) != 0;
+        ShiftCheckBox.IsChecked = (_targetModifiers & (int)ModifierFlags.Shift) != 0;
+        WinCheckBox.IsChecked = (_targetModifiers & (int)ModifierFlags.Win) != 0;
+    }
+
+    private void ModifierCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        // Update _targetModifiers based on checkboxes
+        _targetModifiers = 0;
+        if (CtrlCheckBox.IsChecked == true)
+            _targetModifiers |= (int)ModifierFlags.Ctrl;
+        if (AltCheckBox.IsChecked == true)
+            _targetModifiers |= (int)ModifierFlags.Alt;
+        if (ShiftCheckBox.IsChecked == true)
+            _targetModifiers |= (int)ModifierFlags.Shift;
+        if (WinCheckBox.IsChecked == true)
+            _targetModifiers |= (int)ModifierFlags.Win;
+
+        // Update display
+        if (_targetVkCode != 0)
+        {
+            TargetKeyTextBlock.Text = GetKeyNameWithModifiers(_targetVkCode, _targetModifiers);
         }
     }
 
@@ -257,15 +289,15 @@ public partial class KeyMappingEditorDialog : Window
         {
             _targetVkCode = vkCode;
 
-            // Capture current modifier keys
+            // Capture current modifier keys from checkboxes (instead of keyboard state)
             _targetModifiers = 0;
-            if ((GetKeyState(VK_CONTROL) & 0x8000) != 0)
+            if (CtrlCheckBox.IsChecked == true)
                 _targetModifiers |= (int)ModifierFlags.Ctrl;
-            if ((GetKeyState(VK_SHIFT) & 0x8000) != 0)
-                _targetModifiers |= (int)ModifierFlags.Shift;
-            if ((GetKeyState(VK_MENU) & 0x8000) != 0)
+            if (AltCheckBox.IsChecked == true)
                 _targetModifiers |= (int)ModifierFlags.Alt;
-            if ((GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0)
+            if (ShiftCheckBox.IsChecked == true)
+                _targetModifiers |= (int)ModifierFlags.Shift;
+            if (WinCheckBox.IsChecked == true)
                 _targetModifiers |= (int)ModifierFlags.Win;
 
             TargetKeyTextBlock.Text = GetKeyNameWithModifiers(vkCode, _targetModifiers);

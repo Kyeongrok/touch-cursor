@@ -54,6 +54,24 @@
                     <ComboBox x:Name="TargetKeyComboBox" Width="150" Height="30" Margin="5,5,0,0"
                               SelectionChanged="TargetKeyComboBox_SelectionChanged"/>
                 </StackPanel>
+
+                <!-- Modifier Keys -->
+                <TextBlock TextWrapping="Wrap" Margin="0,15,0,5" FontWeight="SemiBold">
+                    Modifier Keys:
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <CheckBox x:Name="CtrlCheckBox" Content="Ctrl" Margin="0,0,15,0"
+                              Checked="ModifierCheckBox_Changed" Unchecked="ModifierCheckBox_Changed"/>
+                    <CheckBox x:Name="AltCheckBox" Content="Alt" Margin="0,0,15,0"
+                              Checked="ModifierCheckBox_Changed" Unchecked="ModifierCheckBox_Changed"/>
+                    <CheckBox x:Name="ShiftCheckBox" Content="Shift" Margin="0,0,15,0"
+                              Checked="ModifierCheckBox_Changed" Unchecked="ModifierCheckBox_Changed"/>
+                    <CheckBox x:Name="WinCheckBox" Content="Win" Margin="0,0,0,0"
+                              Checked="ModifierCheckBox_Changed" Unchecked="ModifierCheckBox_Changed"/>
+                </StackPanel>
+                <TextBlock TextWrapping="Wrap" Margin="0,0,0,5" Foreground="Gray" FontSize="11">
+                    Select modifier keys to combine with the target key (e.g., Ctrl+C, Shift+Delete)
+                </TextBlock>
             </StackPanel>
         </GroupBox>
 

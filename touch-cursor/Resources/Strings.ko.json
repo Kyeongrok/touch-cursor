@@ -16,8 +16,8 @@
     "MinimizeToTray": "트레이로 최소화"
   },
   "SettingsWindow": {
-    "Title": "고급 설정 - 터치커서",
-    "Header": "고급 설정",
+    "Title": "설정 - 터치커서",
+    "Header": "설정",
     "TabGeneral": "일반",
     "TabKeyMappings": "키 매핑",
     "TabProgramLists": "프로그램 목록",

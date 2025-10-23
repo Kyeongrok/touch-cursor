@@ -16,8 +16,8 @@
     "MinimizeToTray": "Minimize to Tray"
   },
   "SettingsWindow": {
-    "Title": "Advanced Settings - TouchCursor",
-    "Header": "Advanced Settings",
+    "Title": "Settings - TouchCursor",
+    "Header": "Settings",
     "TabGeneral": "General",
     "TabKeyMappings": "Key Mappings",
     "TabProgramLists": "Program Lists",

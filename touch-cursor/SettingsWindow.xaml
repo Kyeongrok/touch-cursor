@@ -4,10 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Advanced Settings - TouchCursor" Height="600" Width="700"
-        WindowStartupLocation="CenterOwner"
+        Title="TouchCursor Settings" Height="600" Width="700"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
-        ShowInTaskbar="False">
+        ShowInTaskbar="True"
+        StateChanged="Window_StateChanged"
+        Closing="Window_Closing">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -54,6 +56,18 @@
 
                         <GroupBox x:Name="BehaviorGroupBox" Header="Behavior" Margin="0,0,0,15">
                             <StackPanel Margin="10">
+                                <CheckBox x:Name="EnabledCheckBox" Content="Enable TouchCursor"
+                                          IsChecked="False" Margin="0,5"
+                                          Checked="EnabledCheckBox_Changed"
+                                          Unchecked="EnabledCheckBox_Changed"/>
+                                <CheckBox x:Name="TrainingModeCheckBox" Content="Training Mode"
+                                          IsChecked="False" Margin="0,5"
+                                          Checked="TrainingModeCheckBox_Changed"
+                                          Unchecked="TrainingModeCheckBox_Changed"/>
+                                <CheckBox x:Name="RunAtStartupCheckBox" Content="Run at Windows startup"
+                                          IsChecked="False" Margin="0,5"
+                                          Checked="RunAtStartupCheckBox_Changed"
+                                          Unchecked="RunAtStartupCheckBox_Changed"/>
                                 <CheckBox x:Name="ShowInTrayCheckBox" Content="Show icon in notification area"
                                           IsChecked="True" Margin="0,5"
                                           Checked="ShowInTrayCheckBox_Changed"
