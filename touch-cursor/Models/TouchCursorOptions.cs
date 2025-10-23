@@ -19,6 +19,7 @@ public class TouchCursorOptions
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
     public int ActivationKey { get; set; } = 0x20; // VK_SPACE
+    public string Language { get; set; } = "en"; // Default language
 
     // Key mapping (VK_CODE -> VK_CODE or VK_CODE | ModifierFlags)
     public Dictionary<int, int> KeyMapping { get; set; } = new();

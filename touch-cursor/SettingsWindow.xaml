@@ -16,33 +16,33 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0" FontSize="20" FontWeight="Bold" Margin="0,0,0,20">
+        <TextBlock x:Name="HeaderTextBlock" Grid.Row="0" FontSize="20" FontWeight="Bold" Margin="0,0,0,20">
             Advanced Settings
         </TextBlock>
 
         <!-- Tab Control for different settings -->
-        <TabControl Grid.Row="1" Margin="0,0,0,20">
+        <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="0,0,0,20">
             <!-- General Tab -->
-            <TabItem Header="General">
+            <TabItem x:Name="GeneralTab" Header="General">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
-                        <GroupBox Header="Activation Key" Margin="0,0,0,15">
+                        <GroupBox x:Name="ActivationKeyGroupBox" Header="Activation Key" Margin="0,0,0,15">
                             <StackPanel Margin="10">
-                                <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
+                                <TextBlock x:Name="ActivationKeyDescriptionTextBlock" TextWrapping="Wrap" Margin="0,0,0,10">
                                     Choose the key that activates TouchCursor mode:
                                 </TextBlock>
                                 <ComboBox x:Name="ActivationKeyComboBox"
                                           Width="200" HorizontalAlignment="Left"
                                           SelectionChanged="ActivationKeyComboBox_SelectionChanged">
-                                    <ComboBoxItem Content="Space (Default)" Tag="32"/>
-                                    <ComboBoxItem Content="CapsLock" Tag="20"/>
-                                    <ComboBoxItem Content="Left Ctrl" Tag="162"/>
-                                    <ComboBoxItem Content="Right Ctrl" Tag="163"/>
+                                    <ComboBoxItem x:Name="ActivationKeySpace" Content="Space (Default)" Tag="32"/>
+                                    <ComboBoxItem x:Name="ActivationKeyCapsLock" Content="CapsLock" Tag="20"/>
+                                    <ComboBoxItem x:Name="ActivationKeyLeftCtrl" Content="Left Ctrl" Tag="162"/>
+                                    <ComboBoxItem x:Name="ActivationKeyRightCtrl" Content="Right Ctrl" Tag="163"/>
                                 </ComboBox>
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="Behavior" Margin="0,0,0,15">
+                        <GroupBox x:Name="BehaviorGroupBox" Header="Behavior" Margin="0,0,0,15">
                             <StackPanel Margin="10">
                                 <CheckBox x:Name="ShowInTrayCheckBox" Content="Show icon in notification area"
                                           IsChecked="True" Margin="0,5"
@@ -59,18 +59,31 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="About" Margin="0,0,0,15">
+                        <GroupBox x:Name="LanguageGroupBox" Header="Language" Margin="0,0,0,15">
                             <StackPanel Margin="10">
-                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                <TextBlock x:Name="LanguageDescriptionTextBlock" TextWrapping="Wrap" Margin="0,0,0,10">
+                                    Select your preferred language:
+                                </TextBlock>
+                                <ComboBox x:Name="LanguageComboBox"
+                                          Width="200" HorizontalAlignment="Left"
+                                          DisplayMemberPath="NativeName"
+                                          SelectedValuePath="Code"
+                                          SelectionChanged="LanguageComboBox_SelectionChanged"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="AboutGroupBox" Header="About" Margin="0,0,0,15">
+                            <StackPanel Margin="10">
+                                <TextBlock x:Name="AboutTitleTextBlock" TextWrapping="Wrap" Margin="0,5">
                                     <Bold>TouchCursor for Windows</Bold>
                                 </TextBlock>
-                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                <TextBlock x:Name="AboutVersionTextBlock" TextWrapping="Wrap" Margin="0,5">
                                     Version: 2.0.0 (C# Edition)
                                 </TextBlock>
-                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                <TextBlock x:Name="AboutOriginalTextBlock" TextWrapping="Wrap" Margin="0,5">
                                     Ported from original TouchCursor by Martin Stone
                                 </TextBlock>
-                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                <TextBlock x:Name="AboutLicenseTextBlock" TextWrapping="Wrap" Margin="0,5">
                                     Licensed under GNU GPL v3.0
                                 </TextBlock>
                             </StackPanel>
@@ -80,13 +93,13 @@
             </TabItem>
 
             <!-- Key Mappings Tab -->
-            <TabItem Header="Key Mappings">
+            <TabItem x:Name="KeyMappingsTab" Header="Key Mappings">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" FontWeight="Bold">
+                        <TextBlock x:Name="CurrentKeyMappingsTextBlock" TextWrapping="Wrap" Margin="0,0,0,10" FontWeight="Bold">
                             Current Key Mappings
                         </TextBlock>
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,15" Foreground="Gray">
+                        <TextBlock x:Name="KeyMappingsNoteTextBlock" TextWrapping="Wrap" Margin="0,0,0,15" Foreground="Gray">
                             Custom key mapping editor will be available in a future update.
                         </TextBlock>
 
@@ -97,9 +110,9 @@
                                   GridLinesVisibility="All"
                                   HeadersVisibility="Column">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Activation Key +" Width="150" Binding="{Binding SourceKey}"/>
-                                <DataGridTextColumn Header="Maps To" Width="150" Binding="{Binding TargetKey}"/>
-                                <DataGridTextColumn Header="Description" Width="*" Binding="{Binding Description}"/>
+                                <DataGridTextColumn x:Name="ColumnActivationKey" Header="Activation Key +" Width="150" Binding="{Binding SourceKey}"/>
+                                <DataGridTextColumn x:Name="ColumnMapsTo" Header="Maps To" Width="150" Binding="{Binding TargetKey}"/>
+                                <DataGridTextColumn x:Name="ColumnDescription" Header="Description" Width="*" Binding="{Binding Description}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -107,29 +120,29 @@
             </TabItem>
 
             <!-- Program Lists Tab -->
-            <TabItem Header="Program Lists">
+            <TabItem x:Name="ProgramListsTab" Header="Program Lists">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" FontWeight="Bold">
+                        <TextBlock x:Name="ProgramSpecificTextBlock" TextWrapping="Wrap" Margin="0,0,0,10" FontWeight="Bold">
                             Program-Specific Settings
                         </TextBlock>
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,15" Foreground="Gray">
+                        <TextBlock x:Name="ProgramSpecificNoteTextBlock" TextWrapping="Wrap" Margin="0,0,0,15" Foreground="Gray">
                             Configure which programs TouchCursor should be enabled or disabled in.
                         </TextBlock>
 
-                        <GroupBox Header="Disable in these programs" Margin="0,0,0,15">
+                        <GroupBox x:Name="DisableProgsGroupBox" Header="Disable in these programs" Margin="0,0,0,15">
                             <StackPanel Margin="10">
                                 <ListBox x:Name="DisableProgsListBox" Height="150" Margin="0,0,0,10"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button Content="Add..." Width="80" Margin="0,0,5,0"
+                                    <Button x:Name="AddDisableProgButton" Content="Add..." Width="80" Margin="0,0,5,0"
                                             Click="AddDisableProg_Click"/>
-                                    <Button Content="Remove" Width="80"
+                                    <Button x:Name="RemoveDisableProgButton" Content="Remove" Width="80"
                                             Click="RemoveDisableProg_Click"/>
                                 </StackPanel>
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="Enable only in these programs" Margin="0,0,0,15">
+                        <GroupBox x:Name="EnableProgsGroupBox" Header="Enable only in these programs" Margin="0,0,0,15">
                             <StackPanel Margin="10">
                                 <CheckBox x:Name="UseEnableListCheckBox"
                                           Content="Use enable list (TouchCursor will only work in listed programs)"
@@ -139,10 +152,10 @@
                                 <ListBox x:Name="EnableProgsListBox" Height="150" Margin="0,0,0,10"
                                          IsEnabled="{Binding IsChecked, ElementName=UseEnableListCheckBox}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button Content="Add..." Width="80" Margin="0,0,5,0"
+                                    <Button x:Name="AddEnableProgButton" Content="Add..." Width="80" Margin="0,0,5,0"
                                             Click="AddEnableProg_Click"
                                             IsEnabled="{Binding IsChecked, ElementName=UseEnableListCheckBox}"/>
-                                    <Button Content="Remove" Width="80"
+                                    <Button x:Name="RemoveEnableProgButton" Content="Remove" Width="80"
                                             Click="RemoveEnableProg_Click"
                                             IsEnabled="{Binding IsChecked, ElementName=UseEnableListCheckBox}"/>
                                 </StackPanel>
@@ -155,11 +168,11 @@
 
         <!-- Bottom Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Reset to Defaults" Width="120" Height="30" Margin="0,0,10,0"
+            <Button x:Name="ResetButton" Content="Reset to Defaults" Width="120" Height="30" Margin="0,0,10,0"
                     Click="ResetButton_Click"/>
-            <Button Content="OK" Width="80" Height="30" Margin="0,0,10,0"
+            <Button x:Name="OkButton" Content="OK" Width="80" Height="30" Margin="0,0,10,0"
                     IsDefault="True" Click="OkButton_Click"/>
-            <Button Content="Cancel" Width="80" Height="30"
+            <Button x:Name="CancelButton" Content="Cancel" Width="80" Height="30"
                     IsCancel="True" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>

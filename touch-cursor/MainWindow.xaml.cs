@@ -25,6 +25,10 @@ public partial class MainWindow : Window
         // Load options
         _options = TouchCursorOptions.Load(TouchCursorOptions.GetDefaultConfigPath());
 
+        // Load language
+        LocalizationManager.Instance.LoadLanguage(_options.Language);
+        LocalizationManager.Instance.LanguageChanged += UpdateUI;
+
         // Initialize services
         _mappingService = new KeyMappingService(_options);
         _hookService = new KeyboardHookService(_mappingService);
@@ -37,6 +41,9 @@ public partial class MainWindow : Window
 
         // Load UI state from options
         LoadOptionsToUI();
+
+        // Update UI text
+        UpdateUI();
 
         // Start keyboard hook if enabled
         if (_options.Enabled)
@@ -94,6 +101,35 @@ public partial class MainWindow : Window
         EnabledCheckBox.IsChecked = _options.Enabled;
         TrainingModeCheckBox.IsChecked = _options.TrainingMode;
         RunAtStartupCheckBox.IsChecked = _options.RunAtStartup;
+    }
+
+    private void UpdateUI()
+    {
+        var loc = LocalizationManager.Instance;
+
+        // Update window title
+        Title = loc.GetString("MainWindow.Title");
+        TitleTextBlock.Text = loc.GetString("AppTitle");
+
+        // Update checkboxes
+        EnabledCheckBox.Content = loc.GetString("MainWindow.EnableTouchCursor");
+        TrainingModeCheckBox.Content = loc.GetString("MainWindow.TrainingMode");
+        RunAtStartupCheckBox.Content = loc.GetString("MainWindow.RunAtStartup");
+
+        // Update group box
+        QuickInfoGroupBox.Header = loc.GetString("MainWindow.QuickInfo");
+
+        // Update key mapping info
+        DefaultKeyMappingsTextBlock.Text = loc.GetString("MainWindow.DefaultKeyMappings");
+        ArrowKeysTextBlock.Text = "• " + loc.GetString("MainWindow.ArrowKeys");
+        HomeEndTextBlock.Text = "• " + loc.GetString("MainWindow.HomeEnd");
+        PageUpDownTextBlock.Text = "• " + loc.GetString("MainWindow.PageUpDown");
+        BackspaceDeleteTextBlock.Text = "• " + loc.GetString("MainWindow.BackspaceDelete");
+        WordNavigationTextBlock.Text = "• " + loc.GetString("MainWindow.WordNavigation");
+
+        // Update buttons
+        SettingsButton.Content = loc.GetString("MainWindow.Settings");
+        MinimizeButton.Content = loc.GetString("MainWindow.MinimizeToTray");
     }
 
     private void EnabledCheckBox_Changed(object sender, RoutedEventArgs e)

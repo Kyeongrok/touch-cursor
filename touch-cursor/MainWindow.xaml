@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" FontSize="24" FontWeight="Bold" Margin="0,0,0,20">
+        <TextBlock x:Name="TitleTextBlock" Grid.Row="0" FontSize="24" FontWeight="Bold" Margin="0,0,0,20">
             TouchCursor
         </TextBlock>
 
@@ -34,24 +34,24 @@
                       Checked="RunAtStartupCheckBox_Changed" Unchecked="RunAtStartupCheckBox_Changed"/>
         </StackPanel>
 
-        <GroupBox Grid.Row="2" Header="Quick Info" Margin="0,0,0,20">
+        <GroupBox x:Name="QuickInfoGroupBox" Grid.Row="2" Header="Quick Info" Margin="0,0,0,20">
             <StackPanel Margin="10">
-                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                <TextBlock x:Name="DefaultKeyMappingsTextBlock" TextWrapping="Wrap" Margin="0,5">
                     <Bold>Default Key Mappings (Space +):</Bold>
                 </TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="10,5">
+                <TextBlock x:Name="ArrowKeysTextBlock" TextWrapping="Wrap" Margin="10,5">
                     • I/J/K/L = Arrow Keys (Up/Left/Down/Right)
                 </TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="10,5">
+                <TextBlock x:Name="HomeEndTextBlock" TextWrapping="Wrap" Margin="10,5">
                     • U/O = Home/End
                 </TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="10,5">
+                <TextBlock x:Name="PageUpDownTextBlock" TextWrapping="Wrap" Margin="10,5">
                     • H/P = Page Up/Down
                 </TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="10,5">
+                <TextBlock x:Name="BackspaceDeleteTextBlock" TextWrapping="Wrap" Margin="10,5">
                     • M/, = Backspace/Delete
                 </TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="10,5">
+                <TextBlock x:Name="WordNavigationTextBlock" TextWrapping="Wrap" Margin="10,5">
                     • N/. = Ctrl+Left/Right (word navigation)
                 </TextBlock>
             </StackPanel>
