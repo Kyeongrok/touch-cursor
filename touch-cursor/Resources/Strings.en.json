@@ -81,6 +81,7 @@
     "PageDown": "Page Down",
     "Backspace": "Backspace",
     "Delete": "Delete",
+    "Insert": "Insert",
     "MoveCursorUp": "Move cursor up",
     "MoveCursorDown": "Move cursor down",
     "MoveCursorLeft": "Move cursor left",

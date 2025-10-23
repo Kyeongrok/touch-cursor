@@ -73,6 +73,7 @@ public class KeyboardHookService : IDisposable
     private IntPtr _hookID = IntPtr.Zero;
     private readonly LowLevelKeyboardProc _proc;
     private readonly KeyMappingService _mappingService;
+    private bool _sendingModifiers = false;
 
     public KeyboardHookService(KeyMappingService mappingService)
     {
@@ -115,7 +116,14 @@ public class KeyboardHookService : IDisposable
             var isKeyDown = wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN;
             var isKeyUp = wParam == (IntPtr)WM_KEYUP || wParam == (IntPtr)WM_SYSKEYUP;
 
-            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}");
+            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, sendingModifiers={_sendingModifiers}");
+
+            // Block modifier key events while we're sending them via SendInput
+            if (_sendingModifiers && IsModifierKey(vkCode))
+            {
+                Debug.WriteLine($"[HookCallback] BLOCKING modifier key {vkCode} during SendInput");
+                return (IntPtr)1;
+            }
 
             if (_mappingService.ProcessKey(vkCode, isKeyDown, isKeyUp))
             {
@@ -128,6 +136,14 @@ public class KeyboardHookService : IDisposable
         return CallNextHookEx(_hookID, nCode, wParam, lParam);
     }
 
+    private bool IsModifierKey(int vkCode)
+    {
+        return vkCode == 0x10 || vkCode == 0xA0 || vkCode == 0xA1 || // Shift
+               vkCode == 0x11 || vkCode == 0xA2 || vkCode == 0xA3 || // Ctrl
+               vkCode == 0x12 || vkCode == 0xA4 || vkCode == 0xA5 || // Alt
+               vkCode == 0x5B || vkCode == 0x5C; // Win
+    }
+
     public void SendKey(int vkCode, bool isDown, int modifierFlags = 0)
     {
         Debug.WriteLine($"[SendKey] vkCode={vkCode}, isDown={isDown}, modifierFlags={modifierFlags:X}");
@@ -137,15 +153,16 @@ public class KeyboardHookService : IDisposable
         if (isDown && modifierFlags != 0)
         {
             Debug.WriteLine("[SendKey] Pressing modifiers");
-            // Press modifiers first
+            _sendingModifiers = true;
+            // Press modifiers first (use specific left modifier keys)
             if ((modifierFlags & 0x00010000) != 0) // Shift
-                inputs.Add(CreateKeyInput(0x10, true));
+                inputs.Add(CreateKeyInput(0xA0, true)); // VK_LSHIFT
             if ((modifierFlags & 0x00020000) != 0) // Ctrl
-                inputs.Add(CreateKeyInput(0x11, true));
+                inputs.Add(CreateKeyInput(0xA2, true)); // VK_LCONTROL
             if ((modifierFlags & 0x00040000) != 0) // Alt
-                inputs.Add(CreateKeyInput(0x12, true));
+                inputs.Add(CreateKeyInput(0xA4, true)); // VK_LMENU
             if ((modifierFlags & 0x00080000) != 0) // Win
-                inputs.Add(CreateKeyInput(0x5B, true));
+                inputs.Add(CreateKeyInput(0x5B, true)); // VK_LWIN
         }
 
         // Press/release the main key
@@ -155,15 +172,16 @@ public class KeyboardHookService : IDisposable
         if (!isDown && modifierFlags != 0)
         {
             Debug.WriteLine("[SendKey] Releasing modifiers");
-            // Release modifiers (reverse order)
+            _sendingModifiers = true;
+            // Release modifiers (reverse order, use specific left modifier keys)
             if ((modifierFlags & 0x00080000) != 0) // Win
-                inputs.Add(CreateKeyInput(0x5B, false));
+                inputs.Add(CreateKeyInput(0x5B, false)); // VK_LWIN
             if ((modifierFlags & 0x00040000) != 0) // Alt
-                inputs.Add(CreateKeyInput(0x12, false));
+                inputs.Add(CreateKeyInput(0xA4, false)); // VK_LMENU
             if ((modifierFlags & 0x00020000) != 0) // Ctrl
-                inputs.Add(CreateKeyInput(0x11, false));
+                inputs.Add(CreateKeyInput(0xA2, false)); // VK_LCONTROL
             if ((modifierFlags & 0x00010000) != 0) // Shift
-                inputs.Add(CreateKeyInput(0x10, false));
+                inputs.Add(CreateKeyInput(0xA0, false)); // VK_LSHIFT
         }
 
         if (inputs.Count > 0)
@@ -173,6 +191,7 @@ public class KeyboardHookService : IDisposable
             var result = SendInput((uint)inputs.Count, inputArray, Marshal.SizeOf(typeof(INPUT)));
             var lastError = Marshal.GetLastWin32Error();
             Debug.WriteLine($"[SendKey] SendInput result: {result}, LastError: {lastError}, StructSize: {Marshal.SizeOf(typeof(INPUT))}");
+            _sendingModifiers = false;
         }
     }
 

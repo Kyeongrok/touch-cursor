@@ -16,7 +16,7 @@
     "MinimizeToTray": "트레이로 최소화"
   },
   "SettingsWindow": {
-    "Title": "설정 - 터치커서",
+    "Title": "설정 - 터치커서", 
     "Header": "설정",
     "TabGeneral": "일반",
     "TabKeyMappings": "키 매핑",
@@ -81,6 +81,7 @@
     "PageDown": "Page Down",
     "Backspace": "Backspace",
     "Delete": "Delete",
+    "Insert": "Insert",
     "MoveCursorUp": "커서를 위로 이동",
     "MoveCursorDown": "커서를 아래로 이동",
     "MoveCursorLeft": "커서를 왼쪽으로 이동",
