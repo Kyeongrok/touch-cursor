@@ -40,24 +40,36 @@ public class KeyMappingService
     }
 
     /// <summary>
+    /// Update modifier state - must be called for ALL keys including injected ones (like original C++ code)
+    /// </summary>
+    public void UpdateModifierState(int vkCode, bool isKeyDown, bool isKeyUp)
+    {
+        if (_modifierKeys.ContainsKey(vkCode))
+        {
+            if (isKeyDown)
+            {
+                _modifierState |= _modifierKeys[vkCode];
+                Debug.WriteLine($"[UpdateModifierState] Key {vkCode} DOWN, modifierState now: {_modifierState:X}");
+            }
+            else if (isKeyUp)
+            {
+                _modifierState &= ~_modifierKeys[vkCode];
+                Debug.WriteLine($"[UpdateModifierState] Key {vkCode} UP, modifierState now: {_modifierState:X}");
+            }
+        }
+    }
+
+    /// <summary>
     /// Process a key event and determine if it should be blocked or remapped.
+    /// NOTE: Modifier keys should NOT be passed to this method (they are handled separately)
     /// </summary>
     /// <returns>True if the key event should be blocked, false to let it through</returns>
     public bool ProcessKey(int vkCode, bool isKeyDown, bool isKeyUp)
     {
-        Debug.WriteLine($"[ProcessKey] vkCode={vkCode}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, Enabled={_options.Enabled}");
+        Debug.WriteLine($"[ProcessKey] vkCode={vkCode}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, Enabled={_options.Enabled}, modifierState={_modifierState:X}");
 
         if (!_options.Enabled)
             return false;
-
-        // Update modifier state
-        if (_modifierKeys.ContainsKey(vkCode))
-        {
-            if (isKeyDown)
-                _modifierState |= _modifierKeys[vkCode];
-            else if (isKeyUp)
-                _modifierState &= ~_modifierKeys[vkCode];
-        }
 
         // Check if this is any of the configured activation keys
         if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
@@ -70,17 +82,22 @@ public class KeyMappingService
                 Debug.WriteLine($"[ProcessKey] Activation key pressed - blocking and setting _currentActivationKey={vkCode}");
                 return true; // Block the activation key press
             }
+            else if (isKeyDown && _currentActivationKey != 0)
+            {
+                // Auto-repeat of activation key - block it (like original C++ state machine)
+                Debug.WriteLine($"[ProcessKey] Activation key auto-repeat - blocking");
+                return true;
+            }
             else if (isKeyUp && _currentActivationKey == vkCode)
             {
                 Debug.WriteLine($"[ProcessKey] Activation key released - releasing {_mappedKeysHeld.Count} held keys, wasUsedForMapping={_activationKeyUsedForMapping}");
 
-                // Release all held mapped keys
+                // Release all held mapped keys WITHOUT modifiers (original C++ behavior)
                 foreach (var heldKey in _mappedKeysHeld)
                 {
                     var targetVk = heldKey & 0xFFFF;
-                    var modifiers = (int)(heldKey & 0xFFFF0000);
-                    Debug.WriteLine($"[ProcessKey] Releasing held key: targetVk={targetVk}, modifiers={modifiers:X}");
-                    SendKeyRequested?.Invoke(targetVk, false, modifiers);
+                    Debug.WriteLine($"[ProcessKey] Releasing held key: targetVk={targetVk}");
+                    SendKeyRequested?.Invoke(targetVk, false, 0);
                 }
                 _mappedKeysHeld.Clear();
 
@@ -108,10 +125,12 @@ public class KeyMappingService
 
             if (isKeyDown)
             {
-                Debug.WriteLine($"[ProcessKey] Sending mapped key DOWN: targetVk={targetVk}");
+                Debug.WriteLine($"[ProcessKey] Sending mapped key DOWN: targetVk={targetVk}, mappingModifiers={modifiers:X}, currentModifiers={_modifierState:X}");
                 _activationKeyUsedForMapping = true; // Mark that we used the activation key for mapping
-                // Send the mapped key down
-                SendKeyRequested?.Invoke(targetVk, true, modifiers);
+                // Only inject modifiers that aren't already pressed (like original C++ code)
+                var effectiveModifiers = modifiers & ~_modifierState;
+                Debug.WriteLine($"[ProcessKey] Effective modifiers to inject: {effectiveModifiers:X}");
+                SendKeyRequested?.Invoke(targetVk, true, effectiveModifiers);
                 _mappedKeysHeld.Add(mappedKey);
 
                 if (_options.TrainingMode && _options.BeepForMistakes)
@@ -123,8 +142,8 @@ public class KeyMappingService
             else if (isKeyUp && _mappedKeysHeld.Contains(mappedKey))
             {
                 Debug.WriteLine($"[ProcessKey] Sending mapped key UP: targetVk={targetVk}");
-                // Send the mapped key up
-                SendKeyRequested?.Invoke(targetVk, false, modifiers);
+                // Send the mapped key up WITHOUT modifiers (original C++ behavior)
+                SendKeyRequested?.Invoke(targetVk, false, 0);
                 _mappedKeysHeld.Remove(mappedKey);
             }
 

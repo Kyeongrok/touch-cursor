@@ -105,6 +105,14 @@ public class KeyboardHookService : IDisposable
         if (nCode >= 0)
         {
             var hookStruct = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
+            var vkCode = (int)hookStruct.vkCode;
+            var isKeyDown = wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN;
+            var isKeyUp = wParam == (IntPtr)WM_KEYUP || wParam == (IntPtr)WM_SYSKEYUP;
+
+            // Update modifier state BEFORE checking if injected (like original C++ code)
+            _mappingService.UpdateModifierState(vkCode, isKeyDown, isKeyUp);
+
+            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, sendingModifiers={_sendingModifiers}");
 
             // Ignore our own injected events
             if (hookStruct.dwExtraInfo == INJECTED_FLAG)
@@ -112,17 +120,18 @@ public class KeyboardHookService : IDisposable
                 return CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
-            var vkCode = (int)hookStruct.vkCode;
-            var isKeyDown = wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN;
-            var isKeyUp = wParam == (IntPtr)WM_KEYUP || wParam == (IntPtr)WM_SYSKEYUP;
-
-            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, sendingModifiers={_sendingModifiers}");
-
             // Block modifier key events while we're sending them via SendInput
             if (_sendingModifiers && IsModifierKey(vkCode))
             {
                 Debug.WriteLine($"[HookCallback] BLOCKING modifier key {vkCode} during SendInput");
                 return (IntPtr)1;
+            }
+
+            // Like original C++ code: don't process modifier keys in state machine
+            if (IsModifierKey(vkCode))
+            {
+                Debug.WriteLine($"[HookCallback] Modifier key {vkCode} - letting it through");
+                return CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
             if (_mappingService.ProcessKey(vkCode, isKeyDown, isKeyUp))
@@ -147,52 +156,55 @@ public class KeyboardHookService : IDisposable
     public void SendKey(int vkCode, bool isDown, int modifierFlags = 0)
     {
         Debug.WriteLine($"[SendKey] vkCode={vkCode}, isDown={isDown}, modifierFlags={modifierFlags:X}");
-        var inputs = new List<INPUT>();
 
-        // Only press/release modifiers when pressing the main key
+        _sendingModifiers = true;
+
+        // Original C++ behavior: send each key event separately with Sleep(1) between them
+        // "separate events are not sent in one SendInput() call, because that doesn't work with Remote Desktop Connection"
+
+        // Original C++ behavior: modifiers are only injected on key DOWN, and immediately released
         if (isDown && modifierFlags != 0)
         {
-            Debug.WriteLine("[SendKey] Pressing modifiers");
-            _sendingModifiers = true;
+            Debug.WriteLine("[SendKey] Pressing modifiers (will release immediately after key press)");
             // Press modifiers first (use specific left modifier keys)
             if ((modifierFlags & 0x00010000) != 0) // Shift
-                inputs.Add(CreateKeyInput(0xA0, true)); // VK_LSHIFT
+                SendSingleKey(0xA0, true); // VK_LSHIFT
             if ((modifierFlags & 0x00020000) != 0) // Ctrl
-                inputs.Add(CreateKeyInput(0xA2, true)); // VK_LCONTROL
+                SendSingleKey(0xA2, true); // VK_LCONTROL
             if ((modifierFlags & 0x00040000) != 0) // Alt
-                inputs.Add(CreateKeyInput(0xA4, true)); // VK_LMENU
+                SendSingleKey(0xA4, true); // VK_LMENU
             if ((modifierFlags & 0x00080000) != 0) // Win
-                inputs.Add(CreateKeyInput(0x5B, true)); // VK_LWIN
+                SendSingleKey(0x5B, true); // VK_LWIN
         }
 
         // Press/release the main key
-        inputs.Add(CreateKeyInput(vkCode, isDown));
+        SendSingleKey(vkCode, isDown);
 
-        // Release modifiers when releasing the main key
-        if (!isDown && modifierFlags != 0)
+        // Original C++ behavior: immediately release modifiers after key press
+        if (isDown && modifierFlags != 0)
         {
-            Debug.WriteLine("[SendKey] Releasing modifiers");
-            _sendingModifiers = true;
+            Debug.WriteLine("[SendKey] Releasing modifiers immediately");
             // Release modifiers (reverse order, use specific left modifier keys)
             if ((modifierFlags & 0x00080000) != 0) // Win
-                inputs.Add(CreateKeyInput(0x5B, false)); // VK_LWIN
+                SendSingleKey(0x5B, false); // VK_LWIN
             if ((modifierFlags & 0x00040000) != 0) // Alt
-                inputs.Add(CreateKeyInput(0xA4, false)); // VK_LMENU
+                SendSingleKey(0xA4, false); // VK_LMENU
             if ((modifierFlags & 0x00020000) != 0) // Ctrl
-                inputs.Add(CreateKeyInput(0xA2, false)); // VK_LCONTROL
+                SendSingleKey(0xA2, false); // VK_LCONTROL
             if ((modifierFlags & 0x00010000) != 0) // Shift
-                inputs.Add(CreateKeyInput(0xA0, false)); // VK_LSHIFT
+                SendSingleKey(0xA0, false); // VK_LSHIFT
         }
 
-        if (inputs.Count > 0)
-        {
-            Debug.WriteLine($"[SendKey] Sending {inputs.Count} input(s) via SendInput");
-            var inputArray = inputs.ToArray();
-            var result = SendInput((uint)inputs.Count, inputArray, Marshal.SizeOf(typeof(INPUT)));
-            var lastError = Marshal.GetLastWin32Error();
-            Debug.WriteLine($"[SendKey] SendInput result: {result}, LastError: {lastError}, StructSize: {Marshal.SizeOf(typeof(INPUT))}");
-            _sendingModifiers = false;
-        }
+        _sendingModifiers = false;
+    }
+
+    private void SendSingleKey(int vkCode, bool isDown)
+    {
+        var input = CreateKeyInput(vkCode, isDown);
+        var result = SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));
+
+        // Sleep(1) seems to be necessary for Remote Desktop Connection
+        System.Threading.Thread.Sleep(1);
     }
 
     private INPUT CreateKeyInput(int vkCode, bool isDown)
