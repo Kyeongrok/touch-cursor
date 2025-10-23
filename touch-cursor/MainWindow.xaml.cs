@@ -153,8 +153,23 @@ public partial class MainWindow : Window
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Settings window will be implemented in the next phase.", "Info",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+        var settingsWindow = new SettingsWindow(_options)
+        {
+            Owner = this
+        };
+
+        if (settingsWindow.ShowDialog() == true)
+        {
+            // Settings were saved, reload UI to reflect any changes
+            LoadOptionsToUI();
+
+            // Update hook service if activation key changed or enabled state changed
+            if (_options.Enabled)
+            {
+                _hookService.StopHook();
+                _hookService.StartHook();
+            }
+        }
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
