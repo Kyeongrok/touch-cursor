@@ -33,6 +33,9 @@ public class KeyboardHookService : IDisposable
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
+    [DllImport("kernel32.dll")]
+    private static extern uint GetLastError();
+
     [StructLayout(LayoutKind.Sequential)]
     private struct KBDLLHOOKSTRUCT
     {
@@ -43,17 +46,12 @@ public class KeyboardHookService : IDisposable
         public IntPtr dwExtraInfo;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit, Size = 40)]
     private struct INPUT
     {
-        public uint type;
-        public INPUTUNION union;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    private struct INPUTUNION
-    {
         [FieldOffset(0)]
+        public uint type;
+        [FieldOffset(8)]
         public KEYBDINPUT ki;
     }
 
@@ -117,8 +115,11 @@ public class KeyboardHookService : IDisposable
             var isKeyDown = wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN;
             var isKeyUp = wParam == (IntPtr)WM_KEYUP || wParam == (IntPtr)WM_SYSKEYUP;
 
+            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}");
+
             if (_mappingService.ProcessKey(vkCode, isKeyDown, isKeyUp))
             {
+                Debug.WriteLine($"[HookCallback] BLOCKING key event for vkCode={vkCode}");
                 // Block this key event
                 return (IntPtr)1;
             }
@@ -129,34 +130,49 @@ public class KeyboardHookService : IDisposable
 
     public void SendKey(int vkCode, bool isDown, int modifierFlags = 0)
     {
+        Debug.WriteLine($"[SendKey] vkCode={vkCode}, isDown={isDown}, modifierFlags={modifierFlags:X}");
         var inputs = new List<INPUT>();
 
-        // Press modifiers first
-        if ((modifierFlags & 0x00010000) != 0) // Shift
-            inputs.Add(CreateKeyInput(0x10, true));
-        if ((modifierFlags & 0x00020000) != 0) // Ctrl
-            inputs.Add(CreateKeyInput(0x11, true));
-        if ((modifierFlags & 0x00040000) != 0) // Alt
-            inputs.Add(CreateKeyInput(0x12, true));
-        if ((modifierFlags & 0x00080000) != 0) // Win
-            inputs.Add(CreateKeyInput(0x5B, true));
+        // Only press/release modifiers when pressing the main key
+        if (isDown && modifierFlags != 0)
+        {
+            Debug.WriteLine("[SendKey] Pressing modifiers");
+            // Press modifiers first
+            if ((modifierFlags & 0x00010000) != 0) // Shift
+                inputs.Add(CreateKeyInput(0x10, true));
+            if ((modifierFlags & 0x00020000) != 0) // Ctrl
+                inputs.Add(CreateKeyInput(0x11, true));
+            if ((modifierFlags & 0x00040000) != 0) // Alt
+                inputs.Add(CreateKeyInput(0x12, true));
+            if ((modifierFlags & 0x00080000) != 0) // Win
+                inputs.Add(CreateKeyInput(0x5B, true));
+        }
 
         // Press/release the main key
         inputs.Add(CreateKeyInput(vkCode, isDown));
 
-        // Release modifiers
-        if ((modifierFlags & 0x00080000) != 0) // Win (reverse order)
-            inputs.Add(CreateKeyInput(0x5B, false));
-        if ((modifierFlags & 0x00040000) != 0) // Alt
-            inputs.Add(CreateKeyInput(0x12, false));
-        if ((modifierFlags & 0x00020000) != 0) // Ctrl
-            inputs.Add(CreateKeyInput(0x11, false));
-        if ((modifierFlags & 0x00010000) != 0) // Shift
-            inputs.Add(CreateKeyInput(0x10, false));
+        // Release modifiers when releasing the main key
+        if (!isDown && modifierFlags != 0)
+        {
+            Debug.WriteLine("[SendKey] Releasing modifiers");
+            // Release modifiers (reverse order)
+            if ((modifierFlags & 0x00080000) != 0) // Win
+                inputs.Add(CreateKeyInput(0x5B, false));
+            if ((modifierFlags & 0x00040000) != 0) // Alt
+                inputs.Add(CreateKeyInput(0x12, false));
+            if ((modifierFlags & 0x00020000) != 0) // Ctrl
+                inputs.Add(CreateKeyInput(0x11, false));
+            if ((modifierFlags & 0x00010000) != 0) // Shift
+                inputs.Add(CreateKeyInput(0x10, false));
+        }
 
         if (inputs.Count > 0)
         {
-            SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf(typeof(INPUT)));
+            Debug.WriteLine($"[SendKey] Sending {inputs.Count} input(s) via SendInput");
+            var inputArray = inputs.ToArray();
+            var result = SendInput((uint)inputs.Count, inputArray, Marshal.SizeOf(typeof(INPUT)));
+            var lastError = Marshal.GetLastWin32Error();
+            Debug.WriteLine($"[SendKey] SendInput result: {result}, LastError: {lastError}, StructSize: {Marshal.SizeOf(typeof(INPUT))}");
         }
     }
 
@@ -165,16 +181,13 @@ public class KeyboardHookService : IDisposable
         return new INPUT
         {
             type = INPUT_KEYBOARD,
-            union = new INPUTUNION
+            ki = new KEYBDINPUT
             {
-                ki = new KEYBDINPUT
-                {
-                    wVk = (ushort)vkCode,
-                    wScan = 0,
-                    dwFlags = isDown ? 0 : KEYEVENTF_KEYUP,
-                    time = 0,
-                    dwExtraInfo = INJECTED_FLAG
-                }
+                wVk = (ushort)vkCode,
+                wScan = 0,
+                dwFlags = isDown ? 0 : KEYEVENTF_KEYUP,
+                time = 0,
+                dwExtraInfo = INJECTED_FLAG
             }
         };
     }

@@ -1,6 +1,7 @@
 // Copyright © 2025. Ported to C# from original C++ TouchCursor by Martin Stone.
 // Original project licensed under GNU GPL v3.
 
+using System.Diagnostics;
 using touch_cursor.Models;
 
 namespace touch_cursor.Services;
@@ -12,6 +13,7 @@ public class KeyMappingService
     private bool _activationKeyDown = false;
     private readonly HashSet<int> _mappedKeysHeld = new();
     private int _modifierState = 0;
+    private bool _activationKeyUsedForMapping = false;
 
     // Event for sending key events
     public event Action<int, bool, int>? SendKeyRequested;
@@ -43,6 +45,8 @@ public class KeyMappingService
     /// <returns>True if the key event should be blocked, false to let it through</returns>
     public bool ProcessKey(int vkCode, bool isKeyDown, bool isKeyUp)
     {
+        Debug.WriteLine($"[ProcessKey] vkCode={vkCode}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, Enabled={_options.Enabled}");
+
         if (!_options.Enabled)
             return false;
 
@@ -58,23 +62,36 @@ public class KeyMappingService
         // Check if this is the activation key (default: Space)
         if (vkCode == _options.ActivationKey)
         {
+            Debug.WriteLine($"[ProcessKey] Activation key detected! ActivationKey={_options.ActivationKey}, _activationKeyDown={_activationKeyDown}");
             if (isKeyDown && !_activationKeyDown)
             {
                 _activationKeyDown = true;
+                _activationKeyUsedForMapping = false;
+                Debug.WriteLine("[ProcessKey] Activation key pressed - blocking and setting _activationKeyDown=true");
                 return true; // Block the activation key press
             }
             else if (isKeyUp && _activationKeyDown)
             {
                 _activationKeyDown = false;
+                Debug.WriteLine($"[ProcessKey] Activation key released - releasing {_mappedKeysHeld.Count} held keys, wasUsedForMapping={_activationKeyUsedForMapping}");
 
                 // Release all held mapped keys
                 foreach (var heldKey in _mappedKeysHeld)
                 {
                     var targetVk = heldKey & 0xFFFF;
                     var modifiers = (int)(heldKey & 0xFFFF0000);
+                    Debug.WriteLine($"[ProcessKey] Releasing held key: targetVk={targetVk}, modifiers={modifiers:X}");
                     SendKeyRequested?.Invoke(targetVk, false, modifiers);
                 }
                 _mappedKeysHeld.Clear();
+
+                // If the activation key was not used for any mapping, send it through
+                if (!_activationKeyUsedForMapping)
+                {
+                    Debug.WriteLine("[ProcessKey] Activation key was not used for mapping - sending space key");
+                    SendKeyRequested?.Invoke(_options.ActivationKey, true, 0);
+                    SendKeyRequested?.Invoke(_options.ActivationKey, false, 0);
+                }
 
                 return true; // Block the activation key release
             }
@@ -85,9 +102,12 @@ public class KeyMappingService
         {
             var targetVk = mappedKey & 0xFFFF;
             var modifiers = (int)(mappedKey & 0xFFFF0000);
+            Debug.WriteLine($"[ProcessKey] Mapping found! vkCode={vkCode} -> targetVk={targetVk}, modifiers={modifiers:X}");
 
             if (isKeyDown)
             {
+                Debug.WriteLine($"[ProcessKey] Sending mapped key DOWN: targetVk={targetVk}");
+                _activationKeyUsedForMapping = true; // Mark that we used the activation key for mapping
                 // Send the mapped key down
                 SendKeyRequested?.Invoke(targetVk, true, modifiers);
                 _mappedKeysHeld.Add(mappedKey);
@@ -100,6 +120,7 @@ public class KeyMappingService
             }
             else if (isKeyUp && _mappedKeysHeld.Contains(mappedKey))
             {
+                Debug.WriteLine($"[ProcessKey] Sending mapped key UP: targetVk={targetVk}");
                 // Send the mapped key up
                 SendKeyRequested?.Invoke(targetVk, false, modifiers);
                 _mappedKeysHeld.Remove(mappedKey);
@@ -111,9 +132,11 @@ public class KeyMappingService
         // Training mode: beep for unmapped keys while activation key is down
         if (_activationKeyDown && _options.TrainingMode && _options.BeepForMistakes && isKeyDown)
         {
+            Debug.WriteLine($"[ProcessKey] Training mode: unmapped key {vkCode} pressed while activation key down");
             Console.Beep(500, 100);
         }
 
+        Debug.WriteLine($"[ProcessKey] Letting key through: vkCode={vkCode}");
         return false; // Let the key through
     }
 
@@ -122,5 +145,6 @@ public class KeyMappingService
         _activationKeyDown = false;
         _mappedKeysHeld.Clear();
         _modifierState = 0;
+        _activationKeyUsedForMapping = false;
     }
 }
