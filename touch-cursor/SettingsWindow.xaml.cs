@@ -348,6 +348,101 @@ public partial class SettingsWindow : Window
         }
     }
 
+    private void KeyMappingsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        bool hasSelection = KeyMappingsDataGrid.SelectedItem != null;
+        EditMappingButton.IsEnabled = hasSelection;
+        RemoveMappingButton.IsEnabled = hasSelection;
+    }
+
+    private void KeyMappingsDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // Check if a row is actually selected
+        if (KeyMappingsDataGrid.SelectedItem != null)
+        {
+            // Call the same method as Edit button
+            EditMappingButton_Click(sender, e);
+        }
+    }
+
+    private void AddMappingButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new KeyMappingEditorDialog();
+        if (dialog.ShowDialog() == true)
+        {
+            var sourceVk = dialog.SourceVkCode;
+            var targetVk = dialog.TargetVkCode;
+            var modifiers = dialog.TargetModifiers;
+            var mappedKey = targetVk | modifiers;
+
+            // Add or update the mapping
+            _options.KeyMapping[sourceVk] = mappedKey;
+            LoadKeyMappings();
+            _hasChanges = true;
+        }
+    }
+
+    private void EditMappingButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (KeyMappingsDataGrid.SelectedItem is KeyMappingDisplay selected)
+        {
+            // Find the original mapping
+            var sourceVk = _options.KeyMapping.FirstOrDefault(kvp =>
+                GetKeyName(kvp.Key) == selected.SourceKey).Key;
+
+            if (sourceVk != 0)
+            {
+                var mappedKey = _options.KeyMapping[sourceVk];
+                var targetVk = mappedKey & 0xFFFF;
+                var modifiers = (int)(mappedKey & 0xFFFF0000);
+
+                var dialog = new KeyMappingEditorDialog(sourceVk, targetVk, modifiers, selected.Description);
+                if (dialog.ShowDialog() == true)
+                {
+                    // Remove old mapping
+                    _options.KeyMapping.Remove(sourceVk);
+
+                    // Add new mapping
+                    var newSourceVk = dialog.SourceVkCode;
+                    var newTargetVk = dialog.TargetVkCode;
+                    var newModifiers = dialog.TargetModifiers;
+                    var newMappedKey = newTargetVk | newModifiers;
+
+                    _options.KeyMapping[newSourceVk] = newMappedKey;
+                    LoadKeyMappings();
+                    _hasChanges = true;
+                }
+            }
+        }
+    }
+
+    private void RemoveMappingButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (KeyMappingsDataGrid.SelectedItem is KeyMappingDisplay selected)
+        {
+            var loc = LocalizationManager.Instance;
+            var result = MessageBox.Show(
+                $"{loc.GetString("SettingsWindow.RemoveMappingConfirmation")}\n\n{selected.SourceKey} → {selected.TargetKey}",
+                loc.GetString("SettingsWindow.RemoveMappingConfirmationTitle"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // Find and remove the mapping
+                var sourceVk = _options.KeyMapping.FirstOrDefault(kvp =>
+                    GetKeyName(kvp.Key) == selected.SourceKey).Key;
+
+                if (sourceVk != 0)
+                {
+                    _options.KeyMapping.Remove(sourceVk);
+                    LoadKeyMappings();
+                    _hasChanges = true;
+                }
+            }
+        }
+    }
+
     private void ResetButton_Click(object sender, RoutedEventArgs e)
     {
         var loc = LocalizationManager.Instance;

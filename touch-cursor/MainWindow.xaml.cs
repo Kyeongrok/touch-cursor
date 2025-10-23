@@ -50,6 +50,9 @@ public partial class MainWindow : Window
         {
             _hookService.StartHook();
         }
+
+        // Hide window on startup - only show in tray
+        this.Visibility = Visibility.Hidden;
     }
 
     private void SetupNotifyIcon()
@@ -211,6 +214,14 @@ public partial class MainWindow : Window
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
     {
         Hide();
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Position window at bottom-right of screen
+        var workingArea = SystemParameters.WorkArea;
+        Left = workingArea.Right - Width - 20;
+        Top = workingArea.Bottom - Height - 20;
     }
 
     private void Window_StateChanged(object sender, EventArgs e)
