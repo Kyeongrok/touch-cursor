@@ -10,7 +10,7 @@ public class KeyMappingService
 {
     private readonly TouchCursorOptions _options;
 
-    private bool _activationKeyDown = false;
+    private int _currentActivationKey = 0; // Which activation key is currently pressed
     private readonly HashSet<int> _mappedKeysHeld = new();
     private int _modifierState = 0;
     private bool _activationKeyUsedForMapping = false;
@@ -59,20 +59,19 @@ public class KeyMappingService
                 _modifierState &= ~_modifierKeys[vkCode];
         }
 
-        // Check if this is the activation key (default: Space)
-        if (vkCode == _options.ActivationKey)
+        // Check if this is any of the configured activation keys
+        if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
         {
-            Debug.WriteLine($"[ProcessKey] Activation key detected! ActivationKey={_options.ActivationKey}, _activationKeyDown={_activationKeyDown}");
-            if (isKeyDown && !_activationKeyDown)
+            Debug.WriteLine($"[ProcessKey] Activation key detected! vkCode={vkCode}, _currentActivationKey={_currentActivationKey}");
+            if (isKeyDown && _currentActivationKey == 0)
             {
-                _activationKeyDown = true;
+                _currentActivationKey = vkCode;
                 _activationKeyUsedForMapping = false;
-                Debug.WriteLine("[ProcessKey] Activation key pressed - blocking and setting _activationKeyDown=true");
+                Debug.WriteLine($"[ProcessKey] Activation key pressed - blocking and setting _currentActivationKey={vkCode}");
                 return true; // Block the activation key press
             }
-            else if (isKeyUp && _activationKeyDown)
+            else if (isKeyUp && _currentActivationKey == vkCode)
             {
-                _activationKeyDown = false;
                 Debug.WriteLine($"[ProcessKey] Activation key released - releasing {_mappedKeysHeld.Count} held keys, wasUsedForMapping={_activationKeyUsedForMapping}");
 
                 // Release all held mapped keys
@@ -88,17 +87,20 @@ public class KeyMappingService
                 // If the activation key was not used for any mapping, send it through
                 if (!_activationKeyUsedForMapping)
                 {
-                    Debug.WriteLine("[ProcessKey] Activation key was not used for mapping - sending space key");
-                    SendKeyRequested?.Invoke(_options.ActivationKey, true, 0);
-                    SendKeyRequested?.Invoke(_options.ActivationKey, false, 0);
+                    Debug.WriteLine($"[ProcessKey] Activation key was not used for mapping - sending key {vkCode}");
+                    SendKeyRequested?.Invoke(vkCode, true, 0);
+                    SendKeyRequested?.Invoke(vkCode, false, 0);
                 }
 
+                _currentActivationKey = 0;
                 return true; // Block the activation key release
             }
         }
 
-        // If activation key is down, check for mappings
-        if (_activationKeyDown && _options.KeyMapping.TryGetValue(vkCode, out var mappedKey))
+        // If activation key is down, check for mappings in the current profile
+        if (_currentActivationKey != 0 &&
+            _options.ActivationKeyProfiles.TryGetValue(_currentActivationKey, out var keyMappings) &&
+            keyMappings.TryGetValue(vkCode, out var mappedKey))
         {
             var targetVk = mappedKey & 0xFFFF;
             var modifiers = (int)(mappedKey & 0xFFFF0000);
@@ -130,7 +132,7 @@ public class KeyMappingService
         }
 
         // Training mode: beep for unmapped keys while activation key is down
-        if (_activationKeyDown && _options.TrainingMode && _options.BeepForMistakes && isKeyDown)
+        if (_currentActivationKey != 0 && _options.TrainingMode && _options.BeepForMistakes && isKeyDown)
         {
             Debug.WriteLine($"[ProcessKey] Training mode: unmapped key {vkCode} pressed while activation key down");
             Console.Beep(500, 100);
@@ -142,7 +144,7 @@ public class KeyMappingService
 
     public void Reset()
     {
-        _activationKeyDown = false;
+        _currentActivationKey = 0;
         _mappedKeysHeld.Clear();
         _modifierState = 0;
         _activationKeyUsedForMapping = false;

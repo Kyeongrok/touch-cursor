@@ -26,9 +26,14 @@
                 <Border BorderBrush="Gray" BorderThickness="1" Padding="15,10" Background="White" Margin="0,0,0,10">
                     <TextBlock x:Name="SourceKeyTextBlock" Text="(Not set)" FontWeight="Bold" FontSize="14"/>
                 </Border>
-                <Button x:Name="CaptureSourceKeyButton" Content="Capture Key..." Width="120" Height="30"
-                        Margin="0,5,0,0" HorizontalAlignment="Left"
-                        Click="CaptureSourceKeyButton_Click"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="CaptureSourceKeyButton" Content="Capture Key..." Width="120" Height="30"
+                            Margin="0,5,5,0" HorizontalAlignment="Left"
+                            Click="CaptureSourceKeyButton_Click"/>
+                    <TextBlock Text="or" VerticalAlignment="Center" Margin="5,5,5,0"/>
+                    <ComboBox x:Name="SourceKeyComboBox" Width="150" Height="30" Margin="5,5,0,0"
+                              SelectionChanged="SourceKeyComboBox_SelectionChanged"/>
+                </StackPanel>
             </StackPanel>
         </GroupBox>
 
@@ -41,9 +46,14 @@
                 <Border BorderBrush="Gray" BorderThickness="1" Padding="15,10" Background="White" Margin="0,0,0,10">
                     <TextBlock x:Name="TargetKeyTextBlock" Text="(Not set)" FontWeight="Bold" FontSize="14"/>
                 </Border>
-                <Button x:Name="CaptureTargetKeyButton" Content="Capture Key..." Width="120" Height="30"
-                        Margin="0,5,0,0" HorizontalAlignment="Left"
-                        Click="CaptureTargetKeyButton_Click"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="CaptureTargetKeyButton" Content="Capture Key..." Width="120" Height="30"
+                            Margin="0,5,5,0" HorizontalAlignment="Left"
+                            Click="CaptureTargetKeyButton_Click"/>
+                    <TextBlock Text="or" VerticalAlignment="Center" Margin="5,5,5,0"/>
+                    <ComboBox x:Name="TargetKeyComboBox" Width="150" Height="30" Margin="5,5,0,0"
+                              SelectionChanged="TargetKeyComboBox_SelectionChanged"/>
+                </StackPanel>
             </StackPanel>
         </GroupBox>
 

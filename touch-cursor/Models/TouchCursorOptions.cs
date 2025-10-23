@@ -18,11 +18,47 @@ public class TouchCursorOptions
     public bool RunAtStartup { get; set; } = false;
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
-    public int ActivationKey { get; set; } = 0x20; // VK_SPACE
+
+    // Legacy: Single activation key (for backward compatibility)
+    [JsonIgnore]
+    public int ActivationKey
+    {
+        get => ActivationKeyProfiles.Keys.FirstOrDefault(0x20);
+        set
+        {
+            if (ActivationKeyProfiles.Count == 0 || ActivationKeyProfiles.ContainsKey(0x20))
+            {
+                // Migrate legacy single activation key to new structure
+                if (ActivationKeyProfiles.ContainsKey(0x20))
+                {
+                    var oldMappings = ActivationKeyProfiles[0x20];
+                    ActivationKeyProfiles.Remove(0x20);
+                    ActivationKeyProfiles[value] = oldMappings;
+                }
+                else
+                {
+                    ActivationKeyProfiles[value] = new Dictionary<int, int>();
+                }
+            }
+        }
+    }
+
     public string Language { get; set; } = "en"; // Default language
 
-    // Key mapping (VK_CODE -> VK_CODE or VK_CODE | ModifierFlags)
-    public Dictionary<int, int> KeyMapping { get; set; } = new();
+    // Multi-activation key support: ActivationKey -> (SourceKey -> TargetKey|Modifiers)
+    public Dictionary<int, Dictionary<int, int>> ActivationKeyProfiles { get; set; } = new();
+
+    // Legacy: Single key mapping (for backward compatibility)
+    [JsonIgnore]
+    public Dictionary<int, int> KeyMapping
+    {
+        get => ActivationKeyProfiles.Values.FirstOrDefault() ?? new Dictionary<int, int>();
+        set
+        {
+            var activationKey = ActivationKeyProfiles.Keys.FirstOrDefault(0x20);
+            ActivationKeyProfiles[activationKey] = value;
+        }
+    }
 
     // Program lists
     public List<string> DisableProgs { get; set; } = new();
@@ -42,28 +78,35 @@ public class TouchCursorOptions
 
     private void InitializeDefaultKeyMappings()
     {
-        // Default TouchCursor mappings (Space + key combinations)
-        // Space + IJKL = Arrow keys
-        KeyMapping[0x49] = 0x26; // I -> Up Arrow
-        KeyMapping[0x4A] = 0x25; // J -> Left Arrow
-        KeyMapping[0x4B] = 0x28; // K -> Down Arrow
-        KeyMapping[0x4C] = 0x27; // L -> Right Arrow
+        // Initialize default Space profile if no profiles exist
+        if (ActivationKeyProfiles.Count == 0)
+        {
+            var spaceMappings = new Dictionary<int, int>();
 
-        // Space + UO = Home/End
-        KeyMapping[0x55] = 0x24; // U -> Home
-        KeyMapping[0x4F] = 0x23; // O -> End
+            // Default TouchCursor mappings (Space + key combinations)
+            // Space + IJKL = Arrow keys
+            spaceMappings[0x49] = 0x26; // I -> Up Arrow
+            spaceMappings[0x4A] = 0x25; // J -> Left Arrow
+            spaceMappings[0x4B] = 0x28; // K -> Down Arrow
+            spaceMappings[0x4C] = 0x27; // L -> Right Arrow
 
-        // Space + HP = Page Up/Down
-        KeyMapping[0x48] = 0x21; // H -> Page Up
-        KeyMapping[0x50] = 0x22; // P -> Page Down
+            // Space + UO = Home/End
+            spaceMappings[0x55] = 0x24; // U -> Home
+            spaceMappings[0x4F] = 0x23; // O -> End
 
-        // Space + M, = Backspace/Delete
-        KeyMapping[0x4D] = 0x08; // M -> Backspace
-        KeyMapping[0xBC] = 0x2E; // , -> Delete (VK_OEM_COMMA)
+            // Space + HP = Page Up/Down
+            spaceMappings[0x48] = 0x25; // H -> Left
+            spaceMappings[0x50] = 0x08; // P -> Backspace
 
-        // Space + NM for word navigation
-        KeyMapping[0x4E] = (int)(0x25 | (int)ModifierFlags.Ctrl); // N -> Ctrl+Left
-        KeyMapping[0xBE] = (int)(0x27 | (int)ModifierFlags.Ctrl); // . -> Ctrl+Right (VK_OEM_PERIOD)
+            // Space + M, = Backspace/Delete
+            spaceMappings[0x4D] = 0x2E; // M -> Delete
+
+            // Space + N. for word navigation
+            spaceMappings[0x4E] = (int)(0x25 | (int)ModifierFlags.Ctrl); // N -> Ctrl+Left
+            spaceMappings[0xBE] = (int)(0x27 | (int)ModifierFlags.Ctrl); // . -> Ctrl+Right (VK_OEM_PERIOD)
+
+            ActivationKeyProfiles[0x20] = spaceMappings; // VK_SPACE
+        }
     }
 
     public bool ShouldCheckForUpdate()

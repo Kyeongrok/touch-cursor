@@ -12,6 +12,7 @@ public partial class SettingsWindow : Window
     private readonly TouchCursorOptions _options;
     private readonly TouchCursorOptions _originalOptions;
     private bool _hasChanges = false;
+    private int _selectedActivationKey = 0; // Currently selected activation key for editing mappings
 
     public SettingsWindow(TouchCursorOptions options)
     {
@@ -50,8 +51,8 @@ public partial class SettingsWindow : Window
 
     private void LoadOptionsToUI()
     {
-        // General Tab
-        SetActivationKeySelection(_options.ActivationKey);
+        // General Tab - Activation Key Profiles
+        LoadActivationKeyProfiles();
         ShowInTrayCheckBox.IsChecked = _options.ShowInNotificationArea;
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
@@ -60,13 +61,33 @@ public partial class SettingsWindow : Window
         LanguageComboBox.ItemsSource = LocalizationManager.Instance.GetAvailableLanguages();
         LanguageComboBox.SelectedValue = _options.Language;
 
-        // Key Mappings Tab
-        LoadKeyMappings();
+        // Key Mappings Tab - Load activation key selector
+        LoadKeyMappingActivationKeys();
 
         // Program Lists Tab
         UseEnableListCheckBox.IsChecked = _options.UseEnableList;
         DisableProgsListBox.ItemsSource = new ObservableCollection<string>(_options.DisableProgs);
         EnableProgsListBox.ItemsSource = new ObservableCollection<string>(_options.EnableProgs);
+    }
+
+    private void LoadActivationKeyProfiles()
+    {
+        var profiles = new ObservableCollection<ActivationKeyProfileDisplay>();
+
+        foreach (var kvp in _options.ActivationKeyProfiles)
+        {
+            var vkCode = kvp.Key;
+            var mappings = kvp.Value;
+
+            profiles.Add(new ActivationKeyProfileDisplay
+            {
+                VkCode = vkCode,
+                KeyName = GetKeyName(vkCode),
+                MappingCount = $"({mappings.Count} mappings)"
+            });
+        }
+
+        ActivationKeyProfilesListBox.ItemsSource = profiles;
     }
 
     private void UpdateUI()
@@ -83,14 +104,8 @@ public partial class SettingsWindow : Window
         ProgramListsTab.Header = loc.GetString("SettingsWindow.TabProgramLists");
 
         // General Tab
-        ActivationKeyGroupBox.Header = loc.GetString("SettingsWindow.ActivationKey");
-        ActivationKeyDescriptionTextBlock.Text = loc.GetString("SettingsWindow.ActivationKeyDescription");
-
-        // Update activation key combo box items
-        ActivationKeySpace.Content = loc.GetString("SettingsWindow.ActivationKeySpace");
-        ActivationKeyCapsLock.Content = loc.GetString("SettingsWindow.ActivationKeyCapsLock");
-        ActivationKeyLeftCtrl.Content = loc.GetString("SettingsWindow.ActivationKeyLeftCtrl");
-        ActivationKeyRightCtrl.Content = loc.GetString("SettingsWindow.ActivationKeyRightCtrl");
+        ActivationKeyProfilesGroupBox.Header = "Activation Key Profiles";
+        ActivationKeyProfilesDescriptionTextBlock.Text = "Manage multiple activation keys, each with their own key mappings:";
 
         BehaviorGroupBox.Header = loc.GetString("SettingsWindow.Behavior");
         ShowInTrayCheckBox.Content = loc.GetString("SettingsWindow.ShowInTray");
@@ -136,26 +151,62 @@ public partial class SettingsWindow : Window
         LoadKeyMappings();
     }
 
-    private void SetActivationKeySelection(int vkCode)
+    // Legacy method - no longer used with multi-activation key support
+    //private void SetActivationKeySelection(int vkCode)
+    //{
+    //    // Removed - using ActivationKeyProfiles instead
+    //}
+
+    private void LoadKeyMappingActivationKeys()
     {
-        foreach (ComboBoxItem item in ActivationKeyComboBox.Items)
+        var profiles = new ObservableCollection<ActivationKeyProfileDisplay>();
+
+        foreach (var kvp in _options.ActivationKeyProfiles)
         {
-            if (item.Tag is string tagStr && int.Parse(tagStr) == vkCode)
+            var vkCode = kvp.Key;
+            var mappings = kvp.Value;
+
+            profiles.Add(new ActivationKeyProfileDisplay
             {
-                ActivationKeyComboBox.SelectedItem = item;
-                return;
-            }
+                VkCode = vkCode,
+                KeyName = GetKeyName(vkCode),
+                MappingCount = $"({mappings.Count} mappings)"
+            });
         }
-        // Default to Space if not found
-        ActivationKeyComboBox.SelectedIndex = 0;
+
+        KeyMappingActivationKeyComboBox.ItemsSource = profiles;
+
+        // Select the first activation key by default
+        if (profiles.Count > 0)
+        {
+            KeyMappingActivationKeyComboBox.SelectedIndex = 0;
+        }
+    }
+
+    private void KeyMappingActivationKeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (KeyMappingActivationKeyComboBox.SelectedItem is ActivationKeyProfileDisplay selected)
+        {
+            _selectedActivationKey = selected.VkCode;
+            LoadKeyMappings();
+        }
     }
 
     private void LoadKeyMappings()
     {
         var mappings = new ObservableCollection<KeyMappingDisplay>();
 
+        // Get the mappings for the currently selected activation key
+        if (_selectedActivationKey == 0 || !_options.ActivationKeyProfiles.ContainsKey(_selectedActivationKey))
+        {
+            KeyMappingsDataGrid.ItemsSource = mappings;
+            return;
+        }
+
+        var keyMappings = _options.ActivationKeyProfiles[_selectedActivationKey];
+
         // Convert key mappings to display format
-        foreach (var kvp in _options.KeyMapping)
+        foreach (var kvp in keyMappings)
         {
             var sourceKey = GetKeyName(kvp.Key);
             var targetVk = kvp.Value & 0xFFFF;
@@ -178,6 +229,13 @@ public partial class SettingsWindow : Window
     {
         return vkCode switch
         {
+            0x08 => "Backspace",
+            0x09 => "Tab",
+            0x14 => "CapsLock",
+            0x20 => "Space",
+            0xA2 => "Left Ctrl",
+            0xA3 => "Right Ctrl",
+            0xFF => "Fn",
             0x49 => "I",
             0x4A => "J",
             0x4B => "K",
@@ -190,6 +248,14 @@ public partial class SettingsWindow : Window
             0xBC => ",",
             0x4E => "N",
             0xBE => ".",
+            0x24 => "Home",
+            0x23 => "End",
+            0x2D => "Insert",
+            0x2E => "Delete",
+            0x26 => "Up",
+            0x28 => "Down",
+            0x25 => "Left",
+            0x27 => "Right",
             _ => $"VK_{vkCode:X2}"
         };
     }
@@ -242,14 +308,11 @@ public partial class SettingsWindow : Window
         };
     }
 
-    private void ActivationKeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (ActivationKeyComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tagStr)
-        {
-            _options.ActivationKey = int.Parse(tagStr);
-            _hasChanges = true;
-        }
-    }
+    // Legacy method - no longer used with multi-activation key support
+    //private void ActivationKeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    //{
+    //    // Removed - using ActivationKeyProfiles instead
+    //}
 
     private void ShowInTrayCheckBox_Changed(object sender, RoutedEventArgs e)
     {
@@ -367,6 +430,13 @@ public partial class SettingsWindow : Window
 
     private void AddMappingButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_selectedActivationKey == 0 || !_options.ActivationKeyProfiles.ContainsKey(_selectedActivationKey))
+        {
+            MessageBox.Show("Please select an activation key profile first.", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         var dialog = new KeyMappingEditorDialog();
         if (dialog.ShowDialog() == true)
         {
@@ -375,24 +445,34 @@ public partial class SettingsWindow : Window
             var modifiers = dialog.TargetModifiers;
             var mappedKey = targetVk | modifiers;
 
-            // Add or update the mapping
-            _options.KeyMapping[sourceVk] = mappedKey;
+            // Add or update the mapping for the selected activation key
+            _options.ActivationKeyProfiles[_selectedActivationKey][sourceVk] = mappedKey;
             LoadKeyMappings();
+            LoadKeyMappingActivationKeys(); // Refresh the activation key list to update mapping counts
             _hasChanges = true;
         }
     }
 
     private void EditMappingButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_selectedActivationKey == 0 || !_options.ActivationKeyProfiles.ContainsKey(_selectedActivationKey))
+        {
+            MessageBox.Show("Please select an activation key profile first.", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         if (KeyMappingsDataGrid.SelectedItem is KeyMappingDisplay selected)
         {
+            var keyMappings = _options.ActivationKeyProfiles[_selectedActivationKey];
+
             // Find the original mapping
-            var sourceVk = _options.KeyMapping.FirstOrDefault(kvp =>
+            var sourceVk = keyMappings.FirstOrDefault(kvp =>
                 GetKeyName(kvp.Key) == selected.SourceKey).Key;
 
             if (sourceVk != 0)
             {
-                var mappedKey = _options.KeyMapping[sourceVk];
+                var mappedKey = keyMappings[sourceVk];
                 var targetVk = mappedKey & 0xFFFF;
                 var modifiers = (int)(mappedKey & 0xFFFF0000);
 
@@ -400,7 +480,7 @@ public partial class SettingsWindow : Window
                 if (dialog.ShowDialog() == true)
                 {
                     // Remove old mapping
-                    _options.KeyMapping.Remove(sourceVk);
+                    keyMappings.Remove(sourceVk);
 
                     // Add new mapping
                     var newSourceVk = dialog.SourceVkCode;
@@ -408,8 +488,9 @@ public partial class SettingsWindow : Window
                     var newModifiers = dialog.TargetModifiers;
                     var newMappedKey = newTargetVk | newModifiers;
 
-                    _options.KeyMapping[newSourceVk] = newMappedKey;
+                    keyMappings[newSourceVk] = newMappedKey;
                     LoadKeyMappings();
+                    LoadKeyMappingActivationKeys(); // Refresh the activation key list to update mapping counts
                     _hasChanges = true;
                 }
             }
@@ -418,6 +499,13 @@ public partial class SettingsWindow : Window
 
     private void RemoveMappingButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_selectedActivationKey == 0 || !_options.ActivationKeyProfiles.ContainsKey(_selectedActivationKey))
+        {
+            MessageBox.Show("Please select an activation key profile first.", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         if (KeyMappingsDataGrid.SelectedItem is KeyMappingDisplay selected)
         {
             var loc = LocalizationManager.Instance;
@@ -429,16 +517,134 @@ public partial class SettingsWindow : Window
 
             if (result == MessageBoxResult.Yes)
             {
+                var keyMappings = _options.ActivationKeyProfiles[_selectedActivationKey];
+
                 // Find and remove the mapping
-                var sourceVk = _options.KeyMapping.FirstOrDefault(kvp =>
+                var sourceVk = keyMappings.FirstOrDefault(kvp =>
                     GetKeyName(kvp.Key) == selected.SourceKey).Key;
 
                 if (sourceVk != 0)
                 {
-                    _options.KeyMapping.Remove(sourceVk);
+                    keyMappings.Remove(sourceVk);
                     LoadKeyMappings();
+                    LoadKeyMappingActivationKeys(); // Refresh the activation key list to update mapping counts
                     _hasChanges = true;
                 }
+            }
+        }
+    }
+
+    private void ActivationKeyProfilesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        bool hasSelection = ActivationKeyProfilesListBox.SelectedItem != null;
+        RemoveActivationKeyButton.IsEnabled = hasSelection;
+    }
+
+    private void AddActivationKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Show a simple dialog to select activation key
+        var dialog = new Window
+        {
+            Title = "Add Activation Key Profile",
+            Width = 400,
+            Height = 250,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            ResizeMode = ResizeMode.NoResize
+        };
+
+        var stack = new StackPanel { Margin = new Thickness(20) };
+
+        stack.Children.Add(new TextBlock
+        {
+            Text = "Select an activation key for the new profile:",
+            Margin = new Thickness(0, 0, 0, 10)
+        });
+
+        var comboBox = new System.Windows.Controls.ComboBox { Width = 200, HorizontalAlignment = System.Windows.HorizontalAlignment.Left };
+        comboBox.Items.Add(new ComboBoxItem { Content = "Space", Tag = 32 });
+        comboBox.Items.Add(new ComboBoxItem { Content = "CapsLock", Tag = 20 });
+        comboBox.Items.Add(new ComboBoxItem { Content = "Left Ctrl", Tag = 162 });
+        comboBox.Items.Add(new ComboBoxItem { Content = "Right Ctrl", Tag = 163 });
+        comboBox.Items.Add(new ComboBoxItem { Content = "Tab", Tag = 9 });
+        comboBox.Items.Add(new ComboBoxItem { Content = "Backspace", Tag = 8 });
+        comboBox.Items.Add(new ComboBoxItem { Content = "Fn", Tag = 255 });
+        comboBox.SelectedIndex = 0;
+        stack.Children.Add(comboBox);
+
+        var buttonPanel = new StackPanel
+        {
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+            Margin = new Thickness(0, 20, 0, 0)
+        };
+
+        var okButton = new System.Windows.Controls.Button
+        {
+            Content = "OK",
+            Width = 80,
+            Height = 30,
+            Margin = new Thickness(0, 0, 10, 0),
+            IsDefault = true
+        };
+        okButton.Click += (s, ev) => { dialog.DialogResult = true; dialog.Close(); };
+        buttonPanel.Children.Add(okButton);
+
+        var cancelButton = new System.Windows.Controls.Button
+        {
+            Content = "Cancel",
+            Width = 80,
+            Height = 30,
+            IsCancel = true
+        };
+        cancelButton.Click += (s, ev) => { dialog.DialogResult = false; dialog.Close(); };
+        buttonPanel.Children.Add(cancelButton);
+
+        stack.Children.Add(buttonPanel);
+        dialog.Content = stack;
+
+        if (dialog.ShowDialog() == true && comboBox.SelectedItem is ComboBoxItem selectedItem)
+        {
+            var vkCode = (int)selectedItem.Tag;
+
+            if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
+            {
+                MessageBox.Show("This activation key already exists!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Add new profile with empty mappings
+            _options.ActivationKeyProfiles[vkCode] = new Dictionary<int, int>();
+            LoadActivationKeyProfiles();
+            LoadKeyMappingActivationKeys(); // Refresh Key Mappings tab activation key selector
+            _hasChanges = true;
+        }
+    }
+
+    private void RemoveActivationKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ActivationKeyProfilesListBox.SelectedItem is ActivationKeyProfileDisplay selected)
+        {
+            if (_options.ActivationKeyProfiles.Count <= 1)
+            {
+                MessageBox.Show("Cannot remove the last activation key profile!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Are you sure you want to remove the '{selected.KeyName}' profile?\n\nThis will delete all key mappings for this activation key.",
+                "Remove Activation Key Profile",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _options.ActivationKeyProfiles.Remove(selected.VkCode);
+                LoadActivationKeyProfiles();
+                LoadKeyMappingActivationKeys(); // Refresh Key Mappings tab activation key selector
+                _hasChanges = true;
             }
         }
     }
@@ -542,6 +748,14 @@ public class KeyMappingDisplay
 }
 
 // Simple input dialog for adding programs
+// Helper class for displaying activation key profiles
+public class ActivationKeyProfileDisplay
+{
+    public int VkCode { get; set; }
+    public string KeyName { get; set; } = "";
+    public string MappingCount { get; set; } = "";
+}
+
 public class InputDialog : Window
 {
     private readonly System.Windows.Controls.TextBox _textBox;
