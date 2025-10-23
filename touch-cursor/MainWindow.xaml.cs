@@ -57,9 +57,24 @@ public partial class MainWindow : Window
 
     private void SetupNotifyIcon()
     {
+        // Load custom icon if available, otherwise use system icon
+        System.Drawing.Icon? appIcon = null;
+        try
+        {
+            var iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                appIcon = new System.Drawing.Icon(iconPath);
+            }
+        }
+        catch
+        {
+            // Fallback to system icon if custom icon fails to load
+        }
+
         _notifyIcon = new NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = appIcon ?? System.Drawing.SystemIcons.Application,
             Visible = true,
             Text = "TouchCursor"
         };
