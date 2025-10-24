@@ -19,6 +19,10 @@ public class TouchCursorOptions
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
 
+    // Rollover detection: if a key is pressed within this time after activation key,
+    // treat both as normal typing instead of cursor mode
+    public int RolloverThresholdMs { get; set; } = 50;
+
     // Legacy: Single activation key (for backward compatibility)
     [JsonIgnore]
     public int ActivationKey

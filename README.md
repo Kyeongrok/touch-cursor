@@ -1,6 +1,6 @@
 # TouchCursor - .NET 8 WPF Edition
 
-C++ 원본 TouchCursor 프로젝트를 .NET 8 WPF로 포팅한 버전입니다.
+**Version 2.1.0** - C++ 원본 TouchCursor 프로젝트를 .NET 8 WPF로 포팅한 버전입니다.
 
 ## 개요
 
@@ -22,10 +22,14 @@ TouchCursor는 키보드의 **Space 키를 활용 키로 사용**하여 홈 포�
 
 ### 추가 기능
 
+- **Rollover Detection** 🆕: 빠른 타이핑 시 의도치 않은 커서 모드 활성화 방지
+  - Space 후 짧은 시간(기본 50ms) 내 키 입력 시 정상 타이핑으로 처리
+  - 설정에서 민감도 조절 가능 (0-200ms)
 - **시스템 트레이 지원**: 백그라운드에서 실행
 - **Windows 시작 프로그램 등록**: 부팅 시 자동 실행
 - **Training Mode**: 잘못된 키 입력 시 소리로 알림
 - **설정 저장**: JSON 형식으로 사용자 설정 보존
+- **다중 Activation Key 프로필**: 여러 activation key 설정 가능
 
 ## 시스템 요구사항
 

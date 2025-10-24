@@ -14,6 +14,7 @@ public class KeyMappingService
     private readonly HashSet<int> _mappedKeysHeld = new();
     private int _modifierState = 0;
     private bool _activationKeyUsedForMapping = false;
+    private long _activationKeyPressTime = 0; // Timestamp when activation key was pressed (ticks)
 
     // Event for sending key events
     public event Action<int, bool, int>? SendKeyRequested;
@@ -79,7 +80,8 @@ public class KeyMappingService
             {
                 _currentActivationKey = vkCode;
                 _activationKeyUsedForMapping = false;
-                Debug.WriteLine($"[ProcessKey] Activation key pressed - blocking and setting _currentActivationKey={vkCode}");
+                _activationKeyPressTime = DateTime.Now.Ticks; // Record timestamp
+                Debug.WriteLine($"[ProcessKey] Activation key pressed - blocking and setting _currentActivationKey={vkCode}, timestamp={_activationKeyPressTime}");
                 return true; // Block the activation key press
             }
             else if (isKeyDown && _currentActivationKey != 0)
@@ -125,6 +127,28 @@ public class KeyMappingService
 
             if (isKeyDown)
             {
+                // Rollover detection: check if key was pressed too quickly after activation key
+                var elapsedMs = (DateTime.Now.Ticks - _activationKeyPressTime) / TimeSpan.TicksPerMillisecond;
+                Debug.WriteLine($"[ProcessKey] Elapsed time since activation: {elapsedMs}ms, threshold: {_options.RolloverThresholdMs}ms");
+
+                if (elapsedMs <= _options.RolloverThresholdMs)
+                {
+                    // ROLLOVER DETECTED: treat as normal typing
+                    Debug.WriteLine($"[ProcessKey] ROLLOVER DETECTED! Treating both keys as normal input");
+
+                    // Send the activation key that was blocked earlier
+                    SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
+                    SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
+
+                    // Reset activation state
+                    _currentActivationKey = 0;
+                    _activationKeyPressTime = 0;
+                    _activationKeyUsedForMapping = false;
+
+                    // Let the current key through (don't block it)
+                    return false;
+                }
+
                 Debug.WriteLine($"[ProcessKey] Sending mapped key DOWN: targetVk={targetVk}, mappingModifiers={modifiers:X}, currentModifiers={_modifierState:X}");
                 _activationKeyUsedForMapping = true; // Mark that we used the activation key for mapping
                 // Only inject modifiers that aren't already pressed (like original C++ code)
@@ -167,5 +191,6 @@ public class KeyMappingService
         _mappedKeysHeld.Clear();
         _modifierState = 0;
         _activationKeyUsedForMapping = false;
+        _activationKeyPressTime = 0;
     }
 }

@@ -64,6 +64,7 @@ public partial class SettingsWindow : Window
             RunAtStartup = options.RunAtStartup,
             ShowInNotificationArea = options.ShowInNotificationArea,
             CheckForUpdates = options.CheckForUpdates,
+            RolloverThresholdMs = options.RolloverThresholdMs,
             ActivationKey = options.ActivationKey,
             UseEnableList = options.UseEnableList,
             DisableProgs = new List<string>(options.DisableProgs),
@@ -142,6 +143,8 @@ public partial class SettingsWindow : Window
         ShowInTrayCheckBox.IsChecked = _options.ShowInNotificationArea;
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
+        RolloverThresholdSlider.Value = _options.RolloverThresholdMs;
+        RolloverThresholdValueText.Text = $"{_options.RolloverThresholdMs} ms";
 
         // General Tab - Activation Key Profiles
         LoadActivationKeyProfiles();
@@ -205,7 +208,9 @@ public partial class SettingsWindow : Window
         LanguageDescriptionTextBlock.Text = loc.GetString("SettingsWindow.LanguageDescription");
 
         AboutGroupBox.Header = loc.GetString("SettingsWindow.About");
-        AboutVersionTextBlock.Text = loc.GetString("SettingsWindow.AboutVersion");
+        // Get version from assembly
+        var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        AboutVersionTextBlock.Text = $"Version: {version?.Major}.{version?.Minor}.{version?.Build} (C# Edition)";
         AboutOriginalTextBlock.Text = loc.GetString("SettingsWindow.AboutOriginal");
         AboutLicenseTextBlock.Text = loc.GetString("SettingsWindow.AboutLicense");
 
@@ -483,6 +488,16 @@ public partial class SettingsWindow : Window
     {
         if (_options == null) return;
         _options.BeepForMistakes = BeepForMistakesCheckBox.IsChecked == true;
+        _hasChanges = true;
+    }
+
+    private void RolloverThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_options == null || RolloverThresholdValueText == null) return;
+
+        var value = (int)RolloverThresholdSlider.Value;
+        _options.RolloverThresholdMs = value;
+        RolloverThresholdValueText.Text = $"{value} ms";
         _hasChanges = true;
     }
 
@@ -817,6 +832,7 @@ public partial class SettingsWindow : Window
             _options.ShowInNotificationArea = defaults.ShowInNotificationArea;
             _options.CheckForUpdates = defaults.CheckForUpdates;
             _options.BeepForMistakes = defaults.BeepForMistakes;
+            _options.RolloverThresholdMs = defaults.RolloverThresholdMs;
             _options.UseEnableList = defaults.UseEnableList;
             _options.DisableProgs.Clear();
             _options.EnableProgs.Clear();
@@ -894,6 +910,7 @@ public partial class SettingsWindow : Window
         _options.ShowInNotificationArea = _originalOptions.ShowInNotificationArea;
         _options.CheckForUpdates = _originalOptions.CheckForUpdates;
         _options.BeepForMistakes = _originalOptions.BeepForMistakes;
+        _options.RolloverThresholdMs = _originalOptions.RolloverThresholdMs;
         _options.UseEnableList = _originalOptions.UseEnableList;
 
         _options.DisableProgs.Clear();
