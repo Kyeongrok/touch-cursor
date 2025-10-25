@@ -196,10 +196,17 @@ public partial class SettingsWindow : Window
         ProgramListsTab.Header = loc.GetString("SettingsWindow.TabProgramLists");
 
         // General Tab
-        ActivationKeyProfilesGroupBox.Header = "Activation Key Profiles";
-        ActivationKeyProfilesDescriptionTextBlock.Text = "Manage multiple activation keys, each with their own key mappings:";
+        ActivationKeyProfilesGroupBox.Header = loc.GetString("SettingsWindow.ActivationKeyProfiles");
+        ActivationKeyProfilesDescriptionTextBlock.Text = loc.GetString("SettingsWindow.ActivationKeyProfilesDescription");
+        AddActivationKeyButton.Content = loc.GetString("SettingsWindow.AddProfile");
+        RemoveActivationKeyButton.Content = loc.GetString("SettingsWindow.RemoveProfile");
 
         BehaviorGroupBox.Header = loc.GetString("SettingsWindow.Behavior");
+        EnabledCheckBox.Content = loc.GetString("SettingsWindow.EnableTouchCursor");
+        TrainingModeCheckBox.Content = loc.GetString("SettingsWindow.TrainingMode");
+        RunAtStartupCheckBox.Content = loc.GetString("SettingsWindow.RunAtStartup");
+        RolloverThresholdLabel.Text = loc.GetString("SettingsWindow.RolloverThreshold");
+        RolloverThresholdDescription.Text = loc.GetString("SettingsWindow.RolloverThresholdDescription");
         ShowInTrayCheckBox.Content = loc.GetString("SettingsWindow.ShowInTray");
         CheckUpdatesCheckBox.Content = loc.GetString("SettingsWindow.CheckUpdates");
         BeepForMistakesCheckBox.Content = loc.GetString("SettingsWindow.BeepForMistakes");
@@ -208,15 +215,20 @@ public partial class SettingsWindow : Window
         LanguageDescriptionTextBlock.Text = loc.GetString("SettingsWindow.LanguageDescription");
 
         AboutGroupBox.Header = loc.GetString("SettingsWindow.About");
+        AboutTitleTextBlock.Text = loc.GetString("SettingsWindow.AboutTitle");
         // Get version from assembly
         var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        AboutVersionTextBlock.Text = $"Version: {version?.Major}.{version?.Minor}.{version?.Build} (C# Edition)";
+        AboutVersionTextBlock.Text = $"{loc.GetString("SettingsWindow.AboutVersion").Replace("2.0.0", $"{version?.Major}.{version?.Minor}.{version?.Build}")}";
         AboutOriginalTextBlock.Text = loc.GetString("SettingsWindow.AboutOriginal");
         AboutLicenseTextBlock.Text = loc.GetString("SettingsWindow.AboutLicense");
 
         // Key Mappings Tab
         CurrentKeyMappingsTextBlock.Text = loc.GetString("SettingsWindow.CurrentKeyMappings");
+        SelectActivationKeyTextBlock.Text = loc.GetString("SettingsWindow.SelectActivationKey");
         KeyMappingsNoteTextBlock.Text = loc.GetString("SettingsWindow.KeyMappingsNote");
+        AddMappingButton.Content = loc.GetString("SettingsWindow.AddMapping");
+        EditMappingButton.Content = loc.GetString("SettingsWindow.EditMapping");
+        RemoveMappingButton.Content = loc.GetString("SettingsWindow.RemoveMapping");
 
         // DataGrid columns
         ColumnActivationKey.Header = loc.GetString("SettingsWindow.ColumnActivationKey");
@@ -708,10 +720,12 @@ public partial class SettingsWindow : Window
 
     private void AddActivationKeyButton_Click(object sender, RoutedEventArgs e)
     {
+        var loc = LocalizationManager.Instance;
+
         // Show a simple dialog to select activation key
         var dialog = new Window
         {
-            Title = "Add Activation Key Profile",
+            Title = loc.GetString("SettingsWindow.AddProfile"),
             Width = 400,
             Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
@@ -723,18 +737,18 @@ public partial class SettingsWindow : Window
 
         stack.Children.Add(new TextBlock
         {
-            Text = "Select an activation key for the new profile:",
+            Text = loc.GetString("SettingsWindow.SelectActivationKeyPrompt"),
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         var comboBox = new System.Windows.Controls.ComboBox { Width = 200, HorizontalAlignment = System.Windows.HorizontalAlignment.Left };
-        comboBox.Items.Add(new ComboBoxItem { Content = "Space", Tag = 32 });
-        comboBox.Items.Add(new ComboBoxItem { Content = "CapsLock", Tag = 20 });
-        comboBox.Items.Add(new ComboBoxItem { Content = "Left Ctrl", Tag = 162 });
-        comboBox.Items.Add(new ComboBoxItem { Content = "Right Ctrl", Tag = 163 });
-        comboBox.Items.Add(new ComboBoxItem { Content = "Tab", Tag = 9 });
-        comboBox.Items.Add(new ComboBoxItem { Content = "Backspace", Tag = 8 });
-        comboBox.Items.Add(new ComboBoxItem { Content = "Fn", Tag = 255 });
+        comboBox.Items.Add(new ComboBoxItem { Content = loc.GetString("SettingsWindow.ActivationKeySpace"), Tag = 32 });
+        comboBox.Items.Add(new ComboBoxItem { Content = loc.GetString("SettingsWindow.ActivationKeyCapsLock"), Tag = 20 });
+        comboBox.Items.Add(new ComboBoxItem { Content = loc.GetString("SettingsWindow.ActivationKeyTab"), Tag = 9 });
+        comboBox.Items.Add(new ComboBoxItem { Content = loc.GetString("SettingsWindow.ActivationKeyBackspace"), Tag = 8 });
+        comboBox.Items.Add(new ComboBoxItem { Content = loc.GetString("SettingsWindow.ActivationKeyFn"), Tag = 255 });
+        // Note: Ctrl, Alt, Shift, Win keys cannot be used as activation keys
+        // because they are modifier keys and bypass ProcessKey in KeyboardHookService
         comboBox.SelectedIndex = 0;
         stack.Children.Add(comboBox);
 
@@ -747,7 +761,7 @@ public partial class SettingsWindow : Window
 
         var okButton = new System.Windows.Controls.Button
         {
-            Content = "OK",
+            Content = loc.GetString("SettingsWindow.OK"),
             Width = 80,
             Height = 30,
             Margin = new Thickness(0, 0, 10, 0),
@@ -758,7 +772,7 @@ public partial class SettingsWindow : Window
 
         var cancelButton = new System.Windows.Controls.Button
         {
-            Content = "Cancel",
+            Content = loc.GetString("SettingsWindow.Cancel"),
             Width = 80,
             Height = 30,
             IsCancel = true

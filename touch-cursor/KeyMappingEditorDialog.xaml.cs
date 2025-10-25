@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using touch_cursor.Models;
+using touch_cursor.Services;
 
 namespace touch_cursor;
 
@@ -56,7 +57,39 @@ public partial class KeyMappingEditorDialog : Window
     public KeyMappingEditorDialog()
     {
         InitializeComponent();
+        UpdateUI();
         LoadKeyComboBoxes();
+    }
+
+    private void UpdateUI()
+    {
+        var loc = LocalizationManager.Instance;
+
+        Title = loc.GetString("KeyMappingEditor.Title");
+
+        // Update GroupBox headers - need to find them in XAML
+        foreach (var child in ((System.Windows.Controls.Grid)Content).Children)
+        {
+            if (child is System.Windows.Controls.GroupBox groupBox)
+            {
+                if (groupBox.Name == "SourceKeyGroupBox" || groupBox.Header?.ToString() == "Source Key")
+                    groupBox.Header = loc.GetString("KeyMappingEditor.SourceKey");
+                else if (groupBox.Name == "TargetKeyGroupBox" || groupBox.Header?.ToString() == "Target Key")
+                    groupBox.Header = loc.GetString("KeyMappingEditor.TargetKey");
+                else if (groupBox.Name == "DescriptionGroupBox" || groupBox.Header?.ToString() == "Description (Optional)")
+                    groupBox.Header = loc.GetString("KeyMappingEditor.DescriptionOptional");
+            }
+        }
+
+        // Update buttons
+        OkButton.Content = loc.GetString("KeyMappingEditor.OK");
+        CancelButton.Content = loc.GetString("KeyMappingEditor.Cancel");
+
+        // Update initial text
+        if (SourceKeyTextBlock.Text == "(Not set)")
+            SourceKeyTextBlock.Text = loc.GetString("KeyMappingEditor.NotSet");
+        if (TargetKeyTextBlock.Text == "(Not set)")
+            TargetKeyTextBlock.Text = loc.GetString("KeyMappingEditor.NotSet");
     }
 
     public KeyMappingEditorDialog(int sourceVk, int targetVk, int modifiers, string description) : this()
@@ -77,7 +110,7 @@ public partial class KeyMappingEditorDialog : Window
     {
         _capturingSource = true;
         _capturingTarget = false;
-        CaptureSourceKeyButton.Content = "Press a key...";
+        CaptureSourceKeyButton.Content = LocalizationManager.Instance.GetString("KeyMappingEditor.CaptureKey");
         CaptureSourceKeyButton.IsEnabled = false;
         Focus();
     }
@@ -86,7 +119,7 @@ public partial class KeyMappingEditorDialog : Window
     {
         _capturingTarget = true;
         _capturingSource = false;
-        CaptureTargetKeyButton.Content = "Press a key...";
+        CaptureTargetKeyButton.Content = LocalizationManager.Instance.GetString("KeyMappingEditor.CaptureKey");
         CaptureTargetKeyButton.IsEnabled = false;
         Focus();
     }
@@ -112,7 +145,7 @@ public partial class KeyMappingEditorDialog : Window
         {
             _sourceVkCode = vkCode;
             SourceKeyTextBlock.Text = GetKeyName(vkCode);
-            CaptureSourceKeyButton.Content = "Capture Key...";
+            CaptureSourceKeyButton.Content = LocalizationManager.Instance.GetString("KeyMappingEditor.CaptureKey");
             CaptureSourceKeyButton.IsEnabled = true;
             _capturingSource = false;
         }
@@ -133,7 +166,7 @@ public partial class KeyMappingEditorDialog : Window
 
             UpdateModifierCheckboxes();
             TargetKeyTextBlock.Text = GetKeyNameWithModifiers(vkCode, _targetModifiers);
-            CaptureTargetKeyButton.Content = "Capture Key...";
+            CaptureTargetKeyButton.Content = LocalizationManager.Instance.GetString("KeyMappingEditor.CaptureKey");
             CaptureTargetKeyButton.IsEnabled = true;
             _capturingTarget = false;
         }
