@@ -48,11 +48,41 @@ dotnet run
 
 ### 빌드
 
+#### 기본 빌드
+
 ```bash
 dotnet build -c Release
 ```
 
 빌드된 실행 파일은 `touch-cursor\bin\Release\net8.0-windows\` 폴더에 생성됩니다.
+
+#### 특정 디렉토리로 빌드 (Publish)
+
+```bash
+# Desktop에 빌드 (Windows)
+dotnet publish -c Release -o %USERPROFILE%\Desktop\TouchCursor
+
+# Desktop에 빌드 (PowerShell)
+dotnet publish -c Release -o $env:USERPROFILE\Desktop\TouchCursor
+
+# 사용자 지정 경로에 빌드
+dotnet publish -c Release -o C:\MyApps\TouchCursor
+```
+
+**옵션 설명:**
+- `-c Release`: Release 구성으로 빌드 (최적화됨)
+- `-o <경로>`: 빌드 결과물을 지정된 경로에 생성
+- `publish` 명령은 런타임 포함 배포 가능한 패키지를 생성합니다
+
+**Self-contained 배포 (런타임 포함):**
+
+```bash
+# .NET 런타임이 없는 PC에서도 실행 가능
+dotnet publish -c Release -r win-x64 --self-contained true -o %USERPROFILE%\Desktop\TouchCursor
+
+# 단일 파일로 배포 (선택사항)
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o %USERPROFILE%\Desktop\TouchCursor
+```
 
 ## 사용 방법
 
