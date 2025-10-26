@@ -5,6 +5,40 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-10-26
+
+### Added
+- **롤오버 예외 키 기능**: 특정 키를 롤오버 감지에서 제외
+  - Key Mappings 탭에 "Ignore Rollover" 체크박스 컬럼 추가
+  - 키마다 다른 롤오버 동작 설정 가능
+  - 예: Space + I/J/K/L은 즉시 반응, Space + H는 롤오버 적용
+- UI 번역 완성 (한국어/영어)
+  - SettingsWindow 전체 번역
+  - KeyMappingEditorDialog 번역
+  - Activation Key Profiles 관련 번역
+- README.md에 특정 디렉토리로 빌드하는 방법 추가
+  - dotnet publish 명령어 예제
+  - Self-contained 배포 옵션 설명
+
+### Changed
+- `TouchCursorOptions`: `RolloverExceptionKeys` 속성 추가
+- `KeyMappingService`: 예외 키 체크 로직 구현
+- `KeyMappingDisplay`: `INotifyPropertyChanged` 구현 및 `IgnoreRollover` 프로퍼티 추가
+- .gitignore에 .idea/, *.user, *.suo 추가
+
+### Fixed
+- Modifier 키(Ctrl, Alt)를 활성화 키 목록에서 제거
+  - 이유: Modifier 키는 ProcessKey를 거치지 않아 작동하지 않음
+
+### Technical Details
+- 관련 파일:
+  - `Models/TouchCursorOptions.cs`
+  - `Services/KeyMappingService.cs`
+  - `SettingsWindow.xaml`
+  - `SettingsWindow.xaml.cs`
+  - `Resources/Strings.en.json`
+  - `Resources/Strings.ko.json`
+
 ## [2.1.0] - 2025-10-24
 
 ### Added
@@ -75,15 +109,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 1. **touch-cursor.csproj** 파일에서 버전 번호 업데이트:
    ```xml
-   <Version>2.1.0</Version>
-   <AssemblyVersion>2.1.0.0</AssemblyVersion>
-   <FileVersion>2.1.0.0</FileVersion>
+   <Version>2.2.0</Version>
+   <AssemblyVersion>2.2.0.0</AssemblyVersion>
+   <FileVersion>2.2.0.0</FileVersion>
    ```
 
 2. **CHANGELOG.md** 파일에 변경 사항 기록
 
 3. Git 태그 생성:
    ```bash
-   git tag -a v2.1.0 -m "Release v2.1.0: Rollover Detection"
-   git push origin v2.1.0
+   git tag -a v2.2.0 -m "Release v2.2.0: Rollover Exception Keys"
+   git push origin v2.2.0
    ```

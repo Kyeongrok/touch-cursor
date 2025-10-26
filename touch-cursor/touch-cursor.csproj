@@ -12,9 +12,9 @@
         <ApplicationIcon>app.ico</ApplicationIcon>
 
         <!-- Version Information -->
-        <Version>2.1.0</Version>
-        <AssemblyVersion>2.1.0.0</AssemblyVersion>
-        <FileVersion>2.1.0.0</FileVersion>
+        <Version>2.2.0</Version>
+        <AssemblyVersion>2.2.0.0</AssemblyVersion>
+        <FileVersion>2.2.0.0</FileVersion>
         <Company>TouchCursor</Company>
         <Product>TouchCursor for Windows</Product>
         <Copyright>Copyright © 2025 - Ported from original by Martin Stone</Copyright>

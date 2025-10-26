@@ -1,6 +1,6 @@
 # TouchCursor - .NET 8 WPF Edition
 
-**Version 2.1.0** - C++ 원본 TouchCursor 프로젝트를 .NET 8 WPF로 포팅한 버전입니다.
+**Version 2.2.0** - C++ 원본 TouchCursor 프로젝트를 .NET 8 WPF로 포팅한 버전입니다.
 
 ## 개요
 
