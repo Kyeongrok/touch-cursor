@@ -233,6 +233,7 @@ public partial class SettingsWindow : Window
         // DataGrid columns
         ColumnActivationKey.Header = loc.GetString("SettingsWindow.ColumnActivationKey");
         ColumnMapsTo.Header = loc.GetString("SettingsWindow.ColumnMapsTo");
+        ColumnIgnoreRollover.Header = loc.GetString("SettingsWindow.ColumnIgnoreRollover");
         ColumnDescription.Header = loc.GetString("SettingsWindow.ColumnDescription");
 
         // Program Lists Tab
@@ -311,6 +312,9 @@ public partial class SettingsWindow : Window
 
         var keyMappings = _options.ActivationKeyProfiles[_selectedActivationKey];
 
+        // Get rollover exception keys for this activation key
+        _options.RolloverExceptionKeys.TryGetValue(_selectedActivationKey, out var exceptionKeys);
+
         // Convert key mappings to display format
         foreach (var kvp in keyMappings)
         {
@@ -320,15 +324,59 @@ public partial class SettingsWindow : Window
             var targetKey = GetKeyNameWithModifiers(targetVk, modifiers);
             var description = GetMappingDescription(kvp.Key, targetVk, modifiers);
 
-            mappings.Add(new KeyMappingDisplay
+            var display = new KeyMappingDisplay
             {
+                SourceVkCode = kvp.Key,
                 SourceKey = sourceKey,
                 TargetKey = targetKey,
-                Description = description
-            });
+                Description = description,
+                IgnoreRollover = exceptionKeys?.Contains(kvp.Key) ?? false
+            };
+
+            // Subscribe to property changes to track modifications
+            display.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(KeyMappingDisplay.IgnoreRollover))
+                {
+                    _hasChanges = true;
+                    UpdateRolloverExceptionKeys();
+                }
+            };
+
+            mappings.Add(display);
         }
 
         KeyMappingsDataGrid.ItemsSource = mappings;
+    }
+
+    private void UpdateRolloverExceptionKeys()
+    {
+        if (KeyMappingsDataGrid.ItemsSource is ObservableCollection<KeyMappingDisplay> mappings)
+        {
+            // Clear existing exception keys for this activation key
+            if (!_options.RolloverExceptionKeys.ContainsKey(_selectedActivationKey))
+            {
+                _options.RolloverExceptionKeys[_selectedActivationKey] = new HashSet<int>();
+            }
+
+            var exceptionKeys = _options.RolloverExceptionKeys[_selectedActivationKey];
+            exceptionKeys.Clear();
+
+            // Add checked keys to exception list
+            foreach (var mapping in mappings)
+            {
+                if (mapping.IgnoreRollover)
+                {
+                    exceptionKeys.Add(mapping.SourceVkCode);
+                }
+            }
+
+            // Remove empty sets to keep config clean
+            if (exceptionKeys.Count == 0)
+            {
+                _options.RolloverExceptionKeys.Remove(_selectedActivationKey);
+            }
+        }
     }
 
     private string GetKeyName(int vkCode)
@@ -942,11 +990,28 @@ public partial class SettingsWindow : Window
 }
 
 // Helper class for displaying key mappings
-public class KeyMappingDisplay
+public class KeyMappingDisplay : INotifyPropertyChanged
 {
+    public int SourceVkCode { get; set; }
     public string SourceKey { get; set; } = "";
     public string TargetKey { get; set; } = "";
     public string Description { get; set; } = "";
+
+    private bool _ignoreRollover;
+    public bool IgnoreRollover
+    {
+        get => _ignoreRollover;
+        set
+        {
+            if (_ignoreRollover != value)
+            {
+                _ignoreRollover = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IgnoreRollover)));
+            }
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 // Simple input dialog for adding programs

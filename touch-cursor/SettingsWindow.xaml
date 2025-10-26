@@ -173,16 +173,16 @@
 
                     <DataGrid x:Name="KeyMappingsDataGrid" Grid.Row="3"
                               AutoGenerateColumns="False"
-                              IsReadOnly="True"
                               GridLinesVisibility="All"
                               HeadersVisibility="Column"
                               SelectionMode="Single"
                               SelectionChanged="KeyMappingsDataGrid_SelectionChanged"
                               MouseDoubleClick="KeyMappingsDataGrid_MouseDoubleClick">
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="ColumnActivationKey" Header="Activation Key +" Width="150" Binding="{Binding SourceKey}"/>
-                            <DataGridTextColumn x:Name="ColumnMapsTo" Header="Maps To" Width="150" Binding="{Binding TargetKey}"/>
-                            <DataGridTextColumn x:Name="ColumnDescription" Header="Description" Width="*" Binding="{Binding Description}"/>
+                            <DataGridTextColumn x:Name="ColumnActivationKey" Header="Activation Key +" Width="150" Binding="{Binding SourceKey}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnMapsTo" Header="Maps To" Width="150" Binding="{Binding TargetKey}" IsReadOnly="True"/>
+                            <DataGridCheckBoxColumn x:Name="ColumnIgnoreRollover" Header="Ignore Rollover" Width="120" Binding="{Binding IgnoreRollover, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn x:Name="ColumnDescription" Header="Description" Width="*" Binding="{Binding Description}" IsReadOnly="True"/>
                         </DataGrid.Columns>
                     </DataGrid>
 

@@ -23,6 +23,10 @@ public class TouchCursorOptions
     // treat both as normal typing instead of cursor mode
     public int RolloverThresholdMs { get; set; } = 50;
 
+    // Rollover exception keys: keys that ignore rollover detection (per activation key)
+    // ActivationKey -> HashSet of source keys that always activate cursor mode
+    public Dictionary<int, HashSet<int>> RolloverExceptionKeys { get; set; } = new();
+
     // Legacy: Single activation key (for backward compatibility)
     [JsonIgnore]
     public int ActivationKey

@@ -63,6 +63,7 @@
     "RemoveMappingConfirmationTitle": "Remove Mapping",
     "ColumnActivationKey": "Activation Key +",
     "ColumnMapsTo": "Maps To",
+    "ColumnIgnoreRollover": "Ignore Rollover",
     "ColumnDescription": "Description",
     "ProgramSpecificSettings": "Program-Specific Settings",
     "ProgramSpecificNote": "Configure which programs TouchCursor should be enabled or disabled in.",

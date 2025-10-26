@@ -63,6 +63,7 @@
     "RemoveMappingConfirmationTitle": "매핑 제거",
     "ColumnActivationKey": "활성화 키 +",
     "ColumnMapsTo": "매핑 대상",
+    "ColumnIgnoreRollover": "롤오버 무시",
     "ColumnDescription": "설명",
     "ProgramSpecificSettings": "프로그램별 설정",
     "ProgramSpecificNote": "터치커서를 활성화하거나 비활성화할 프로그램을 설정합니다.",

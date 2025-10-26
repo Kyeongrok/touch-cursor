@@ -127,26 +127,38 @@ public class KeyMappingService
 
             if (isKeyDown)
             {
+                // Check if this key is an exception to rollover detection
+                var isRolloverException = _options.RolloverExceptionKeys.TryGetValue(_currentActivationKey, out var exceptionKeys)
+                                          && exceptionKeys.Contains(vkCode);
+
                 // Rollover detection: check if key was pressed too quickly after activation key
-                var elapsedMs = (DateTime.Now.Ticks - _activationKeyPressTime) / TimeSpan.TicksPerMillisecond;
-                Debug.WriteLine($"[ProcessKey] Elapsed time since activation: {elapsedMs}ms, threshold: {_options.RolloverThresholdMs}ms");
-
-                if (elapsedMs <= _options.RolloverThresholdMs)
+                // Skip rollover check if this key is in the exception list
+                if (!isRolloverException && _options.RolloverThresholdMs > 0)
                 {
-                    // ROLLOVER DETECTED: treat as normal typing
-                    Debug.WriteLine($"[ProcessKey] ROLLOVER DETECTED! Treating both keys as normal input");
+                    var elapsedMs = (DateTime.Now.Ticks - _activationKeyPressTime) / TimeSpan.TicksPerMillisecond;
+                    Debug.WriteLine($"[ProcessKey] Elapsed time since activation: {elapsedMs}ms, threshold: {_options.RolloverThresholdMs}ms");
 
-                    // Send the activation key that was blocked earlier
-                    SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
-                    SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
+                    if (elapsedMs <= _options.RolloverThresholdMs)
+                    {
+                        // ROLLOVER DETECTED: treat as normal typing
+                        Debug.WriteLine($"[ProcessKey] ROLLOVER DETECTED! Treating both keys as normal input");
 
-                    // Reset activation state
-                    _currentActivationKey = 0;
-                    _activationKeyPressTime = 0;
-                    _activationKeyUsedForMapping = false;
+                        // Send the activation key that was blocked earlier
+                        SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
+                        SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
 
-                    // Let the current key through (don't block it)
-                    return false;
+                        // Reset activation state
+                        _currentActivationKey = 0;
+                        _activationKeyPressTime = 0;
+                        _activationKeyUsedForMapping = false;
+
+                        // Let the current key through (don't block it)
+                        return false;
+                    }
+                }
+                else if (isRolloverException)
+                {
+                    Debug.WriteLine($"[ProcessKey] Key {vkCode} is in rollover exception list - skipping rollover detection");
                 }
 
                 Debug.WriteLine($"[ProcessKey] Sending mapped key DOWN: targetVk={targetVk}, mappingModifiers={modifiers:X}, currentModifiers={_modifierState:X}");
