@@ -18,6 +18,7 @@ public class TouchCursorOptions
     public bool RunAtStartup { get; set; } = false;
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
+    public bool TypingAnalyticsEnabled { get; set; } = false;
 
     // Rollover detection: if a key is pressed within this time after activation key,
     // treat both as normal typing instead of cursor mode

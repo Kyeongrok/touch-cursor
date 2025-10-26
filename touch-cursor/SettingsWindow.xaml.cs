@@ -15,6 +15,7 @@ public partial class SettingsWindow : Window
     private readonly TouchCursorOptions _originalOptions;
     private readonly KeyboardHookService _hookService;
     private readonly KeyMappingService _mappingService;
+    private readonly TypingLogger _typingLogger;
     private NotifyIcon? _notifyIcon;
     private bool _isClosing = false;
     private bool _hasChanges = false;
@@ -35,7 +36,10 @@ public partial class SettingsWindow : Window
         LocalizationManager.Instance.LanguageChanged += UpdateUI;
 
         // Initialize services
-        _mappingService = new KeyMappingService(_options);
+        _typingLogger = new TypingLogger();
+        _typingLogger.Enabled = _options.TypingAnalyticsEnabled;
+
+        _mappingService = new KeyMappingService(_options, _typingLogger);
         _hookService = new KeyboardHookService(_mappingService);
 
         // Wire up the SendKey event
@@ -64,6 +68,7 @@ public partial class SettingsWindow : Window
             RunAtStartup = options.RunAtStartup,
             ShowInNotificationArea = options.ShowInNotificationArea,
             CheckForUpdates = options.CheckForUpdates,
+            TypingAnalyticsEnabled = options.TypingAnalyticsEnabled,
             RolloverThresholdMs = options.RolloverThresholdMs,
             ActivationKey = options.ActivationKey,
             UseEnableList = options.UseEnableList,
@@ -143,6 +148,7 @@ public partial class SettingsWindow : Window
         ShowInTrayCheckBox.IsChecked = _options.ShowInNotificationArea;
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
+        TypingAnalyticsCheckBox.IsChecked = _options.TypingAnalyticsEnabled;
         RolloverThresholdSlider.Value = _options.RolloverThresholdMs;
         RolloverThresholdValueText.Text = $"{_options.RolloverThresholdMs} ms";
 
@@ -548,6 +554,14 @@ public partial class SettingsWindow : Window
     {
         if (_options == null) return;
         _options.BeepForMistakes = BeepForMistakesCheckBox.IsChecked == true;
+        _hasChanges = true;
+    }
+
+    private void TypingAnalyticsCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null) return;
+        _options.TypingAnalyticsEnabled = TypingAnalyticsCheckBox.IsChecked == true;
+        _typingLogger.Enabled = _options.TypingAnalyticsEnabled;
         _hasChanges = true;
     }
 

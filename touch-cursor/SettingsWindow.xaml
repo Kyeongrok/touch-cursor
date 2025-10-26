@@ -80,6 +80,10 @@
                                           IsChecked="False" Margin="0,5"
                                           Checked="BeepForMistakesCheckBox_Changed"
                                           Unchecked="BeepForMistakesCheckBox_Changed"/>
+                                <CheckBox x:Name="TypingAnalyticsCheckBox" Content="Enable Typing Analytics (ML data collection)"
+                                          IsChecked="False" Margin="0,5"
+                                          Checked="TypingAnalyticsCheckBox_Changed"
+                                          Unchecked="TypingAnalyticsCheckBox_Changed"/>
 
                                 <Separator Margin="0,10,0,10"/>
 
