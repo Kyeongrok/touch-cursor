@@ -69,6 +69,7 @@ public partial class SettingsWindow : Window
             ShowInNotificationArea = options.ShowInNotificationArea,
             CheckForUpdates = options.CheckForUpdates,
             TypingAnalyticsEnabled = options.TypingAnalyticsEnabled,
+            ActivationKeyHoldDelayMs = options.ActivationKeyHoldDelayMs,
             RolloverThresholdMs = options.RolloverThresholdMs,
             ActivationKey = options.ActivationKey,
             UseEnableList = options.UseEnableList,
@@ -149,6 +150,7 @@ public partial class SettingsWindow : Window
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
         TypingAnalyticsCheckBox.IsChecked = _options.TypingAnalyticsEnabled;
+        HoldDelaySlider.Value = _options.ActivationKeyHoldDelayMs;
         RolloverThresholdSlider.Value = _options.RolloverThresholdMs;
         RolloverThresholdValueText.Text = $"{_options.RolloverThresholdMs} ms";
 
@@ -565,6 +567,16 @@ public partial class SettingsWindow : Window
         _hasChanges = true;
     }
 
+    private void HoldDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_options == null || HoldDelayValueText == null) return;
+
+        var value = (int)HoldDelaySlider.Value;
+        _options.ActivationKeyHoldDelayMs = value;
+        HoldDelayValueText.Text = $"{value} ms";
+        _hasChanges = true;
+    }
+
     private void RolloverThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_options == null || RolloverThresholdValueText == null) return;
@@ -908,6 +920,7 @@ public partial class SettingsWindow : Window
             _options.ShowInNotificationArea = defaults.ShowInNotificationArea;
             _options.CheckForUpdates = defaults.CheckForUpdates;
             _options.BeepForMistakes = defaults.BeepForMistakes;
+            _options.ActivationKeyHoldDelayMs = defaults.ActivationKeyHoldDelayMs;
             _options.RolloverThresholdMs = defaults.RolloverThresholdMs;
             _options.UseEnableList = defaults.UseEnableList;
             _options.DisableProgs.Clear();

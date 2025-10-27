@@ -11,7 +11,7 @@ public class TouchCursorOptions
 {
     private const int MaxKeyCodes = 0x100;
 
-    // General settings
+    // 일반 설정
     public bool Enabled { get; set; } = true;
     public bool TrainingMode { get; set; } = false;
     public bool BeepForMistakes { get; set; } = false;
@@ -20,15 +20,20 @@ public class TouchCursorOptions
     public bool CheckForUpdates { get; set; } = true;
     public bool TypingAnalyticsEnabled { get; set; } = false;
 
-    // Rollover detection: if a key is pressed within this time after activation key,
-    // treat both as normal typing instead of cursor mode
+    // 활성화 키 홀드 딜레이: 활성화 키를 이 시간만큼 눌러야 커서 모드 활성화
+    // 매핑된 키를 딜레이 전에 누르면 두 키 모두 일반 타이핑으로 처리됨
+    // 0으로 설정하면 비활성화 (즉시 활성화)
+    public int ActivationKeyHoldDelayMs { get; set; } = 0;
+
+    // 롤오버 감지: 활성화 키 누른 후 이 시간 내에 키를 누르면
+    // 두 키 모두 일반 타이핑으로 처리
     public int RolloverThresholdMs { get; set; } = 50;
 
-    // Rollover exception keys: keys that ignore rollover detection (per activation key)
-    // ActivationKey -> HashSet of source keys that always activate cursor mode
+    // 롤오버 예외 키: 롤오버 감지를 무시하는 키 (활성화 키별)
+    // ActivationKey -> 항상 커서 모드를 활성화하는 소스 키 HashSet
     public Dictionary<int, HashSet<int>> RolloverExceptionKeys { get; set; } = new();
 
-    // Legacy: Single activation key (for backward compatibility)
+    // 레거시: 단일 활성화 키 (하위 호환성)
     [JsonIgnore]
     public int ActivationKey
     {
@@ -37,7 +42,7 @@ public class TouchCursorOptions
         {
             if (ActivationKeyProfiles.Count == 0 || ActivationKeyProfiles.ContainsKey(0x20))
             {
-                // Migrate legacy single activation key to new structure
+                // 레거시 단일 활성화 키를 새 구조로 마이그레이션
                 if (ActivationKeyProfiles.ContainsKey(0x20))
                 {
                     var oldMappings = ActivationKeyProfiles[0x20];
@@ -52,12 +57,12 @@ public class TouchCursorOptions
         }
     }
 
-    public string Language { get; set; } = "en"; // Default language
+    public string Language { get; set; } = "en"; // 기본 언어
 
-    // Multi-activation key support: ActivationKey -> (SourceKey -> TargetKey|Modifiers)
+    // 다중 활성화 키 지원: ActivationKey -> (SourceKey -> TargetKey|Modifiers)
     public Dictionary<int, Dictionary<int, int>> ActivationKeyProfiles { get; set; } = new();
 
-    // Legacy: Single key mapping (for backward compatibility)
+    // 레거시: 단일 키 매핑 (하위 호환성)
     [JsonIgnore]
     public Dictionary<int, int> KeyMapping
     {
@@ -69,7 +74,7 @@ public class TouchCursorOptions
         }
     }
 
-    // Program lists
+    // 프로그램 목록
     public List<string> DisableProgs { get; set; } = new();
     public List<string> EnableProgs { get; set; } = new();
     public List<string> NeverTrainProgs { get; set; } = new();
@@ -77,7 +82,7 @@ public class TouchCursorOptions
     public bool UseEnableList { get; set; } = false;
     public bool UseOnlyTrainList { get; set; } = false;
 
-    // Last update check timestamp
+    // 마지막 업데이트 확인 타임스탬프
     public DateTime LastUpdateCheck { get; set; } = DateTime.MinValue;
 
     public TouchCursorOptions()
@@ -87,30 +92,30 @@ public class TouchCursorOptions
 
     private void InitializeDefaultKeyMappings()
     {
-        // Initialize default Space profile if no profiles exist
+        // 프로파일이 없을 경우 기본 Space 프로파일 초기화
         if (ActivationKeyProfiles.Count == 0)
         {
             var spaceMappings = new Dictionary<int, int>();
 
-            // Default TouchCursor mappings (Space + key combinations)
-            // Space + IJKL = Arrow keys
-            spaceMappings[0x49] = 0x26; // I -> Up Arrow
-            spaceMappings[0x4A] = 0x25; // J -> Left Arrow
-            spaceMappings[0x4B] = 0x28; // K -> Down Arrow
-            spaceMappings[0x4C] = 0x27; // L -> Right Arrow
+            // 기본 TouchCursor 매핑 (Space + 키 조합)
+            // Space + IJKL = 방향키
+            spaceMappings[0x49] = 0x26; // I -> 위 방향키
+            spaceMappings[0x4A] = 0x25; // J -> 왼쪽 방향키
+            spaceMappings[0x4B] = 0x28; // K -> 아래 방향키
+            spaceMappings[0x4C] = 0x27; // L -> 오른쪽 방향키
 
             // Space + UO = Home/End
             spaceMappings[0x55] = 0x24; // U -> Home
             spaceMappings[0x4F] = 0x23; // O -> End
 
-            // Space + HP = Page Up/Down
-            spaceMappings[0x48] = 0x25; // H -> Left
+            // Space + HP = 좌/백스페이스
+            spaceMappings[0x48] = 0x25; // H -> 왼쪽
             spaceMappings[0x50] = 0x08; // P -> Backspace
 
-            // Space + M, = Backspace/Delete
+            // Space + M = Delete
             spaceMappings[0x4D] = 0x2E; // M -> Delete
 
-            // Space + N. for word navigation
+            // Space + N. = 단어 단위 이동
             spaceMappings[0x4E] = (int)(0x25 | (int)ModifierFlags.Ctrl); // N -> Ctrl+Left
             spaceMappings[0xBE] = (int)(0x27 | (int)ModifierFlags.Ctrl); // . -> Ctrl+Right (VK_OEM_PERIOD)
 

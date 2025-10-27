@@ -43,7 +43,7 @@ public class KeyMappingService
     }
 
     /// <summary>
-    /// Update modifier state - must be called for ALL keys including injected ones (like original C++ code)
+    /// 수정자 상태 업데이트 - 주입된 키를 포함한 모든 키에 대해 호출되어야 함 (원본 C++ 코드처럼)
     /// </summary>
     public void UpdateModifierState(int vkCode, bool isKeyDown, bool isKeyUp)
     {
@@ -63,101 +63,146 @@ public class KeyMappingService
     }
 
     /// <summary>
-    /// Process a key event and determine if it should be blocked or remapped.
-    /// NOTE: Modifier keys should NOT be passed to this method (they are handled separately)
+    /// 키 이벤트를 처리하고 차단 또는 재매핑 여부 결정
+    /// 참고: 수정자 키는 이 메서드로 전달하면 안 됨 (별도로 처리됨)
     /// </summary>
-    /// <returns>True if the key event should be blocked, false to let it through</returns>
+    /// <returns>키 이벤트를 차단해야 하면 True, 통과시키려면 false</returns>
     public bool ProcessKey(int vkCode, bool isKeyDown, bool isKeyUp)
     {
         Debug.WriteLine($"[ProcessKey] vkCode={vkCode}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, Enabled={_options.Enabled}, modifierState={_modifierState:X}");
 
-        // Check for Ctrl+Shift+Z hotkey to mark last entry as mistake
-        if (isKeyDown && vkCode == 0x5A && // Z key
+        // Ctrl+Shift+Z 단축키로 마지막 항목을 실수로 표시
+        if (isKeyDown && vkCode == 0x5A && // Z 키
             (_modifierState & (int)ModifierFlags.Ctrl) != 0 &&
             (_modifierState & (int)ModifierFlags.Shift) != 0)
         {
-            Debug.WriteLine("[ProcessKey] Ctrl+Shift+Z detected - marking last entry as mistake");
+            Debug.WriteLine("[ProcessKey] Ctrl+Shift+Z 감지 - 마지막 항목을 실수로 표시");
             _typingLogger?.MarkLastAsMistake();
-            return false; // Let the key through (don't block it)
+            return false; // 키를 통과시킴 (차단하지 않음)
         }
 
         if (!_options.Enabled)
             return false;
 
-        // Check if this is any of the configured activation keys
+        // 설정된 활성화 키인지 확인
         if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
         {
-            Debug.WriteLine($"[ProcessKey] Activation key detected! vkCode={vkCode}, _currentActivationKey={_currentActivationKey}");
+            Debug.WriteLine($"[ProcessKey] 활성화 키 감지! vkCode={vkCode}, _currentActivationKey={_currentActivationKey}");
             if (isKeyDown && _currentActivationKey == 0)
             {
                 _currentActivationKey = vkCode;
                 _activationKeyUsedForMapping = false;
-                _activationKeyPressTime = DateTime.Now.Ticks; // Record timestamp
-                Debug.WriteLine($"[ProcessKey] Activation key pressed - blocking and setting _currentActivationKey={vkCode}, timestamp={_activationKeyPressTime}");
-                return true; // Block the activation key press
+                _activationKeyPressTime = DateTime.Now.Ticks; // 타임스탬프 기록
+                Debug.WriteLine($"[ProcessKey] 활성화 키 눌림 - 차단 및 _currentActivationKey={vkCode} 설정, timestamp={_activationKeyPressTime}");
+                return true; // 활성화 키 누름 차단
             }
             else if (isKeyDown && _currentActivationKey != 0)
             {
-                // Auto-repeat of activation key - block it (like original C++ state machine)
-                Debug.WriteLine($"[ProcessKey] Activation key auto-repeat - blocking");
+                // 활성화 키 자동 반복 - 차단 (원본 C++ 상태 머신처럼)
+                Debug.WriteLine($"[ProcessKey] 활성화 키 자동 반복 - 차단");
                 return true;
             }
             else if (isKeyUp && _currentActivationKey == vkCode)
             {
-                Debug.WriteLine($"[ProcessKey] Activation key released - releasing {_mappedKeysHeld.Count} held keys, wasUsedForMapping={_activationKeyUsedForMapping}");
+                Debug.WriteLine($"[ProcessKey] 활성화 키 해제 - {_mappedKeysHeld.Count}개 유지 키 해제, wasUsedForMapping={_activationKeyUsedForMapping}");
 
-                // Release all held mapped keys WITHOUT modifiers (original C++ behavior)
+                // 모든 유지된 매핑 키를 수정자 없이 해제 (원본 C++ 동작)
                 foreach (var heldKey in _mappedKeysHeld)
                 {
                     var targetVk = heldKey & 0xFFFF;
-                    Debug.WriteLine($"[ProcessKey] Releasing held key: targetVk={targetVk}");
+                    Debug.WriteLine($"[ProcessKey] 유지 키 해제: targetVk={targetVk}");
                     SendKeyRequested?.Invoke(targetVk, false, 0);
                 }
                 _mappedKeysHeld.Clear();
 
-                // If the activation key was not used for any mapping, send it through
+                // 활성화 키가 매핑에 사용되지 않았으면 키를 통과시킴
                 if (!_activationKeyUsedForMapping)
                 {
-                    Debug.WriteLine($"[ProcessKey] Activation key was not used for mapping - sending key {vkCode}");
+                    Debug.WriteLine($"[ProcessKey] 활성화 키가 매핑에 사용되지 않음 - 키 {vkCode} 전송");
                     SendKeyRequested?.Invoke(vkCode, true, 0);
                     SendKeyRequested?.Invoke(vkCode, false, 0);
                 }
 
                 _currentActivationKey = 0;
-                return true; // Block the activation key release
+                return true; // 활성화 키 해제 차단
             }
         }
 
-        // If activation key is down, check for mappings in the current profile
+        // 활성화 키가 눌려있으면 현재 프로파일에서 매핑 확인
         if (_currentActivationKey != 0 &&
             _options.ActivationKeyProfiles.TryGetValue(_currentActivationKey, out var keyMappings) &&
             keyMappings.TryGetValue(vkCode, out var mappedKey))
         {
             var targetVk = mappedKey & 0xFFFF;
             var modifiers = (int)(mappedKey & 0xFFFF0000);
-            Debug.WriteLine($"[ProcessKey] Mapping found! vkCode={vkCode} -> targetVk={targetVk}, modifiers={modifiers:X}");
+            Debug.WriteLine($"[ProcessKey] 매핑 발견! vkCode={vkCode} -> targetVk={targetVk}, modifiers={modifiers:X}");
 
             if (isKeyDown)
             {
-                // Calculate elapsed time since activation key press
+                // 활성화 키 누른 이후 경과 시간 계산
                 var elapsedMs = (DateTime.Now.Ticks - _activationKeyPressTime) / TimeSpan.TicksPerMillisecond;
 
-                // Check if this key is an exception to rollover detection
+                // 이 키가 롤오버 감지 예외인지 확인
                 var isRolloverException = _options.RolloverExceptionKeys.TryGetValue(_currentActivationKey, out var exceptionKeys)
                                           && exceptionKeys.Contains(vkCode);
 
-                // Rollover detection: check if key was pressed too quickly after activation key
-                // Skip rollover check if this key is in the exception list
+                // 홀드 딜레이 확인: 활성화 키를 최소 지속시간만큼 눌러야 함
+                // 이 확인은 롤오버 감지 이전에 수행됨
+                if (!isRolloverException && _options.ActivationKeyHoldDelayMs > 0)
+                {
+                    Debug.WriteLine($"[ProcessKey] 홀드 딜레이 확인: elapsed={elapsedMs}ms, required={_options.ActivationKeyHoldDelayMs}ms");
+
+                    if (elapsedMs < _options.ActivationKeyHoldDelayMs)
+                    {
+                        // 홀드 딜레이 미달: 활성화 키를 충분히 오래 누르지 않음
+                        Debug.WriteLine($"[ProcessKey] 홀드 딜레이 미달! 두 키 모두 일반 입력으로 처리");
+
+                        // 홀드 딜레이 이벤트 기록
+                        _typingLogger?.LogKeyEvent(new TypingLogEntry
+                        {
+                            Timestamp = DateTime.Now,
+                            ActivationKey = _currentActivationKey,
+                            ActivationKeyName = GetKeyName(_currentActivationKey),
+                            SourceKey = vkCode,
+                            SourceKeyName = GetKeyName(vkCode),
+                            TargetKey = targetVk,
+                            TargetKeyName = GetKeyName(targetVk),
+                            Modifiers = _modifierState,
+                            ElapsedMs = elapsedMs,
+                            RolloverThreshold = _options.RolloverThresholdMs,
+                            RolloverDetected = false,
+                            IsRolloverException = false,
+                            EventType = "hold_delay_not_met",
+                            TrainingMode = _options.TrainingMode,
+                            MarkedAsMistake = false
+                        });
+
+                        // 이전에 차단된 활성화 키 전송
+                        SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
+                        SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
+
+                        // 활성화 상태 초기화
+                        _currentActivationKey = 0;
+                        _activationKeyPressTime = 0;
+                        _activationKeyUsedForMapping = false;
+
+                        // 현재 키를 통과시킴 (차단하지 않음)
+                        return false;
+                    }
+                }
+
+                // 롤오버 감지: 활성화 키 누른 후 너무 빨리 키를 눌렀는지 확인
+                // 이 키가 예외 목록에 있으면 롤오버 확인 건너뜀
                 if (!isRolloverException && _options.RolloverThresholdMs > 0)
                 {
-                    Debug.WriteLine($"[ProcessKey] Elapsed time since activation: {elapsedMs}ms, threshold: {_options.RolloverThresholdMs}ms");
+                    Debug.WriteLine($"[ProcessKey] 활성화 이후 경과 시간: {elapsedMs}ms, 임계값: {_options.RolloverThresholdMs}ms");
 
                     if (elapsedMs <= _options.RolloverThresholdMs)
                     {
-                        // ROLLOVER DETECTED: treat as normal typing
-                        Debug.WriteLine($"[ProcessKey] ROLLOVER DETECTED! Treating both keys as normal input");
+                        // 롤오버 감지: 일반 타이핑으로 처리
+                        Debug.WriteLine($"[ProcessKey] 롤오버 감지! 두 키 모두 일반 입력으로 처리");
 
-                        // Log rollover event
+                        // 롤오버 이벤트 기록
                         _typingLogger?.LogKeyEvent(new TypingLogEntry
                         {
                             Timestamp = DateTime.Now,
@@ -177,33 +222,33 @@ public class KeyMappingService
                             MarkedAsMistake = false
                         });
 
-                        // Send the activation key that was blocked earlier
+                        // 이전에 차단된 활성화 키 전송
                         SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
                         SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
 
-                        // Reset activation state
+                        // 활성화 상태 초기화
                         _currentActivationKey = 0;
                         _activationKeyPressTime = 0;
                         _activationKeyUsedForMapping = false;
 
-                        // Let the current key through (don't block it)
+                        // 현재 키를 통과시킴 (차단하지 않음)
                         return false;
                     }
                 }
                 else if (isRolloverException)
                 {
-                    Debug.WriteLine($"[ProcessKey] Key {vkCode} is in rollover exception list - skipping rollover detection");
+                    Debug.WriteLine($"[ProcessKey] 키 {vkCode}는 롤오버 예외 목록에 있음 - 롤오버 감지 건너뜀");
                 }
 
-                Debug.WriteLine($"[ProcessKey] Sending mapped key DOWN: targetVk={targetVk}, mappingModifiers={modifiers:X}, currentModifiers={_modifierState:X}");
-                _activationKeyUsedForMapping = true; // Mark that we used the activation key for mapping
-                // Only inject modifiers that aren't already pressed (like original C++ code)
+                Debug.WriteLine($"[ProcessKey] 매핑된 키 DOWN 전송: targetVk={targetVk}, mappingModifiers={modifiers:X}, currentModifiers={_modifierState:X}");
+                _activationKeyUsedForMapping = true; // 활성화 키를 매핑에 사용했다고 표시
+                // 이미 눌려있지 않은 수정자만 주입 (원본 C++ 코드처럼)
                 var effectiveModifiers = modifiers & ~_modifierState;
-                Debug.WriteLine($"[ProcessKey] Effective modifiers to inject: {effectiveModifiers:X}");
+                Debug.WriteLine($"[ProcessKey] 주입할 실효 수정자: {effectiveModifiers:X}");
                 SendKeyRequested?.Invoke(targetVk, true, effectiveModifiers);
                 _mappedKeysHeld.Add(mappedKey);
 
-                // Log mapped event
+                // 매핑 이벤트 기록
                 _typingLogger?.LogKeyEvent(new TypingLogEntry
                 {
                     Timestamp = DateTime.Now,
@@ -225,30 +270,30 @@ public class KeyMappingService
 
                 if (_options.TrainingMode && _options.BeepForMistakes)
                 {
-                    // Beep to indicate successful mapping in training mode
+                    // 훈련 모드에서 성공적인 매핑을 나타내기 위해 비프음 출력
                     Console.Beep(1000, 50);
                 }
             }
             else if (isKeyUp && _mappedKeysHeld.Contains(mappedKey))
             {
-                Debug.WriteLine($"[ProcessKey] Sending mapped key UP: targetVk={targetVk}");
-                // Send the mapped key up WITHOUT modifiers (original C++ behavior)
+                Debug.WriteLine($"[ProcessKey] 매핑된 키 UP 전송: targetVk={targetVk}");
+                // 수정자 없이 매핑된 키 UP 전송 (원본 C++ 동작)
                 SendKeyRequested?.Invoke(targetVk, false, 0);
                 _mappedKeysHeld.Remove(mappedKey);
             }
 
-            return true; // Block the original key
+            return true; // 원본 키 차단
         }
 
-        // Training mode: beep for unmapped keys while activation key is down
+        // 훈련 모드: 활성화 키가 눌려있을 때 매핑되지 않은 키에 대해 비프음
         if (_currentActivationKey != 0 && _options.TrainingMode && _options.BeepForMistakes && isKeyDown)
         {
-            Debug.WriteLine($"[ProcessKey] Training mode: unmapped key {vkCode} pressed while activation key down");
+            Debug.WriteLine($"[ProcessKey] 훈련 모드: 활성화 키가 눌려있는 동안 매핑되지 않은 키 {vkCode} 눌림");
             Console.Beep(500, 100);
         }
 
-        Debug.WriteLine($"[ProcessKey] Letting key through: vkCode={vkCode}");
-        return false; // Let the key through
+        Debug.WriteLine($"[ProcessKey] 키 통과시킴: vkCode={vkCode}");
+        return false; // 키를 통과시킴
     }
 
     public void Reset()
