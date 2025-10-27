@@ -40,6 +40,8 @@
       <None Include="app.ico">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Remove="%USERPROFILE%\Desktop\TouchCursor\touch-cursor.runtimeconfig.json" />
+      <None Remove="%USERPROFILE%\Desktop\TouchCursor\touch-cursor.deps.json" />
     </ItemGroup>
 
 </Project>
