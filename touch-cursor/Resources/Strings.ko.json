@@ -3,6 +3,7 @@
   "MainWindow": {
     "Title": "터치커서",
     "EnableTouchCursor": "터치커서 활성화",
+    "EnableModSwitch": "Mod Switch 활성화 (Alt+Space 토글)",
     "TrainingMode": "훈련 모드 (실수 시 경고음)",
     "RunAtStartup": "윈도우 시작 시 자동 실행",
     "QuickInfo": "빠른 정보",
@@ -12,6 +13,7 @@
     "PageUpDown": "H/P = Page Up/Down",
     "BackspaceDelete": "M/, = Backspace/Delete",
     "WordNavigation": "N/. = Ctrl+왼쪽/오른쪽 (단어 이동)",
+    "ModSwitch": "Alt+Space = Mod Switch 토글 (활성화 키 고정)",
     "Settings": "설정",
     "MinimizeToTray": "트레이로 최소화"
   },
@@ -39,6 +41,7 @@
     "ActivationKeyFn": "Fn",
     "Behavior": "동작",
     "EnableTouchCursor": "터치커서 활성화",
+    "EnableModSwitch": "Mod Switch 활성화 (Alt+Space 토글)",
     "TrainingMode": "훈련 모드",
     "RunAtStartup": "윈도우 시작 시 자동 실행",
     "ShowInTray": "알림 영역에 아이콘 표시",

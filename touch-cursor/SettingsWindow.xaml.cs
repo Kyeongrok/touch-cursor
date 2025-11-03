@@ -150,6 +150,7 @@ public partial class SettingsWindow : Window
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
         TypingAnalyticsCheckBox.IsChecked = _options.TypingAnalyticsEnabled;
+        ModSwitchCheckBox.IsChecked = _options.ModSwitchEnabled;
         HoldDelaySlider.Value = _options.ActivationKeyHoldDelayMs;
         RolloverThresholdSlider.Value = _options.RolloverThresholdMs;
         RolloverThresholdValueText.Text = $"{_options.RolloverThresholdMs} ms";
@@ -218,6 +219,7 @@ public partial class SettingsWindow : Window
         ShowInTrayCheckBox.Content = loc.GetString("SettingsWindow.ShowInTray");
         CheckUpdatesCheckBox.Content = loc.GetString("SettingsWindow.CheckUpdates");
         BeepForMistakesCheckBox.Content = loc.GetString("SettingsWindow.BeepForMistakes");
+        ModSwitchCheckBox.Content = loc.GetString("SettingsWindow.EnableModSwitch");
 
         LanguageGroupBox.Header = loc.GetString("SettingsWindow.Language");
         LanguageDescriptionTextBlock.Text = loc.GetString("SettingsWindow.LanguageDescription");
@@ -565,6 +567,19 @@ public partial class SettingsWindow : Window
         _options.TypingAnalyticsEnabled = TypingAnalyticsCheckBox.IsChecked == true;
         _typingLogger.Enabled = _options.TypingAnalyticsEnabled;
         _hasChanges = true;
+    }
+
+    private void ModSwitchCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null) return;
+        _options.ModSwitchEnabled = ModSwitchCheckBox.IsChecked == true;
+        _hasChanges = true;
+
+        // Mod Switch가 비활성화되면 현재 토글 상태도 리셋
+        if (!_options.ModSwitchEnabled && _mappingService != null)
+        {
+            _mappingService.Reset();
+        }
     }
 
     private void HoldDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

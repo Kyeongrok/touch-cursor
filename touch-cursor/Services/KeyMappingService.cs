@@ -17,6 +17,10 @@ public class KeyMappingService
     private bool _activationKeyUsedForMapping = false;
     private long _activationKeyPressTime = 0; // Timestamp when activation key was pressed (ticks)
 
+    // Mod Switch 상태
+    private bool _modSwitchToggled = false; // 토글 모드가 활성화되었는지
+    private int _toggledActivationKey = 0; // 어떤 활성화 키가 토글되었는지
+
     // Event for sending key events
     public event Action<int, bool, int>? SendKeyRequested;
 
@@ -69,7 +73,43 @@ public class KeyMappingService
     /// <returns>키 이벤트를 차단해야 하면 True, 통과시키려면 false</returns>
     public bool ProcessKey(int vkCode, bool isKeyDown, bool isKeyUp)
     {
-        Debug.WriteLine($"[ProcessKey] vkCode={vkCode}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, Enabled={_options.Enabled}, modifierState={_modifierState:X}");
+        Debug.WriteLine($"[ProcessKey] vkCode={vkCode}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, Enabled={_options.Enabled}, modifierState={_modifierState:X}, modSwitchToggled={_modSwitchToggled}");
+
+        // Mod Switch 토글 단축키 감지 (예: Alt + Space)
+        if (_options.ModSwitchEnabled && isKeyDown &&
+            vkCode == _options.ModSwitchToggleKey &&
+            (_modifierState & _options.ModSwitchToggleModifiers) == _options.ModSwitchToggleModifiers)
+        {
+            // Mod Switch 토글
+            _modSwitchToggled = !_modSwitchToggled;
+
+            if (_modSwitchToggled)
+            {
+                // 토글 활성화: 첫 번째 활성화 키 프로파일 사용
+                _toggledActivationKey = _options.ActivationKeyProfiles.Keys.FirstOrDefault(0x20);
+                _currentActivationKey = _toggledActivationKey;
+                _activationKeyUsedForMapping = false;
+                _activationKeyPressTime = DateTime.Now.Ticks;
+                Debug.WriteLine($"[ProcessKey] Mod Switch ON - 활성화 키 {_toggledActivationKey} 토글됨");
+                Console.Beep(1200, 100); // 높은 톤 비프음
+            }
+            else
+            {
+                // 토글 비활성화: 모든 유지된 키 해제
+                Debug.WriteLine($"[ProcessKey] Mod Switch OFF - {_mappedKeysHeld.Count}개 키 해제");
+                foreach (var heldKey in _mappedKeysHeld)
+                {
+                    var targetVk = heldKey & 0xFFFF;
+                    SendKeyRequested?.Invoke(targetVk, false, 0);
+                }
+                _mappedKeysHeld.Clear();
+                _currentActivationKey = 0;
+                _toggledActivationKey = 0;
+                Console.Beep(800, 100); // 낮은 톤 비프음
+            }
+
+            return true; // 토글 단축키 차단
+        }
 
         // Ctrl+Shift+Z 단축키로 마지막 항목을 실수로 표시
         if (isKeyDown && vkCode == 0x5A && // Z 키
@@ -84,8 +124,8 @@ public class KeyMappingService
         if (!_options.Enabled)
             return false;
 
-        // 설정된 활성화 키인지 확인
-        if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
+        // 설정된 활성화 키인지 확인 (토글 모드가 아닐 때만)
+        if (!_modSwitchToggled && _options.ActivationKeyProfiles.ContainsKey(vkCode))
         {
             Debug.WriteLine($"[ProcessKey] 활성화 키 감지! vkCode={vkCode}, _currentActivationKey={_currentActivationKey}");
             if (isKeyDown && _currentActivationKey == 0)
@@ -303,7 +343,14 @@ public class KeyMappingService
         _modifierState = 0;
         _activationKeyUsedForMapping = false;
         _activationKeyPressTime = 0;
+        _modSwitchToggled = false;
+        _toggledActivationKey = 0;
     }
+
+    /// <summary>
+    /// Mod Switch 토글 상태를 반환합니다.
+    /// </summary>
+    public bool IsModSwitchToggled => _modSwitchToggled;
 
     private string GetKeyName(int vkCode)
     {

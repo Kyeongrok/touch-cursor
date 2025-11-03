@@ -3,6 +3,7 @@
   "MainWindow": {
     "Title": "TouchCursor",
     "EnableTouchCursor": "Enable TouchCursor",
+    "EnableModSwitch": "Enable Mod Switch (Alt+Space toggle)",
     "TrainingMode": "Training Mode (beep for mistakes)",
     "RunAtStartup": "Run at Windows Startup",
     "QuickInfo": "Quick Info",
@@ -12,6 +13,7 @@
     "PageUpDown": "H/P = Page Up/Down",
     "BackspaceDelete": "M/, = Backspace/Delete",
     "WordNavigation": "N/. = Ctrl+Left/Right (word navigation)",
+    "ModSwitch": "Alt+Space = Mod Switch Toggle (lock activation key)",
     "Settings": "Settings",
     "MinimizeToTray": "Minimize to Tray"
   },
@@ -39,6 +41,7 @@
     "ActivationKeyFn": "Fn",
     "Behavior": "Behavior",
     "EnableTouchCursor": "Enable TouchCursor",
+    "EnableModSwitch": "Enable Mod Switch (Alt+Space toggle)",
     "TrainingMode": "Training Mode",
     "RunAtStartup": "Run at Windows startup",
     "ShowInTray": "Show icon in notification area",

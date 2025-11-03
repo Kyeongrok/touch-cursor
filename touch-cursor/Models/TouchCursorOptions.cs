@@ -29,6 +29,14 @@ public class TouchCursorOptions
     // 두 키 모두 일반 타이핑으로 처리
     public int RolloverThresholdMs { get; set; } = 50;
 
+    // Mod Switch 기능: 단축키로 활성화 키를 토글 (누르고 있는 것처럼 유지)
+    public bool ModSwitchEnabled { get; set; } = true;
+
+    // Mod Switch 토글 단축키 (기본: Alt + Space)
+    // 수정자 키 플래그 (상위 2바이트) + 키 코드 (하위 2바이트)
+    public int ModSwitchToggleKey { get; set; } = 0x20; // Space (VK_SPACE)
+    public int ModSwitchToggleModifiers { get; set; } = (int)ModifierFlags.Alt; // Alt 키
+
     // 롤오버 예외 키: 롤오버 감지를 무시하는 키 (활성화 키별)
     // ActivationKey -> 항상 커서 모드를 활성화하는 소스 키 HashSet
     public Dictionary<int, HashSet<int>> RolloverExceptionKeys { get; set; } = new();
