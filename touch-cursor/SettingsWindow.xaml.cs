@@ -40,7 +40,7 @@ public partial class SettingsWindow : Window
         _typingLogger.Enabled = _options.TypingAnalyticsEnabled;
 
         _mappingService = new KeyMappingService(_options, _typingLogger);
-        _hookService = new KeyboardHookService(_mappingService);
+        _hookService = new KeyboardHookService(_mappingService, _options);
 
         // Wire up the SendKey event
         _mappingService.SendKeyRequested += _hookService.SendKey;
@@ -69,6 +69,7 @@ public partial class SettingsWindow : Window
             ShowInNotificationArea = options.ShowInNotificationArea,
             CheckForUpdates = options.CheckForUpdates,
             TypingAnalyticsEnabled = options.TypingAnalyticsEnabled,
+            AutoSwitchToEnglishOnNonConsonant = options.AutoSwitchToEnglishOnNonConsonant,
             ActivationKeyHoldDelayMs = options.ActivationKeyHoldDelayMs,
             RolloverThresholdMs = options.RolloverThresholdMs,
             ActivationKey = options.ActivationKey,
@@ -150,6 +151,7 @@ public partial class SettingsWindow : Window
         CheckUpdatesCheckBox.IsChecked = _options.CheckForUpdates;
         BeepForMistakesCheckBox.IsChecked = _options.BeepForMistakes;
         TypingAnalyticsCheckBox.IsChecked = _options.TypingAnalyticsEnabled;
+        AutoSwitchToEnglishCheckBox.IsChecked = _options.AutoSwitchToEnglishOnNonConsonant;
         HoldDelaySlider.Value = _options.ActivationKeyHoldDelayMs;
         RolloverThresholdSlider.Value = _options.RolloverThresholdMs;
         RolloverThresholdValueText.Text = $"{_options.RolloverThresholdMs} ms";
@@ -564,6 +566,13 @@ public partial class SettingsWindow : Window
         if (_options == null) return;
         _options.TypingAnalyticsEnabled = TypingAnalyticsCheckBox.IsChecked == true;
         _typingLogger.Enabled = _options.TypingAnalyticsEnabled;
+        _hasChanges = true;
+    }
+
+    private void AutoSwitchToEnglishCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null) return;
+        _options.AutoSwitchToEnglishOnNonConsonant = AutoSwitchToEnglishCheckBox.IsChecked == true;
         _hasChanges = true;
     }
 

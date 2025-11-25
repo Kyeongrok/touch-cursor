@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using touch_cursor.Models;
 
 namespace touch_cursor.Services;
 
@@ -35,6 +36,26 @@ public class KeyboardHookService : IDisposable
 
     [DllImport("kernel32.dll")]
     private static extern uint GetLastError();
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetKeyboardLayout(uint idThread);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr ActivateKeyboardLayout(IntPtr hkl, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState,
+        [Out, MarshalAs(UnmanagedType.LPWStr)] System.Text.StringBuilder pwszBuff,
+        int cchBuff, uint wFlags, IntPtr dwhkl);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetKeyboardState(byte[] lpKeyState);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct KBDLLHOOKSTRUCT
@@ -74,11 +95,73 @@ public class KeyboardHookService : IDisposable
     private readonly LowLevelKeyboardProc _proc;
     private readonly KeyMappingService _mappingService;
     private bool _sendingModifiers = false;
+    private readonly TouchCursorOptions _options;
+    private IntPtr _englishLayout = IntPtr.Zero;
+    private IntPtr _koreanLayout = IntPtr.Zero;
+    private bool _lastWasInitialConsonant = false; // 마지막 입력이 초성 자음이었는지
 
-    public KeyboardHookService(KeyMappingService mappingService)
+    // 세벌식 최종 모음 키 (VK 코드)
+    private static readonly HashSet<int> SebeolFinalVowelKeys = new()
+    {
+        0x44, // D = ㅣ
+        0x46, // F = ㅏ
+        0x54, // T = ㅓ
+        0x47, // G = ㅡ (Shift+G = ㅒ)
+        0x56, // V = ㅗ
+        0x42, // B = ㅜ
+        0x39, // 9 = ㅜ
+        0x35, // 5 = ㅠ
+        0x45, // E = ㅕ
+        0x43, // C = ㅔ
+        0x34, // 4 = ㅛ
+        0x36, // 6 = ㅑ, ㅐ
+        0x37, // 7 = ㅖ
+        0x38, // 8 = ㅢ
+        0xBF, // / = ㅗ (VK_OEM_2)
+    };
+
+    // 세벌식 최종 초성 자음 키 (VK 코드)
+    private static readonly HashSet<int> SebeolFinalInitialConsonantKeys = new()
+    {
+        0x4B, // K = ㄱ
+        0x48, // H
+        0x55, // U
+        0x59, // Y
+        0x49, // I
+        0xBA, // ; (VK_OEM_1)
+        0x4E, // N = ㅅ
+        0x4A, // J = ㅇ
+        0x4D, // M = ㅎ
+        0x4C, // L = ㅈ
+        0x50, // P = ㅍ
+        0xDE, // ' = ㅌ (VK_OEM_7)
+        0x4F, // O = ㅊ
+    };
+
+    public KeyboardHookService(KeyMappingService mappingService, TouchCursorOptions options)
     {
         _mappingService = mappingService;
+        _options = options;
         _proc = HookCallback;
+        CacheKeyboardLayouts();
+    }
+
+    private void CacheKeyboardLayouts()
+    {
+        // 영문(0x0409) 및 한글(0x0412) 레이아웃 찾기
+        var layouts = InputLanguage.InstalledInputLanguages;
+        foreach (InputLanguage layout in layouts)
+        {
+            var cultureLCID = layout.Culture.LCID & 0xFFFF;
+            if (cultureLCID == 0x0409) // 영문
+            {
+                _englishLayout = layout.Handle;
+            }
+            else if (cultureLCID == 0x0412) // 한글
+            {
+                _koreanLayout = layout.Handle;
+            }
+        }
     }
 
     public void StartHook()
@@ -134,6 +217,64 @@ public class KeyboardHookService : IDisposable
                 return CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
+            // 세벌식 모음 자동 영문 전환: 초성 없이 모음 키를 누르면 영문 전환
+            if (_options.AutoSwitchToEnglishOnNonConsonant && isKeyDown)
+            {
+                if (IsKoreanLayout())
+                {
+                    bool isVowelKey = SebeolFinalVowelKeys.Contains(vkCode);
+                    bool isInitialConsonantKey = SebeolFinalInitialConsonantKeys.Contains(vkCode);
+
+                    Debug.WriteLine($"[AutoSwitch] vk={vkCode:X2} isVowel={isVowelKey} isInitial={isInitialConsonantKey} lastWasInitial={_lastWasInitialConsonant}");
+
+                    if (isVowelKey && !_lastWasInitialConsonant)
+                    {
+                        // 초성 없이 모음 입력 → 영문 전환 후 키 재전송
+                        Debug.WriteLine($"[AutoSwitch] 초성 없이 모음 입력 - 영문 전환");
+
+                        SwitchToEnglishLayout();
+
+                        // 영문 전환 완료 대기
+                        for (int i = 0; i < 10; i++)
+                        {
+                            System.Threading.Thread.Sleep(10);
+                            if (!IsKoreanLayout()) break;
+                        }
+
+                        Debug.WriteLine($"[AutoSwitch] 영문 전환 완료, 키 재전송");
+                        _lastWasInitialConsonant = false;
+
+                        // 원래 키를 차단하고 영문 키로 재전송
+                        SendSingleKey(vkCode, true);
+                        SendSingleKey(vkCode, false);
+                        return (IntPtr)1; // 원래 키 차단
+                    }
+                    else if (isInitialConsonantKey)
+                    {
+                        // 초성 자음 입력
+                        _lastWasInitialConsonant = true;
+                        Debug.WriteLine($"[AutoSwitch] 초성 자음 입력");
+                    }
+                    else if (isVowelKey)
+                    {
+                        // 초성 다음 모음 → 통과, 상태 유지 (키 반복 대응)
+                        // _lastWasInitialConsonant는 리셋하지 않음
+                        Debug.WriteLine($"[AutoSwitch] 초성 다음 모음 - 통과");
+                    }
+                    else
+                    {
+                        // 종성, 숫자, 기호 등 → 상태 리셋
+                        _lastWasInitialConsonant = false;
+                        Debug.WriteLine($"[AutoSwitch] 기타 입력 - 상태 리셋");
+                    }
+                }
+                else
+                {
+                    // 영문 모드에서는 상태 초기화
+                    _lastWasInitialConsonant = false;
+                }
+            }
+
             if (_mappingService.ProcessKey(vkCode, isKeyDown, isKeyUp))
             {
                 Debug.WriteLine($"[HookCallback] BLOCKING key event for vkCode={vkCode}");
@@ -151,6 +292,81 @@ public class KeyboardHookService : IDisposable
                vkCode == 0x11 || vkCode == 0xA2 || vkCode == 0xA3 || // Ctrl
                vkCode == 0x12 || vkCode == 0xA4 || vkCode == 0xA5 || // Alt
                vkCode == 0x5B || vkCode == 0x5C; // Win
+    }
+
+    private bool IsKoreanLayout()
+    {
+        // 포커스된 윈도우의 스레드 ID를 가져와서 해당 스레드의 키보드 레이아웃 확인
+        var hwnd = GetForegroundWindow();
+        var threadId = GetWindowThreadProcessId(hwnd, out _);
+        var currentLayout = GetKeyboardLayout(threadId);
+        var layoutId = (uint)currentLayout.ToInt64() & 0xFFFF;
+        Debug.WriteLine($"[IsKoreanLayout] threadId={threadId}, layoutId={layoutId:X4}");
+        return layoutId == 0x0412;
+    }
+
+    private bool IsKoreanInitialConsonant(int vkCode, uint scanCode)
+    {
+        // 초성 자음인지 확인 (종성 제외)
+        var keyState = new byte[256];
+        GetKeyboardState(keyState);
+
+        var sb = new System.Text.StringBuilder(10);
+        var currentLayout = GetKeyboardLayout(0);
+        var result = ToUnicodeEx((uint)vkCode, scanCode, keyState, sb, sb.Capacity, 0, currentLayout);
+
+        Debug.WriteLine($"[IsKoreanInitialConsonant] vkCode={vkCode}, result={result}, sbLength={sb.Length}");
+
+        if (result > 0 && sb.Length > 0)
+        {
+            var ch = sb[0];
+            Debug.WriteLine($"[IsKoreanInitialConsonant] char='{ch}' (U+{(int)ch:X4})");
+
+            // 초성 자모: U+1100 ~ U+1112
+            // 호환 자모 자음: U+3131 ~ U+314E (두벌식에서 사용)
+            bool isInitial = (ch >= 0x1100 && ch <= 0x1112) || (ch >= 0x3131 && ch <= 0x314E);
+
+            // 종성은 제외: U+11A8 ~ U+11C2
+            bool isFinal = ch >= 0x11A8 && ch <= 0x11C2;
+
+            Debug.WriteLine($"[IsKoreanInitialConsonant] isInitial={isInitial}, isFinal={isFinal}");
+
+            return isInitial && !isFinal;
+        }
+
+        return false;
+    }
+
+    private bool IsKoreanVowel(int vkCode, uint scanCode)
+    {
+        var keyState = new byte[256];
+        GetKeyboardState(keyState);
+
+        var sb = new System.Text.StringBuilder(10);
+        var currentLayout = GetKeyboardLayout(0);
+        var result = ToUnicodeEx((uint)vkCode, scanCode, keyState, sb, sb.Capacity, 0, currentLayout);
+
+        if (result > 0 && sb.Length > 0)
+        {
+            var ch = sb[0];
+            // 중성 자모: U+1161 ~ U+1175
+            // 호환 자모 모음: U+314F ~ U+3163 (두벌식에서 사용)
+            bool isVowel = (ch >= 0x1161 && ch <= 0x1175) || (ch >= 0x314F && ch <= 0x3163);
+            Debug.WriteLine($"[IsKoreanVowel] char='{ch}' (U+{(int)ch:X4}), isVowel={isVowel}");
+            return isVowel;
+        }
+
+        return false;
+    }
+
+    private void SwitchToEnglishLayout()
+    {
+        // 한/영 키(VK_HANGUL = 0x15)를 시뮬레이션하여 영문으로 전환
+        Debug.WriteLine("[AutoSwitch] 한/영 키를 눌러 영문으로 전환");
+
+        const int VK_HANGUL = 0x15;
+        SendSingleKey(VK_HANGUL, true);
+        SendSingleKey(VK_HANGUL, false);
     }
 
     public void SendKey(int vkCode, bool isDown, int modifierFlags = 0)

@@ -31,7 +31,7 @@ public partial class MainWindow : Window
 
         // Initialize services
         _mappingService = new KeyMappingService(_options);
-        _hookService = new KeyboardHookService(_mappingService);
+        _hookService = new KeyboardHookService(_mappingService, _options);
 
         // Wire up the SendKey event
         _mappingService.SendKeyRequested += _hookService.SendKey;
