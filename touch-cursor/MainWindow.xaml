@@ -27,6 +27,9 @@
             <CheckBox x:Name="EnabledCheckBox" Content="Enable TouchCursor"
                       IsChecked="True" FontSize="14" Margin="0,5"
                       Checked="EnabledCheckBox_Changed" Unchecked="EnabledCheckBox_Changed"/>
+            <CheckBox x:Name="ModSwitchCheckBox" Content="Enable Mod Switch (Alt+Space toggle)"
+                      IsChecked="True" FontSize="14" Margin="0,5"
+                      Checked="ModSwitchCheckBox_Changed" Unchecked="ModSwitchCheckBox_Changed"/>
             <CheckBox x:Name="TrainingModeCheckBox" Content="Training Mode (beep for mistakes)"
                       FontSize="14" Margin="0,5"
                       Checked="TrainingModeCheckBox_Changed" Unchecked="TrainingModeCheckBox_Changed"/>
@@ -54,6 +57,9 @@
                 </TextBlock>
                 <TextBlock x:Name="WordNavigationTextBlock" TextWrapping="Wrap" Margin="10,5">
                     • N/. = Ctrl+Left/Right (word navigation)
+                </TextBlock>
+                <TextBlock x:Name="ModSwitchTextBlock" TextWrapping="Wrap" Margin="10,5" FontWeight="Bold" Foreground="#FF4CAF50">
+                    • Alt+Space = Mod Switch Toggle (lock activation key)
                 </TextBlock>
             </StackPanel>
         </GroupBox>

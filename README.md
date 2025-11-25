@@ -22,7 +22,11 @@ TouchCursor는 키보드의 **Space 키를 활용 키로 사용**하여 홈 포�
 
 ### 추가 기능
 
-- **Rollover Detection** 🆕: 빠른 타이핑 시 의도치 않은 커서 모드 활성화 방지
+- **Mod Switch** 🆕: Alt+Space로 활성화 키를 토글 (고정)
+  - Alt+Space를 누르면 Space 키를 계속 누르고 있는 것처럼 동작
+  - 다시 Alt+Space를 누르면 해제
+  - 높은 톤/낮은 톤 비프음으로 on/off 상태 알림
+- **Rollover Detection**: 빠른 타이핑 시 의도치 않은 커서 모드 활성화 방지
   - Space 후 짧은 시간(기본 50ms) 내 키 입력 시 정상 타이핑으로 처리
   - 설정에서 민감도 조절 가능 (0-200ms)
 - **시스템 트레이 지원**: 백그라운드에서 실행
@@ -94,12 +98,18 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
    - Space 키를 누른 상태에서 매핑된 키를 누르면 해당 기능이 실행됩니다
    - Space 키만 누르고 떼면 일반 Space로 동작합니다
 
-3. **설정 변경**
+3. **Mod Switch 사용** 🆕
+   - Alt+Space를 누르면 Space 키를 계속 누르고 있는 것처럼 고정됩니다
+   - 이 상태에서는 Space를 누르지 않아도 IJKL 등의 키가 화살표로 작동합니다
+   - 다시 Alt+Space를 누르면 일반 모드로 돌아갑니다
+   - 높은 톤 비프음 = 활성화, 낮은 톤 비프음 = 비활성화
+
+4. **설정 변경**
    - 시스템 트레이 아이콘 더블클릭 → 메인 창 표시
    - Enable/Disable 체크박스로 기능 on/off
    - Training Mode: 매핑되지 않은 키 입력 시 경고음
 
-4. **종료**
+5. **종료**
    - 시스템 트레이 아이콘 우클릭 → Exit
 
 ## 프로젝트 구조

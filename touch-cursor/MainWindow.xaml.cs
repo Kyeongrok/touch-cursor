@@ -117,6 +117,7 @@ public partial class MainWindow : Window
     private void LoadOptionsToUI()
     {
         EnabledCheckBox.IsChecked = _options.Enabled;
+        ModSwitchCheckBox.IsChecked = _options.ModSwitchEnabled;
         TrainingModeCheckBox.IsChecked = _options.TrainingMode;
         RunAtStartupCheckBox.IsChecked = _options.RunAtStartup;
     }
@@ -131,6 +132,7 @@ public partial class MainWindow : Window
 
         // Update checkboxes
         EnabledCheckBox.Content = loc.GetString("MainWindow.EnableTouchCursor");
+        ModSwitchCheckBox.Content = loc.GetString("MainWindow.EnableModSwitch");
         TrainingModeCheckBox.Content = loc.GetString("MainWindow.TrainingMode");
         RunAtStartupCheckBox.Content = loc.GetString("MainWindow.RunAtStartup");
 
@@ -144,6 +146,7 @@ public partial class MainWindow : Window
         PageUpDownTextBlock.Text = "• " + loc.GetString("MainWindow.PageUpDown");
         BackspaceDeleteTextBlock.Text = "• " + loc.GetString("MainWindow.BackspaceDelete");
         WordNavigationTextBlock.Text = "• " + loc.GetString("MainWindow.WordNavigation");
+        ModSwitchTextBlock.Text = "• " + loc.GetString("MainWindow.ModSwitch");
 
         // Update buttons
         SettingsButton.Content = loc.GetString("MainWindow.Settings");
@@ -160,6 +163,20 @@ public partial class MainWindow : Window
         else
             _hookService.StopHook();
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+    }
+
+    private void ModSwitchCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_options == null) return;
+
+        _options.ModSwitchEnabled = ModSwitchCheckBox.IsChecked == true;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+
+        // Mod Switch가 비활성화되면 현재 토글 상태도 리셋
+        if (!_options.ModSwitchEnabled && _mappingService != null)
+        {
+            _mappingService.Reset();
+        }
     }
 
     private void TrainingModeCheckBox_Changed(object sender, RoutedEventArgs e)
