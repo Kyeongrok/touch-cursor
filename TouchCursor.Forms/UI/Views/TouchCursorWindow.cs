@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using TouchCursor.Forms.ViewModels;
 using TouchCursor.Main.UI.Views;
-using TouchCursor.Support.UI.Views;
 
 namespace TouchCursor.Forms.UI.Views;
 

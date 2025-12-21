@@ -1,14 +1,14 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace TouchCursor.Support.UI.Views;
+namespace TouchCursor.Main.UI.Views;
 
-[TemplatePart(Name = PART_ActivationKeyProfilesListBox, Type = typeof(System.Windows.Controls.ListBox))]
-public class GeneralSettingsView : System.Windows.Controls.Control
+[TemplatePart(Name = PART_ActivationKeyProfilesListBox, Type = typeof(ListBox))]
+public class GeneralSettingsView : Control
 {
     private const string PART_ActivationKeyProfilesListBox = "PART_ActivationKeyProfilesListBox";
 
-    private System.Windows.Controls.ListBox? _activationKeyProfilesListBox;
+    private ListBox? _activationKeyProfilesListBox;
 
     static GeneralSettingsView()
     {
@@ -24,7 +24,7 @@ public class GeneralSettingsView : System.Windows.Controls.Control
         if (_activationKeyProfilesListBox != null)
             _activationKeyProfilesListBox.SelectionChanged -= OnActivationKeyProfileSelectionChanged;
 
-        _activationKeyProfilesListBox = GetTemplateChild(PART_ActivationKeyProfilesListBox) as System.Windows.Controls.ListBox;
+        _activationKeyProfilesListBox = GetTemplateChild(PART_ActivationKeyProfilesListBox) as ListBox;
 
         if (_activationKeyProfilesListBox != null)
             _activationKeyProfilesListBox.SelectionChanged += OnActivationKeyProfileSelectionChanged;

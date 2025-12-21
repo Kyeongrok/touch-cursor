@@ -5,6 +5,7 @@
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingEditor.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingsView.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ActivationKeyDialog.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/GeneralSettingsView.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>
