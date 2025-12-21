@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Forms;
 using touch_cursor.Models;
 using touch_cursor.Services;
+using TouchCursor.Support.Local.Helpers;
 using MessageBox = System.Windows.MessageBox;
 
 namespace touch_cursor;

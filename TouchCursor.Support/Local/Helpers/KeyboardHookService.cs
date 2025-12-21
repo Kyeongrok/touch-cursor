@@ -4,9 +4,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
-using touch_cursor.Models;
 
-namespace touch_cursor.Services;
+namespace TouchCursor.Support.Local.Helpers;
 
 public class KeyboardHookService : IDisposable
 {
@@ -93,9 +92,9 @@ public class KeyboardHookService : IDisposable
 
     private IntPtr _hookID = IntPtr.Zero;
     private readonly LowLevelKeyboardProc _proc;
-    private readonly KeyMappingService _mappingService;
+    private readonly IKeyMappingService _mappingService;
     private bool _sendingModifiers = false;
-    private readonly TouchCursorOptions _options;
+    private readonly ITouchCursorOptions _options;
     private IntPtr _englishLayout = IntPtr.Zero;
     private IntPtr _koreanLayout = IntPtr.Zero;
     private bool _lastWasInitialConsonant = false; // 마지막 입력이 초성 자음이었는지
@@ -138,7 +137,7 @@ public class KeyboardHookService : IDisposable
         0x4F, // O = ㅊ
     };
 
-    public KeyboardHookService(KeyMappingService mappingService, TouchCursorOptions options)
+    public KeyboardHookService(IKeyMappingService mappingService, ITouchCursorOptions options)
     {
         _mappingService = mappingService;
         _options = options;

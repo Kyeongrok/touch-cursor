@@ -4,10 +4,11 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TouchCursor.Support.Local.Helpers;
 
 namespace touch_cursor.Models;
 
-public class TouchCursorOptions
+public class TouchCursorOptions : ITouchCursorOptions
 {
     private const int MaxKeyCodes = 0x100;
 

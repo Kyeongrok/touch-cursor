@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "touch-cursor", "touch-cursor\touch-cursor.csproj", "{035DE0AB-0789-4842-8732-71EEE80DD627}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TouchCursor.Support", "TouchCursor.Support\TouchCursor.Support.csproj", "{4DF4F390-C6D7-4D4F-9DD7-E79ABAE18075}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{035DE0AB-0789-4842-8732-71EEE80DD627}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{035DE0AB-0789-4842-8732-71EEE80DD627}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{035DE0AB-0789-4842-8732-71EEE80DD627}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DF4F390-C6D7-4D4F-9DD7-E79ABAE18075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DF4F390-C6D7-4D4F-9DD7-E79ABAE18075}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DF4F390-C6D7-4D4F-9DD7-E79ABAE18075}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DF4F390-C6D7-4D4F-9DD7-E79ABAE18075}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

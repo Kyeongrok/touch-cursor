@@ -3,10 +3,11 @@
 
 using System.Diagnostics;
 using touch_cursor.Models;
+using TouchCursor.Support.Local.Helpers;
 
 namespace touch_cursor.Services;
 
-public class KeyMappingService
+public class KeyMappingService : IKeyMappingService
 {
     private readonly TouchCursorOptions _options;
     private readonly TypingLogger? _typingLogger;

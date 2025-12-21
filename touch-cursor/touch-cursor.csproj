@@ -26,6 +26,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TouchCursor.Support\TouchCursor.Support.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
       <EmbeddedResource Include="Resources\Strings.en.json" />
       <EmbeddedResource Include="Resources\Strings.ko.json" />
     </ItemGroup>
