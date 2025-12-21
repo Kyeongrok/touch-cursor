@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Prism.Commands;
-using Prism.Mvvm;
 
 namespace TouchCursor.Main.ViewModels;
 
