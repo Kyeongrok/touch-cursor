@@ -3,6 +3,7 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/TouchCursor.Forms;component/Themes/Views/TouchCursorWindow.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Forms;component/Themes/Views/ActivationOverlayWindow.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

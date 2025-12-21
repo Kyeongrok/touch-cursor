@@ -22,4 +22,9 @@ public interface IKeyMappingService
     /// 키 전송 요청 이벤트
     /// </summary>
     event Action<int, bool, int>? SendKeyRequested;
+
+    /// <summary>
+    /// 활성화 상태 변경 이벤트 (activationKey, isActive)
+    /// </summary>
+    event Action<int, bool>? ActivationStateChanged;
 }

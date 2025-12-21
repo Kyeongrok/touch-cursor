@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Hardcodet.Wpf.TaskbarNotification;
 using Prism.Mvvm;
+using TouchCursor.Forms.UI.Views;
 using TouchCursor.Main.UI.Views;
 using TouchCursor.Main.ViewModels;
 using TouchCursor.Support.Local.Helpers;
@@ -14,8 +15,10 @@ public class TouchCursorWindowViewModel : BindableBase
 {
     private readonly ITouchCursorOptions _options;
     private readonly KeyboardHookService _hookService;
+    private readonly IKeyMappingService _mappingService;
     private readonly SettingsWindowViewModel _settingsViewModel;
     private TaskbarIcon? _taskbarIcon;
+    private ActivationOverlayWindow? _overlayWindow;
     private bool _isClosing = false;
 
     public SettingsWindowViewModel SettingsViewModel => _settingsViewModel;
@@ -26,11 +29,17 @@ public class TouchCursorWindowViewModel : BindableBase
 
     public TouchCursorWindowViewModel(
         ITouchCursorOptions options,
-        KeyboardHookService hookService)
+        KeyboardHookService hookService,
+        IKeyMappingService mappingService)
     {
         _options = options;
         _hookService = hookService;
+        _mappingService = mappingService;
         _settingsViewModel = new SettingsWindowViewModel();
+
+        // Create overlay window
+        _overlayWindow = new ActivationOverlayWindow();
+        _mappingService.ActivationStateChanged += OnActivationStateChanged;
 
         LoadOptionsToViewModel();
 
@@ -82,8 +91,21 @@ public class TouchCursorWindowViewModel : BindableBase
         }
 
         _taskbarIcon?.Dispose();
+        _overlayWindow?.Close();
         _hookService.Dispose();
         return false; // Allow close
+    }
+
+    private void OnActivationStateChanged(int activationKey, bool isActive)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (_overlayWindow != null)
+            {
+                _overlayWindow.KeyName = GetKeyName(activationKey);
+                _overlayWindow.IsActivated = isActive;
+            }
+        });
     }
 
     public bool ShouldHideOnMinimize => _options.ShowInNotificationArea;

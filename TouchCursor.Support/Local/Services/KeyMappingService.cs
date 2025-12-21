@@ -21,6 +21,7 @@ public class KeyMappingService : IKeyMappingService
     private int _toggledActivationKey = 0;
 
     public event Action<int, bool, int>? SendKeyRequested;
+    public event Action<int, bool>? ActivationStateChanged;
 
     private readonly Dictionary<int, int> _modifierKeys = new()
     {
@@ -72,6 +73,7 @@ public class KeyMappingService : IKeyMappingService
                 _currentActivationKey = _toggledActivationKey;
                 _activationKeyUsedForMapping = false;
                 _activationKeyPressTime = DateTime.Now.Ticks;
+                ActivationStateChanged?.Invoke(_currentActivationKey, true);
                 Console.Beep(1200, 100);
             }
             else
@@ -84,6 +86,7 @@ public class KeyMappingService : IKeyMappingService
                 _mappedKeysHeld.Clear();
                 _currentActivationKey = 0;
                 _toggledActivationKey = 0;
+                ActivationStateChanged?.Invoke(0, false);
                 Console.Beep(800, 100);
             }
 
@@ -101,6 +104,7 @@ public class KeyMappingService : IKeyMappingService
                 _currentActivationKey = vkCode;
                 _activationKeyUsedForMapping = false;
                 _activationKeyPressTime = DateTime.Now.Ticks;
+                // 아직 활성화된 것이 아님 - 매핑이 사용될 때 이벤트 발생
                 return true;
             }
             else if (isKeyDown && _currentActivationKey != 0)
@@ -120,6 +124,11 @@ public class KeyMappingService : IKeyMappingService
                 {
                     SendKeyRequested?.Invoke(vkCode, true, 0);
                     SendKeyRequested?.Invoke(vkCode, false, 0);
+                }
+                else
+                {
+                    // 매핑이 사용된 경우에만 비활성화 이벤트 발생
+                    ActivationStateChanged?.Invoke(0, false);
                 }
 
                 _currentActivationKey = 0;
@@ -152,6 +161,7 @@ public class KeyMappingService : IKeyMappingService
                         _currentActivationKey = 0;
                         _activationKeyPressTime = 0;
                         _activationKeyUsedForMapping = false;
+                        // 활성화된 적 없으므로 이벤트 불필요
                         return false;
                     }
                 }
@@ -166,11 +176,17 @@ public class KeyMappingService : IKeyMappingService
                         _currentActivationKey = 0;
                         _activationKeyPressTime = 0;
                         _activationKeyUsedForMapping = false;
+                        // 활성화된 적 없으므로 이벤트 불필요
                         return false;
                     }
                 }
 
-                _activationKeyUsedForMapping = true;
+                // 첫 매핑 사용 시 활성화 이벤트 발생
+                if (!_activationKeyUsedForMapping)
+                {
+                    _activationKeyUsedForMapping = true;
+                    ActivationStateChanged?.Invoke(_currentActivationKey, true);
+                }
                 var effectiveModifiers = modifiers & ~_modifierState;
                 SendKeyRequested?.Invoke(targetVk, true, effectiveModifiers);
                 _mappedKeysHeld.Add(mappedKey);
