@@ -1,7 +1,7 @@
 // Copyright © 2025. Ported to C# from original C++ TouchCursor by Martin Stone.
 // Original project licensed under GNU GPL v3.
 
-namespace touch_cursor.Models;
+namespace TouchCursor.Support.Local.Helpers;
 
 [Flags]
 public enum ModifierFlags

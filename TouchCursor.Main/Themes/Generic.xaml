@@ -4,6 +4,7 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/SettingsWindow.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingEditor.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingsView.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

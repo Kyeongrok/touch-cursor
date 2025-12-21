@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using TouchCursor.Main.Core;
+using Prism.Commands;
+using Prism.Mvvm;
 
 namespace TouchCursor.Main.ViewModels;
 
-public class KeyMappingEditorViewModel : ViewModelBase
+public class KeyMappingEditorViewModel : BindableBase
 {
     private int _sourceVkCode;
     private int _targetVkCode;
@@ -162,10 +163,10 @@ public class KeyMappingEditorViewModel : ViewModelBase
 
     public KeyMappingEditorViewModel()
     {
-        CaptureSourceKeyCommand = new RelayCommand(ExecuteCaptureSourceKey);
-        CaptureTargetKeyCommand = new RelayCommand(ExecuteCaptureTargetKey);
-        OkCommand = new RelayCommand(ExecuteOk);
-        CancelCommand = new RelayCommand(ExecuteCancel);
+        CaptureSourceKeyCommand = new DelegateCommand(ExecuteCaptureSourceKey);
+        CaptureTargetKeyCommand = new DelegateCommand(ExecuteCaptureTargetKey);
+        OkCommand = new DelegateCommand(ExecuteOk);
+        CancelCommand = new DelegateCommand(ExecuteCancel);
 
         LoadKeyLists();
     }
@@ -181,10 +182,10 @@ public class KeyMappingEditorViewModel : ViewModelBase
         UpdateModifierCheckboxes();
         UpdateTargetDisplay();
 
-        OnPropertyChanged(nameof(SourceVkCode));
-        OnPropertyChanged(nameof(TargetVkCode));
-        OnPropertyChanged(nameof(TargetModifiers));
-        OnPropertyChanged(nameof(Description));
+        RaisePropertyChanged(nameof(SourceVkCode));
+        RaisePropertyChanged(nameof(TargetVkCode));
+        RaisePropertyChanged(nameof(TargetModifiers));
+        RaisePropertyChanged(nameof(Description));
     }
 
     public void OnKeyPressed(int vkCode, bool shiftPressed, bool ctrlPressed, bool altPressed, bool winPressed)
@@ -259,10 +260,10 @@ public class KeyMappingEditorViewModel : ViewModelBase
         _altModifier = (_targetModifiers & 0x00040000) != 0;
         _winModifier = (_targetModifiers & 0x00080000) != 0;
 
-        OnPropertyChanged(nameof(ShiftModifier));
-        OnPropertyChanged(nameof(CtrlModifier));
-        OnPropertyChanged(nameof(AltModifier));
-        OnPropertyChanged(nameof(WinModifier));
+        RaisePropertyChanged(nameof(ShiftModifier));
+        RaisePropertyChanged(nameof(CtrlModifier));
+        RaisePropertyChanged(nameof(AltModifier));
+        RaisePropertyChanged(nameof(WinModifier));
     }
 
     private void UpdateModifiersFromCheckboxes()

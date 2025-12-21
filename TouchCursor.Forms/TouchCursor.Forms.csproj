@@ -9,8 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Local\Helpers\" />
-      <Folder Include="UI\Units\" />
+      <ProjectReference Include="..\TouchCursor.Main\TouchCursor.Main.csproj" />
+      <ProjectReference Include="..\TouchCursor.Support\TouchCursor.Support.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Local\" />
     </ItemGroup>
 
 </Project>

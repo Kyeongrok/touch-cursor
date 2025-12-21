@@ -4,9 +4,8 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using TouchCursor.Support.Local.Helpers;
 
-namespace touch_cursor.Models;
+namespace TouchCursor.Support.Local.Helpers;
 
 public class TouchCursorOptions : ITouchCursorOptions
 {
@@ -19,7 +18,6 @@ public class TouchCursorOptions : ITouchCursorOptions
     public bool RunAtStartup { get; set; } = false;
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
-    public bool TypingAnalyticsEnabled { get; set; } = false;
 
     // 한글 자음 자동 영문 전환: 한글 입력 모드에서 자음이 아닌 키를 누르면 자동으로 영문으로 전환
     public bool AutoSwitchToEnglishOnNonConsonant { get; set; } = false;
@@ -85,14 +83,6 @@ public class TouchCursorOptions : ITouchCursorOptions
             ActivationKeyProfiles[activationKey] = value;
         }
     }
-
-    // 프로그램 목록
-    public List<string> DisableProgs { get; set; } = new();
-    public List<string> EnableProgs { get; set; } = new();
-    public List<string> NeverTrainProgs { get; set; } = new();
-    public List<string> OnlyTrainProgs { get; set; } = new();
-    public bool UseEnableList { get; set; } = false;
-    public bool UseOnlyTrainList { get; set; } = false;
 
     // 마지막 업데이트 확인 타임스탬프
     public DateTime LastUpdateCheck { get; set; } = DateTime.MinValue;

@@ -1,16 +1,15 @@
 ﻿using System.Windows;
-using touch_cursor.Models;
-using touch_cursor.Services;
+using TouchCursor.Forms.UI.Views;
 using TouchCursor.Support.Local.Helpers;
+using TouchCursor.Support.Local.Services;
 
 namespace touch_cursor;
 
 partial class App : PrismApplication
 {
-    
     protected override Window CreateShell()
     {
-        return Container.Resolve<ShellWindow>();
+        return Container.Resolve<TouchCursorWindow>();
     }
 
     protected override void RegisterTypes(IContainerRegistry containerRegistry)
@@ -21,12 +20,11 @@ partial class App : PrismApplication
         containerRegistry.RegisterInstance(options);
 
         // Services
-        containerRegistry.RegisterSingleton<TypingLogger>();
         containerRegistry.RegisterSingleton<IKeyMappingService, KeyMappingService>();
         containerRegistry.RegisterSingleton<KeyboardHookService>();
 
         // Views
-        containerRegistry.Register<ShellWindow>();
+        containerRegistry.Register<TouchCursorWindow>();
     }
 
     protected override void OnInitialized()

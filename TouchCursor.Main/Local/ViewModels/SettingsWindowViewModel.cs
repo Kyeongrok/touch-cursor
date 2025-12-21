@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using TouchCursor.Main.Core;
+using Prism.Commands;
+using Prism.Mvvm;
 
 namespace TouchCursor.Main.ViewModels;
 
-public class SettingsWindowViewModel : ViewModelBase
+public class SettingsWindowViewModel : BindableBase
 {
     #region Fields
 
@@ -14,11 +15,9 @@ public class SettingsWindowViewModel : ViewModelBase
     private bool _showInTray = true;
     private bool _checkUpdates = true;
     private bool _beepForMistakes;
-    private bool _typingAnalyticsEnabled;
     private bool _autoSwitchToEnglish;
     private int _holdDelayMs;
     private int _rolloverThresholdMs = 50;
-    private bool _useEnableList;
     private string _selectedLanguage = "en";
     private ActivationKeyProfileViewModel? _selectedActivationKeyProfile;
     private KeyMappingViewModel? _selectedKeyMapping;
@@ -79,12 +78,6 @@ public class SettingsWindowViewModel : ViewModelBase
         set => SetProperty(ref _beepForMistakes, value);
     }
 
-    public bool TypingAnalyticsEnabled
-    {
-        get => _typingAnalyticsEnabled;
-        set => SetProperty(ref _typingAnalyticsEnabled, value);
-    }
-
     public bool AutoSwitchToEnglish
     {
         get => _autoSwitchToEnglish;
@@ -101,12 +94,6 @@ public class SettingsWindowViewModel : ViewModelBase
     {
         get => _rolloverThresholdMs;
         set => SetProperty(ref _rolloverThresholdMs, value);
-    }
-
-    public bool UseEnableList
-    {
-        get => _useEnableList;
-        set => SetProperty(ref _useEnableList, value);
     }
 
     public string SelectedLanguage
@@ -147,8 +134,6 @@ public class SettingsWindowViewModel : ViewModelBase
 
     public ObservableCollection<ActivationKeyProfileViewModel> ActivationKeyProfiles { get; } = new();
     public ObservableCollection<KeyMappingViewModel> KeyMappings { get; } = new();
-    public ObservableCollection<string> DisableProgs { get; } = new();
-    public ObservableCollection<string> EnableProgs { get; } = new();
     public ObservableCollection<LanguageItem> AvailableLanguages { get; } = new();
 
     #endregion
@@ -160,10 +145,6 @@ public class SettingsWindowViewModel : ViewModelBase
     public ICommand AddKeyMappingCommand { get; }
     public ICommand EditKeyMappingCommand { get; }
     public ICommand RemoveKeyMappingCommand { get; }
-    public ICommand AddDisableProgCommand { get; }
-    public ICommand RemoveDisableProgCommand { get; }
-    public ICommand AddEnableProgCommand { get; }
-    public ICommand RemoveEnableProgCommand { get; }
     public ICommand ResetToDefaultsCommand { get; }
     public ICommand SaveCommand { get; }
     public ICommand CancelCommand { get; }
@@ -178,7 +159,6 @@ public class SettingsWindowViewModel : ViewModelBase
     public event Action? LanguageChanged;
     public event Action? SaveRequested;
     public event Action? CancelRequested;
-    public event Func<string?, string?>? AddProgramRequested;
     public event Func<ActivationKeyProfileViewModel?>? AddActivationKeyRequested;
     public event Func<KeyMappingViewModel?, KeyMappingViewModel?>? EditKeyMappingRequested;
 
@@ -187,18 +167,17 @@ public class SettingsWindowViewModel : ViewModelBase
     public SettingsWindowViewModel()
     {
         // Initialize commands
-        AddActivationKeyProfileCommand = new RelayCommand(ExecuteAddActivationKeyProfile);
-        RemoveActivationKeyProfileCommand = new RelayCommand(ExecuteRemoveActivationKeyProfile, () => SelectedActivationKeyProfile != null);
-        AddKeyMappingCommand = new RelayCommand(ExecuteAddKeyMapping);
-        EditKeyMappingCommand = new RelayCommand(ExecuteEditKeyMapping, () => SelectedKeyMapping != null);
-        RemoveKeyMappingCommand = new RelayCommand(ExecuteRemoveKeyMapping, () => SelectedKeyMapping != null);
-        AddDisableProgCommand = new RelayCommand(ExecuteAddDisableProg);
-        RemoveDisableProgCommand = new RelayCommand<string>(ExecuteRemoveDisableProg);
-        AddEnableProgCommand = new RelayCommand(ExecuteAddEnableProg);
-        RemoveEnableProgCommand = new RelayCommand<string>(ExecuteRemoveEnableProg);
-        ResetToDefaultsCommand = new RelayCommand(ExecuteResetToDefaults);
-        SaveCommand = new RelayCommand(ExecuteSave);
-        CancelCommand = new RelayCommand(ExecuteCancel);
+        AddActivationKeyProfileCommand = new DelegateCommand(ExecuteAddActivationKeyProfile);
+        RemoveActivationKeyProfileCommand = new DelegateCommand(ExecuteRemoveActivationKeyProfile, () => SelectedActivationKeyProfile != null)
+            .ObservesProperty(() => SelectedActivationKeyProfile);
+        AddKeyMappingCommand = new DelegateCommand(ExecuteAddKeyMapping);
+        EditKeyMappingCommand = new DelegateCommand(ExecuteEditKeyMapping, () => SelectedKeyMapping != null)
+            .ObservesProperty(() => SelectedKeyMapping);
+        RemoveKeyMappingCommand = new DelegateCommand(ExecuteRemoveKeyMapping, () => SelectedKeyMapping != null)
+            .ObservesProperty(() => SelectedKeyMapping);
+        ResetToDefaultsCommand = new DelegateCommand(ExecuteResetToDefaults);
+        SaveCommand = new DelegateCommand(ExecuteSave);
+        CancelCommand = new DelegateCommand(ExecuteCancel);
     }
 
     #region Command Implementations
@@ -254,51 +233,13 @@ public class SettingsWindowViewModel : ViewModelBase
         }
     }
 
-    private void ExecuteAddDisableProg()
-    {
-        var program = AddProgramRequested?.Invoke(null);
-        if (!string.IsNullOrWhiteSpace(program) && !DisableProgs.Contains(program))
-        {
-            DisableProgs.Add(program);
-        }
-    }
-
-    private void ExecuteRemoveDisableProg(string? program)
-    {
-        if (program != null)
-        {
-            DisableProgs.Remove(program);
-        }
-    }
-
-    private void ExecuteAddEnableProg()
-    {
-        var program = AddProgramRequested?.Invoke(null);
-        if (!string.IsNullOrWhiteSpace(program) && !EnableProgs.Contains(program))
-        {
-            EnableProgs.Add(program);
-        }
-    }
-
-    private void ExecuteRemoveEnableProg(string? program)
-    {
-        if (program != null)
-        {
-            EnableProgs.Remove(program);
-        }
-    }
-
     private void ExecuteResetToDefaults()
     {
-        // Reset all settings to defaults
         HoldDelayMs = 0;
         RolloverThresholdMs = 50;
         ShowInTray = true;
         CheckUpdates = true;
         BeepForMistakes = false;
-        UseEnableList = false;
-        DisableProgs.Clear();
-        EnableProgs.Clear();
     }
 
     private void ExecuteSave()
@@ -327,35 +268,12 @@ public class SettingsWindowViewModel : ViewModelBase
     private void LoadKeyMappingsForActivationKey()
     {
         KeyMappings.Clear();
-        // This will be called when the selected activation key changes
-        // The actual loading logic will be implemented by the host application
     }
 
     #endregion
 }
 
-public class RelayCommand<T> : ICommand
-{
-    private readonly Action<T?> _execute;
-    private readonly Func<T?, bool>? _canExecute;
-
-    public RelayCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
-    {
-        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecute = canExecute;
-    }
-
-    public event EventHandler? CanExecuteChanged
-    {
-        add => CommandManager.RequerySuggested += value;
-        remove => CommandManager.RequerySuggested -= value;
-    }
-
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke((T?)parameter) ?? true;
-    public void Execute(object? parameter) => _execute((T?)parameter);
-}
-
-public class ActivationKeyProfileViewModel : ViewModelBase
+public class ActivationKeyProfileViewModel : BindableBase
 {
     private int _vkCode;
     private string _keyName = "";
@@ -382,7 +300,7 @@ public class ActivationKeyProfileViewModel : ViewModelBase
     public string DisplayText => $"{KeyName} ({MappingCount} mappings)";
 }
 
-public class KeyMappingViewModel : ViewModelBase
+public class KeyMappingViewModel : BindableBase
 {
     private int _sourceVkCode;
     private string _sourceKey = "";

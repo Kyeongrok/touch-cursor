@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TouchCursor.Forms\TouchCursor.Forms.csproj" />
       <ProjectReference Include="..\TouchCursor.Main\TouchCursor.Main.csproj" />
       <ProjectReference Include="..\TouchCursor.Support\TouchCursor.Support.csproj" />
     </ItemGroup>
