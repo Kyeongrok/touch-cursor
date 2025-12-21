@@ -1,5 +1,6 @@
 using System.Windows;
 using TouchCursor.Forms.UI.Views;
+using TouchCursor.Forms.ViewModels;
 using TouchCursor.Support.Local.Helpers;
 using TouchCursor.Support.Local.Services;
 
@@ -22,6 +23,9 @@ partial class App : PrismApplication
         // Services
         containerRegistry.RegisterSingleton<IKeyMappingService, KeyMappingService>();
         containerRegistry.RegisterSingleton<KeyboardHookService>();
+
+        // ViewModels
+        containerRegistry.RegisterSingleton<TouchCursorWindowViewModel>();
 
         // Views
         containerRegistry.Register<TouchCursorWindow>();

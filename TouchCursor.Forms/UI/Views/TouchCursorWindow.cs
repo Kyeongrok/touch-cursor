@@ -28,6 +28,11 @@ public class TouchCursorWindow : Window
             new FrameworkPropertyMetadata(typeof(TouchCursorWindow)));
     }
 
+    public TouchCursorWindow(TouchCursorWindowViewModel viewModel)
+    {
+        ViewModel = viewModel;
+    }
+
     public static readonly DependencyProperty ViewModelProperty =
         DependencyProperty.Register(nameof(ViewModel), typeof(TouchCursorWindowViewModel),
             typeof(TouchCursorWindow), new PropertyMetadata(null, OnViewModelChanged));
@@ -121,7 +126,28 @@ public class TouchCursorWindow : Window
                     control._generalSettingsView.DataContext = viewModel.SettingsViewModel;
                 if (control._keyMappingsView != null)
                     control._keyMappingsView.DataContext = viewModel.SettingsViewModel;
+
+                // Setup tray icon
+                control.SetupTrayIcon(viewModel);
             }
         }
+    }
+
+    private void SetupTrayIcon(TouchCursorWindowViewModel viewModel)
+    {
+        var icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
+        if (icon != null)
+        {
+            viewModel.SetupNotifyIcon(icon);
+        }
+
+        viewModel.CloseRequested += () => Close();
+        viewModel.HideRequested += () => Hide();
+        viewModel.ShowRequested += () =>
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        };
     }
 }

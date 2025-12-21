@@ -1,6 +1,9 @@
 using System.ComponentModel;
-using System.Windows.Forms;
+using System.Windows;
+using System.Windows.Controls;
+using Hardcodet.Wpf.TaskbarNotification;
 using Prism.Mvvm;
+using TouchCursor.Main.UI.Views;
 using TouchCursor.Main.ViewModels;
 using TouchCursor.Support.Local.Helpers;
 
@@ -11,7 +14,7 @@ public class TouchCursorWindowViewModel : BindableBase
     private readonly ITouchCursorOptions _options;
     private readonly KeyboardHookService _hookService;
     private readonly SettingsWindowViewModel _settingsViewModel;
-    private NotifyIcon? _notifyIcon;
+    private TaskbarIcon? _taskbarIcon;
     private bool _isClosing = false;
 
     public SettingsWindowViewModel SettingsViewModel => _settingsViewModel;
@@ -45,20 +48,26 @@ public class TouchCursorWindowViewModel : BindableBase
 
     public void SetupNotifyIcon(System.Drawing.Icon icon)
     {
-        _notifyIcon = new NotifyIcon
+        var showMenuItem = new MenuItem { Header = "Show" };
+        showMenuItem.Click += (s, e) => ShowRequested?.Invoke();
+
+        var exitMenuItem = new MenuItem { Header = "Exit" };
+        exitMenuItem.Click += (s, e) => { _isClosing = true; CloseRequested?.Invoke(); };
+
+        var contextMenu = new ContextMenu();
+        contextMenu.Items.Add(showMenuItem);
+        contextMenu.Items.Add(new Separator());
+        contextMenu.Items.Add(exitMenuItem);
+
+        _taskbarIcon = new TaskbarIcon
         {
             Icon = icon,
-            Visible = _options.ShowInNotificationArea,
-            Text = "TouchCursor"
+            Visibility = _options.ShowInNotificationArea ? Visibility.Visible : Visibility.Collapsed,
+            ToolTipText = "TouchCursor",
+            ContextMenu = contextMenu
         };
 
-        var contextMenu = new ContextMenuStrip();
-        contextMenu.Items.Add("Show", null, (s, e) => ShowRequested?.Invoke());
-        contextMenu.Items.Add("-");
-        contextMenu.Items.Add("Exit", null, (s, e) => { _isClosing = true; CloseRequested?.Invoke(); });
-
-        _notifyIcon.ContextMenuStrip = contextMenu;
-        _notifyIcon.DoubleClick += (s, e) => ShowRequested?.Invoke();
+        _taskbarIcon.TrayMouseDoubleClick += (s, e) => ShowRequested?.Invoke();
     }
 
     public bool HandleClosing()
@@ -69,7 +78,7 @@ public class TouchCursorWindowViewModel : BindableBase
             return true; // Cancel close
         }
 
-        _notifyIcon?.Dispose();
+        _taskbarIcon?.Dispose();
         _hookService.Dispose();
         return false; // Allow close
     }
@@ -198,94 +207,17 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private ActivationKeyProfileViewModel? OnAddActivationKeyRequested()
     {
-        using var form = new Form
+        var dialog = new ActivationKeyDialogWindow
         {
-            Text = "프로파일 추가...",
-            Size = new System.Drawing.Size(350, 180),
-            StartPosition = FormStartPosition.CenterParent,
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            MaximizeBox = false,
-            MinimizeBox = false,
-            Padding = new Padding(20)
+            Owner = Application.Current.MainWindow
         };
 
-        var label = new Label
-        {
-            Text = "새 프로파일의 활성화 키를 선택하세요:",
-            AutoSize = true,
-            Location = new System.Drawing.Point(20, 20)
-        };
-
-        var comboBox = new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Location = new System.Drawing.Point(20, 50),
-            Width = 290
-        };
-
-        // 활성화 키 후보 목록
-        var keyOptions = new (int vkCode, string name)[]
-        {
-            (0x20, "스페이스 (기본값)"),
-            (0x14, "CapsLock"),
-            (0x09, "Tab"),
-            (0xA0, "왼쪽 Shift"),
-            (0xA1, "오른쪽 Shift"),
-            (0xA2, "왼쪽 Ctrl"),
-            (0xA3, "오른쪽 Ctrl"),
-            (0xA4, "왼쪽 Alt"),
-            (0xA5, "오른쪽 Alt"),
-            (0x1B, "Escape"),
-            (0xC0, "` (백틱)"),
-        };
-
-        foreach (var (vkCode, name) in keyOptions)
-        {
-            comboBox.Items.Add(new KeyComboItem { VkCode = vkCode, DisplayName = name });
-        }
-        comboBox.DisplayMember = "DisplayName";
-        comboBox.SelectedIndex = 0;
-
-        var buttonPanel = new FlowLayoutPanel
-        {
-            FlowDirection = FlowDirection.RightToLeft,
-            Dock = DockStyle.Bottom,
-            Height = 40,
-            Padding = new Padding(0, 5, 15, 5)
-        };
-
-        var cancelButton = new Button
-        {
-            Text = "취소",
-            Width = 80,
-            Height = 28,
-            DialogResult = System.Windows.Forms.DialogResult.Cancel
-        };
-
-        var okButton = new Button
-        {
-            Text = "확인",
-            Width = 80,
-            Height = 28,
-            DialogResult = System.Windows.Forms.DialogResult.OK,
-            Margin = new Padding(5, 0, 0, 0)
-        };
-
-        buttonPanel.Controls.Add(cancelButton);
-        buttonPanel.Controls.Add(okButton);
-
-        form.Controls.Add(label);
-        form.Controls.Add(comboBox);
-        form.Controls.Add(buttonPanel);
-        form.AcceptButton = okButton;
-        form.CancelButton = cancelButton;
-
-        if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK && comboBox.SelectedItem is KeyComboItem selected)
+        if (dialog.ShowDialog() == true && dialog.SelectedKey is { } selected)
         {
             // Check if already exists
             if (_settingsViewModel.ActivationKeyProfiles.Any(p => p.VkCode == selected.VkCode))
             {
-                MessageBox.Show("이 키는 이미 활성화 키로 등록되어 있습니다.", "중복", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("이 키는 이미 활성화 키로 등록되어 있습니다.", "중복", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
 
@@ -304,12 +236,6 @@ public class TouchCursorWindowViewModel : BindableBase
         }
 
         return null;
-    }
-
-    private class KeyComboItem
-    {
-        public int VkCode { get; set; }
-        public string DisplayName { get; set; } = "";
     }
 
     private KeyMappingViewModel? OnEditKeyMappingRequested(KeyMappingViewModel? existing)
