@@ -3,13 +3,14 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using TouchCursor.Forms.ViewModels;
 using TouchCursor.Main.UI.Views;
+using BaseTouchCursorWindow = TouchCursor.Support.UI.Views.TouchCursorWindow;
 
 namespace TouchCursor.Forms.UI.Views;
 
 [TemplatePart(Name = PART_ContentRegion, Type = typeof(ContentControl))]
 [TemplatePart(Name = PART_GeneralTab, Type = typeof(ToggleButton))]
 [TemplatePart(Name = PART_KeyMappingsTab, Type = typeof(ToggleButton))]
-public class TouchCursorWindow : Window
+public class TouchCursorWindow : BaseTouchCursorWindow
 {
     private const string PART_ContentRegion = "PART_ContentRegion";
     private const string PART_GeneralTab = "PART_GeneralTab";
@@ -97,18 +98,18 @@ public class TouchCursorWindow : Window
 
     private void ShowGeneralSettings()
     {
-        if (_contentRegion != null && _generalSettingsView != null)
+        if (_contentRegion != null && _generalSettingsView != null && ViewModel != null)
         {
-            _generalSettingsView.DataContext = DataContext;
+            _generalSettingsView.DataContext = ViewModel.SettingsViewModel.GeneralSettings;
             _contentRegion.Content = _generalSettingsView;
         }
     }
 
     private void ShowKeyMappings()
     {
-        if (_contentRegion != null && _keyMappingsView != null)
+        if (_contentRegion != null && _keyMappingsView != null && ViewModel != null)
         {
-            _keyMappingsView.DataContext = DataContext;
+            _keyMappingsView.DataContext = ViewModel.SettingsViewModel;
             _contentRegion.Content = _keyMappingsView;
         }
     }
@@ -123,7 +124,7 @@ public class TouchCursorWindow : Window
 
                 // Update view DataContexts if already created
                 if (control._generalSettingsView != null)
-                    control._generalSettingsView.DataContext = viewModel.SettingsViewModel;
+                    control._generalSettingsView.DataContext = viewModel.SettingsViewModel.GeneralSettings;
                 if (control._keyMappingsView != null)
                     control._keyMappingsView.DataContext = viewModel.SettingsViewModel;
 

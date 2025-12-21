@@ -92,28 +92,6 @@
                                     </StackPanel>
                                 </GroupBox>
 
-                                <!-- Language -->
-                                <GroupBox Header="{loc:Localize SettingsWindow.Language, Default='Language'}" Margin="0,0,0,15">
-                                    <StackPanel Margin="10">
-                                        <TextBlock Text="{loc:Localize SettingsWindow.LanguageDescription, Default='Select your preferred language:'}"
-                                                   TextWrapping="Wrap" Margin="0,0,0,10"/>
-                                        <ComboBox Width="200" HorizontalAlignment="Left"
-                                                  ItemsSource="{Binding AvailableLanguages}"
-                                                  DisplayMemberPath="NativeName"
-                                                  SelectedValuePath="Code"
-                                                  SelectedValue="{Binding SelectedLanguage}"/>
-                                    </StackPanel>
-                                </GroupBox>
-
-                                <!-- About -->
-                                <GroupBox Header="{loc:Localize SettingsWindow.About, Default='About'}" Margin="0,0,0,15">
-                                    <StackPanel Margin="10">
-                                        <TextBlock Text="{loc:Localize SettingsWindow.AboutTitle, Default='TouchCursor'}" Margin="0,5" FontWeight="Bold"/>
-                                        <TextBlock Text="{loc:Localize SettingsWindow.AboutVersion, Default='Version 1.0'}" Margin="0,5"/>
-                                        <TextBlock Text="{loc:Localize SettingsWindow.AboutOriginal, Default='Based on original TouchCursor by Martin Stone'}" Margin="0,5"/>
-                                        <TextBlock Text="{loc:Localize SettingsWindow.AboutLicense, Default='Licensed under GNU GPL v3'}" Margin="0,5"/>
-                                    </StackPanel>
-                                </GroupBox>
                             </StackPanel>
                         </ScrollViewer>
                     </Border>

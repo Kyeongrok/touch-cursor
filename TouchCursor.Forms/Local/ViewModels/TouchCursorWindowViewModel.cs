@@ -6,6 +6,7 @@ using Prism.Mvvm;
 using TouchCursor.Main.UI.Views;
 using TouchCursor.Main.ViewModels;
 using TouchCursor.Support.Local.Helpers;
+using TouchCursor.Support.Local.Services;
 
 namespace TouchCursor.Forms.ViewModels;
 
@@ -35,9 +36,11 @@ public class TouchCursorWindowViewModel : BindableBase
 
         _settingsViewModel.SaveRequested += OnSaveRequested;
         _settingsViewModel.CancelRequested += OnCancelRequested;
-        _settingsViewModel.EnabledChanged += OnEnabledChanged;
-        _settingsViewModel.PropertyChanged += OnSettingsPropertyChanged;
-        _settingsViewModel.AddActivationKeyRequested += OnAddActivationKeyRequested;
+        _settingsViewModel.AboutRequested += OnAboutRequested;
+        _settingsViewModel.GeneralSettings.EnabledChanged += OnEnabledChanged;
+        _settingsViewModel.GeneralSettings.LanguageChanged += OnLanguageChanged;
+        _settingsViewModel.GeneralSettings.PropertyChanged += OnGeneralSettingsPropertyChanged;
+        _settingsViewModel.GeneralSettings.AddActivationKeyRequested += OnAddActivationKeyRequested;
         _settingsViewModel.EditKeyMappingRequested += OnEditKeyMappingRequested;
 
         if (_options.Enabled)
@@ -87,21 +90,23 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void LoadOptionsToViewModel()
     {
-        _settingsViewModel.IsEnabled = _options.Enabled;
-        _settingsViewModel.TrainingMode = _options.TrainingMode;
-        _settingsViewModel.RunAtStartup = _options.RunAtStartup;
-        _settingsViewModel.ShowInTray = _options.ShowInNotificationArea;
-        _settingsViewModel.CheckUpdates = _options.CheckForUpdates;
-        _settingsViewModel.BeepForMistakes = _options.BeepForMistakes;
-        _settingsViewModel.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
-        _settingsViewModel.RolloverThresholdMs = _options.RolloverThresholdMs;
-        _settingsViewModel.SelectedLanguage = _options.Language;
+        var gs = _settingsViewModel.GeneralSettings;
+
+        gs.IsEnabled = _options.Enabled;
+        gs.TrainingMode = _options.TrainingMode;
+        gs.RunAtStartup = _options.RunAtStartup;
+        gs.ShowInTray = _options.ShowInNotificationArea;
+        gs.CheckUpdates = _options.CheckForUpdates;
+        gs.BeepForMistakes = _options.BeepForMistakes;
+        gs.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
+        gs.RolloverThresholdMs = _options.RolloverThresholdMs;
+        gs.SelectedLanguage = _options.Language;
 
         // Load activation key profiles
-        _settingsViewModel.ActivationKeyProfiles.Clear();
+        gs.ActivationKeyProfiles.Clear();
         foreach (var profile in _options.ActivationKeyProfiles)
         {
-            _settingsViewModel.ActivationKeyProfiles.Add(new ActivationKeyProfileViewModel
+            gs.ActivationKeyProfiles.Add(new ActivationKeyProfileViewModel
             {
                 VkCode = profile.Key,
                 KeyName = GetKeyName(profile.Key),
@@ -110,18 +115,18 @@ public class TouchCursorWindowViewModel : BindableBase
         }
 
         // Load key mappings for first profile
-        if (_settingsViewModel.ActivationKeyProfiles.Count > 0)
+        if (gs.ActivationKeyProfiles.Count > 0)
         {
-            var firstProfile = _settingsViewModel.ActivationKeyProfiles[0];
-            _settingsViewModel.SelectedActivationKeyProfile = firstProfile;
+            var firstProfile = gs.ActivationKeyProfiles[0];
+            gs.SelectedActivationKeyProfile = firstProfile;
             _settingsViewModel.SelectedActivationKeyForMappings = firstProfile.VkCode;
             LoadKeyMappings(firstProfile.VkCode);
         }
 
         // Load languages
-        _settingsViewModel.AvailableLanguages.Clear();
-        _settingsViewModel.AvailableLanguages.Add(new LanguageItem { Code = "en", NativeName = "English" });
-        _settingsViewModel.AvailableLanguages.Add(new LanguageItem { Code = "ko", NativeName = "한국어" });
+        gs.AvailableLanguages.Clear();
+        gs.AvailableLanguages.Add(new LanguageItem { Code = "en", NativeName = "English" });
+        gs.AvailableLanguages.Add(new LanguageItem { Code = "ko", NativeName = "한국어" });
     }
 
     private void LoadKeyMappings(int activationKey)
@@ -151,15 +156,17 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void SaveViewModelToOptions()
     {
-        _options.Enabled = _settingsViewModel.IsEnabled;
-        _options.TrainingMode = _settingsViewModel.TrainingMode;
-        _options.RunAtStartup = _settingsViewModel.RunAtStartup;
-        _options.ShowInNotificationArea = _settingsViewModel.ShowInTray;
-        _options.CheckForUpdates = _settingsViewModel.CheckUpdates;
-        _options.BeepForMistakes = _settingsViewModel.BeepForMistakes;
-        _options.ActivationKeyHoldDelayMs = _settingsViewModel.HoldDelayMs;
-        _options.RolloverThresholdMs = _settingsViewModel.RolloverThresholdMs;
-        _options.Language = _settingsViewModel.SelectedLanguage;
+        var gs = _settingsViewModel.GeneralSettings;
+
+        _options.Enabled = gs.IsEnabled;
+        _options.TrainingMode = gs.TrainingMode;
+        _options.RunAtStartup = gs.RunAtStartup;
+        _options.ShowInNotificationArea = gs.ShowInTray;
+        _options.CheckForUpdates = gs.CheckUpdates;
+        _options.BeepForMistakes = gs.BeepForMistakes;
+        _options.ActivationKeyHoldDelayMs = gs.HoldDelayMs;
+        _options.RolloverThresholdMs = gs.RolloverThresholdMs;
+        _options.Language = gs.SelectedLanguage;
 
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
@@ -177,9 +184,21 @@ public class TouchCursorWindowViewModel : BindableBase
         CloseRequested?.Invoke();
     }
 
+    private void OnAboutRequested()
+    {
+        MessageBox.Show(
+            "TouchCursor\n" +
+            "Version 1.0\n\n" +
+            "Based on original TouchCursor by Martin Stone\n" +
+            "Licensed under GNU GPL v3",
+            "About TouchCursor",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+
     private void OnEnabledChanged()
     {
-        if (_settingsViewModel.IsEnabled)
+        if (_settingsViewModel.GeneralSettings.IsEnabled)
         {
             _hookService.StartHook();
         }
@@ -187,21 +206,24 @@ public class TouchCursorWindowViewModel : BindableBase
         {
             _hookService.StopHook();
         }
-        _options.Enabled = _settingsViewModel.IsEnabled;
+        _options.Enabled = _settingsViewModel.GeneralSettings.IsEnabled;
     }
 
-    private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnLanguageChanged()
     {
-        if (e.PropertyName == nameof(SettingsWindowViewModel.SelectedActivationKeyProfile))
+        var language = _settingsViewModel.GeneralSettings.SelectedLanguage;
+        LocalizationService.Instance.LoadLanguage(language);
+        _options.Language = language;
+    }
+
+    private void OnGeneralSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(GeneralSettingsViewModel.SelectedActivationKeyProfile))
         {
-            if (_settingsViewModel.SelectedActivationKeyProfile != null)
+            if (_settingsViewModel.GeneralSettings.SelectedActivationKeyProfile != null)
             {
-                LoadKeyMappings(_settingsViewModel.SelectedActivationKeyProfile.VkCode);
+                LoadKeyMappings(_settingsViewModel.GeneralSettings.SelectedActivationKeyProfile.VkCode);
             }
-        }
-        else if (e.PropertyName == nameof(SettingsWindowViewModel.SelectedActivationKeyForMappings))
-        {
-            LoadKeyMappings(_settingsViewModel.SelectedActivationKeyForMappings);
         }
     }
 
@@ -215,7 +237,7 @@ public class TouchCursorWindowViewModel : BindableBase
         if (dialog.ShowDialog() == true && dialog.SelectedKey is { } selected)
         {
             // Check if already exists
-            if (_settingsViewModel.ActivationKeyProfiles.Any(p => p.VkCode == selected.VkCode))
+            if (_settingsViewModel.GeneralSettings.ActivationKeyProfiles.Any(p => p.VkCode == selected.VkCode))
             {
                 MessageBox.Show("이 키는 이미 활성화 키로 등록되어 있습니다.", "중복", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
