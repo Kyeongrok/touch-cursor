@@ -15,7 +15,6 @@ public class SettingsWindowViewModel : BindableBase
     private bool _showInTray = true;
     private bool _checkUpdates = true;
     private bool _beepForMistakes;
-    private bool _autoSwitchToEnglish;
     private int _holdDelayMs;
     private int _rolloverThresholdMs = 50;
     private string _selectedLanguage = "en";
@@ -76,12 +75,6 @@ public class SettingsWindowViewModel : BindableBase
     {
         get => _beepForMistakes;
         set => SetProperty(ref _beepForMistakes, value);
-    }
-
-    public bool AutoSwitchToEnglish
-    {
-        get => _autoSwitchToEnglish;
-        set => SetProperty(ref _autoSwitchToEnglish, value);
     }
 
     public int HoldDelayMs

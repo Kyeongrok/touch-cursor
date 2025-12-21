@@ -84,7 +84,6 @@ public class TouchCursorWindowViewModel : BindableBase
         _settingsViewModel.ShowInTray = _options.ShowInNotificationArea;
         _settingsViewModel.CheckUpdates = _options.CheckForUpdates;
         _settingsViewModel.BeepForMistakes = _options.BeepForMistakes;
-        _settingsViewModel.AutoSwitchToEnglish = _options.AutoSwitchToEnglishOnNonConsonant;
         _settingsViewModel.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
         _settingsViewModel.RolloverThresholdMs = _options.RolloverThresholdMs;
         _settingsViewModel.SelectedLanguage = _options.Language;
@@ -149,7 +148,6 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.ShowInNotificationArea = _settingsViewModel.ShowInTray;
         _options.CheckForUpdates = _settingsViewModel.CheckUpdates;
         _options.BeepForMistakes = _settingsViewModel.BeepForMistakes;
-        _options.AutoSwitchToEnglishOnNonConsonant = _settingsViewModel.AutoSwitchToEnglish;
         _options.ActivationKeyHoldDelayMs = _settingsViewModel.HoldDelayMs;
         _options.RolloverThresholdMs = _settingsViewModel.RolloverThresholdMs;
         _options.Language = _settingsViewModel.SelectedLanguage;

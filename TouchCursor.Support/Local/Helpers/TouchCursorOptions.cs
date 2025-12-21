@@ -19,9 +19,6 @@ public class TouchCursorOptions : ITouchCursorOptions
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
 
-    // 한글 자음 자동 영문 전환: 한글 입력 모드에서 자음이 아닌 키를 누르면 자동으로 영문으로 전환
-    public bool AutoSwitchToEnglishOnNonConsonant { get; set; } = false;
-
     // 활성화 키 홀드 딜레이: 활성화 키를 이 시간만큼 눌러야 커서 모드 활성화
     // 매핑된 키를 딜레이 전에 누르면 두 키 모두 일반 타이핑으로 처리됨
     // 0으로 설정하면 비활성화 (즉시 활성화)

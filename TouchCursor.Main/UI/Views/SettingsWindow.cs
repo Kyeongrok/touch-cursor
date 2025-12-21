@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using TouchCursor.Main.ViewModels;
@@ -121,8 +122,67 @@ public class SettingsWindow : Control
     {
         if (d is SettingsWindow control)
         {
+            // Unsubscribe from old ViewModel
+            if (e.OldValue is SettingsWindowViewModel oldVm)
+            {
+                oldVm.AddActivationKeyRequested -= control.OnAddActivationKeyRequested;
+            }
+
             control.DataContext = e.NewValue;
+
+            // Subscribe to new ViewModel
+            if (e.NewValue is SettingsWindowViewModel newVm)
+            {
+                newVm.AddActivationKeyRequested += control.OnAddActivationKeyRequested;
+            }
         }
+    }
+
+    private ActivationKeyProfileViewModel? OnAddActivationKeyRequested()
+    {
+        var dialog = new ActivationKeyDialog();
+        ActivationKeyProfileViewModel? result = null;
+
+        var window = new Window
+        {
+            Title = "프로파일 추가",
+            Content = dialog,
+            Width = 350,
+            Height = 180,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ResizeMode = ResizeMode.NoResize,
+            ShowInTaskbar = false,
+            Owner = Window.GetWindow(this)
+        };
+
+        dialog.OkClicked += (s, key) =>
+        {
+            if (key != null)
+            {
+                // Check for duplicates
+                if (ViewModel?.ActivationKeyProfiles.Any(p => p.VkCode == key.VkCode) == true)
+                {
+                    MessageBox.Show("이 키는 이미 활성화 키로 등록되어 있습니다.", "중복",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                result = new ActivationKeyProfileViewModel
+                {
+                    VkCode = key.VkCode,
+                    KeyName = key.DisplayName,
+                    MappingCount = 0
+                };
+                window.DialogResult = true;
+            }
+        };
+
+        dialog.CancelClicked += (s, _) =>
+        {
+            window.DialogResult = false;
+        };
+
+        return window.ShowDialog() == true ? result : null;
     }
 
     private void OnActivationKeyProfileSelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -9,7 +9,6 @@ public interface ITouchCursorOptions
     bool RunAtStartup { get; set; }
     bool ShowInNotificationArea { get; set; }
     bool CheckForUpdates { get; set; }
-    bool AutoSwitchToEnglishOnNonConsonant { get; set; }
 
     // 타이밍 설정
     int ActivationKeyHoldDelayMs { get; set; }

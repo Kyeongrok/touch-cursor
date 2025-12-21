@@ -4,6 +4,7 @@
                     xmlns:main="clr-namespace:TouchCursor.Main.UI.Views;assembly=TouchCursor.Main">
 
     <Style TargetType="{x:Type local:TouchCursorWindow}">
+        <Setter Property="Background" Value="White" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TouchCursorWindow}">
