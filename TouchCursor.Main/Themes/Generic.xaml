@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/SettingsWindow.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingEditor.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>
