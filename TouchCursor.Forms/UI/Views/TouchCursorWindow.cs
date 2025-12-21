@@ -1,11 +1,28 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using TouchCursor.Forms.ViewModels;
 using TouchCursor.Main.UI.Views;
+using TouchCursor.Support.UI.Views;
 
 namespace TouchCursor.Forms.UI.Views;
 
+[TemplatePart(Name = PART_ContentRegion, Type = typeof(ContentControl))]
+[TemplatePart(Name = PART_GeneralTab, Type = typeof(ToggleButton))]
+[TemplatePart(Name = PART_KeyMappingsTab, Type = typeof(ToggleButton))]
 public class TouchCursorWindow : Window
 {
+    private const string PART_ContentRegion = "PART_ContentRegion";
+    private const string PART_GeneralTab = "PART_GeneralTab";
+    private const string PART_KeyMappingsTab = "PART_KeyMappingsTab";
+
+    private ContentControl? _contentRegion;
+    private ToggleButton? _generalTab;
+    private ToggleButton? _keyMappingsTab;
+
+    private GeneralSettingsView? _generalSettingsView;
+    private KeyMappingsView? _keyMappingsView;
+
     static TouchCursorWindow()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(TouchCursorWindow),
@@ -22,27 +39,89 @@ public class TouchCursorWindow : Window
         set => SetValue(ViewModelProperty, value);
     }
 
-    private SettingsWindow? _settingsControl;
-
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
 
-        _settingsControl = GetTemplateChild("PART_SettingsControl") as SettingsWindow;
+        // Unsubscribe old events
+        if (_generalTab != null)
+            _generalTab.Checked -= OnGeneralTabChecked;
+        if (_keyMappingsTab != null)
+            _keyMappingsTab.Checked -= OnKeyMappingsTabChecked;
 
-        if (_settingsControl != null && ViewModel != null)
+        // Get template parts
+        _contentRegion = GetTemplateChild(PART_ContentRegion) as ContentControl;
+        _generalTab = GetTemplateChild(PART_GeneralTab) as ToggleButton;
+        _keyMappingsTab = GetTemplateChild(PART_KeyMappingsTab) as ToggleButton;
+
+        // Subscribe new events
+        if (_generalTab != null)
+            _generalTab.Checked += OnGeneralTabChecked;
+        if (_keyMappingsTab != null)
+            _keyMappingsTab.Checked += OnKeyMappingsTabChecked;
+
+        // Create views
+        _generalSettingsView = new GeneralSettingsView();
+        _keyMappingsView = new KeyMappingsView();
+
+        // Set initial content
+        if (_generalTab?.IsChecked == true)
         {
-            _settingsControl.ViewModel = ViewModel.SettingsViewModel;
+            ShowGeneralSettings();
+        }
+        else if (_keyMappingsTab?.IsChecked == true)
+        {
+            ShowKeyMappings();
+        }
+        else
+        {
+            // Default to General tab
+            if (_generalTab != null)
+                _generalTab.IsChecked = true;
+        }
+    }
+
+    private void OnGeneralTabChecked(object sender, RoutedEventArgs e)
+    {
+        ShowGeneralSettings();
+    }
+
+    private void OnKeyMappingsTabChecked(object sender, RoutedEventArgs e)
+    {
+        ShowKeyMappings();
+    }
+
+    private void ShowGeneralSettings()
+    {
+        if (_contentRegion != null && _generalSettingsView != null)
+        {
+            _generalSettingsView.DataContext = DataContext;
+            _contentRegion.Content = _generalSettingsView;
+        }
+    }
+
+    private void ShowKeyMappings()
+    {
+        if (_contentRegion != null && _keyMappingsView != null)
+        {
+            _keyMappingsView.DataContext = DataContext;
+            _contentRegion.Content = _keyMappingsView;
         }
     }
 
     private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is TouchCursorWindow control && control._settingsControl != null)
+        if (d is TouchCursorWindow control)
         {
             if (e.NewValue is TouchCursorWindowViewModel viewModel)
             {
-                control._settingsControl.ViewModel = viewModel.SettingsViewModel;
+                control.DataContext = viewModel.SettingsViewModel;
+
+                // Update view DataContexts if already created
+                if (control._generalSettingsView != null)
+                    control._generalSettingsView.DataContext = viewModel.SettingsViewModel;
+                if (control._keyMappingsView != null)
+                    control._keyMappingsView.DataContext = viewModel.SettingsViewModel;
             }
         }
     }

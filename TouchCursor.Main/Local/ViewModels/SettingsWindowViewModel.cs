@@ -21,6 +21,7 @@ public class SettingsWindowViewModel : BindableBase
     private ActivationKeyProfileViewModel? _selectedActivationKeyProfile;
     private KeyMappingViewModel? _selectedKeyMapping;
     private int _selectedActivationKeyForMappings;
+    private int _selectedTabIndex;
 
     #endregion
 
@@ -97,6 +98,12 @@ public class SettingsWindowViewModel : BindableBase
             if (SetProperty(ref _selectedLanguage, value))
                 OnLanguageChanged();
         }
+    }
+
+    public int SelectedTabIndex
+    {
+        get => _selectedTabIndex;
+        set => SetProperty(ref _selectedTabIndex, value);
     }
 
     public ActivationKeyProfileViewModel? SelectedActivationKeyProfile

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using TouchCursor.Forms.UI.Views;
 using TouchCursor.Support.Local.Helpers;
 using TouchCursor.Support.Local.Services;
