@@ -32,6 +32,15 @@ public class TouchCursorWindow : BaseTouchCursorWindow
     public TouchCursorWindow(TouchCursorWindowViewModel viewModel)
     {
         ViewModel = viewModel;
+        Closing += OnWindowClosing;
+    }
+
+    private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (ViewModel?.HandleClosing() == true)
+        {
+            e.Cancel = true;
+        }
     }
 
     public static readonly DependencyProperty ViewModelProperty =
