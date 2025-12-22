@@ -98,7 +98,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void OnActivationStateChanged(int activationKey, bool isActive)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
             if (_overlayWindow != null)
             {
