@@ -27,9 +27,12 @@ public class ActivationOverlayWindow : Window
         IsHitTestVisible = false;
         Focusable = false;
         ShowActivated = false;
+        Width = 40;
+        Height = 40;
+        SizeToContent = SizeToContent.Manual;
 
-        // Default position: bottom-right corner
-        SetPosition(TouchCursor.Support.Local.Helpers.OverlayPosition.BottomRight);
+        // Default position: top-left corner
+        SetPosition(TouchCursor.Support.Local.Helpers.OverlayPosition.TopLeft);
     }
 
     public void SetPosition(TouchCursor.Support.Local.Helpers.OverlayPosition position)
