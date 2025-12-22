@@ -80,7 +80,11 @@ public class GeneralSettingsViewModel : BindableBase
     public int HoldDelayMs
     {
         get => _holdDelayMs;
-        set => SetProperty(ref _holdDelayMs, value);
+        set
+        {
+            if (SetProperty(ref _holdDelayMs, value))
+                HoldDelayMsChanged?.Invoke();
+        }
     }
 
     public int RolloverThresholdMs
@@ -139,6 +143,7 @@ public class GeneralSettingsViewModel : BindableBase
     public event Action? RunAtStartupChanged;
     public event Action? LanguageChanged;
     public event Action? OverlayPositionChanged;
+    public event Action? HoldDelayMsChanged;
     public event Func<ActivationKeyProfileViewModel?>? AddActivationKeyRequested;
 
     #endregion

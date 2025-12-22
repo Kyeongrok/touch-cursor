@@ -52,6 +52,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _settingsViewModel.GeneralSettings.EnabledChanged += OnEnabledChanged;
         _settingsViewModel.GeneralSettings.LanguageChanged += OnLanguageChanged;
         _settingsViewModel.GeneralSettings.OverlayPositionChanged += OnOverlayPositionChanged;
+        _settingsViewModel.GeneralSettings.HoldDelayMsChanged += OnHoldDelayMsChanged;
         _settingsViewModel.GeneralSettings.PropertyChanged += OnGeneralSettingsPropertyChanged;
         _settingsViewModel.GeneralSettings.AddActivationKeyRequested += OnAddActivationKeyRequested;
         _settingsViewModel.EditKeyMappingRequested += OnEditKeyMappingRequested;
@@ -282,6 +283,11 @@ public class TouchCursorWindowViewModel : BindableBase
         var position = _settingsViewModel.GeneralSettings.OverlayPosition;
         _overlayWindow?.SetPosition(position);
         _options.OverlayPosition = position;
+    }
+
+    private void OnHoldDelayMsChanged()
+    {
+        _options.ActivationKeyHoldDelayMs = _settingsViewModel.GeneralSettings.HoldDelayMs;
     }
 
     private void OnGeneralSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
