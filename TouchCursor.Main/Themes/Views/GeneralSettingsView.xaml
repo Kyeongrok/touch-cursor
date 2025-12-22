@@ -60,6 +60,16 @@
 
                                         <Separator Margin="0,10"/>
 
+                                        <!-- Language -->
+                                        <TextBlock Text="언어 / Language:" Margin="0,5,0,5"/>
+                                        <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                                                  SelectedValue="{Binding SelectedLanguage}"
+                                                  SelectedValuePath="Code"
+                                                  DisplayMemberPath="NativeName"
+                                                  Margin="0,5,0,10"/>
+
+                                        <Separator Margin="0,10"/>
+
                                         <!-- Overlay Position -->
                                         <TextBlock Text="오버레이 위치:" Margin="0,5,0,5"/>
                                         <ComboBox SelectedItem="{Binding OverlayPosition}" Margin="0,5,0,10">

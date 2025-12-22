@@ -160,17 +160,8 @@
                             <!-- Menu Bar -->
                             <Menu Grid.Row="1" Background="#F5F5F5">
                                 <MenuItem Header="{loc:Localize Menu.Settings, Default='_Settings'}">
-                                    <MenuItem Header="{loc:Localize Menu.Language, Default='_Language'}"
-                                              ItemsSource="{Binding GeneralSettings.AvailableLanguages}">
-                                        <MenuItem.ItemContainerStyle>
-                                            <Style TargetType="MenuItem">
-                                                <Setter Property="Header" Value="{Binding NativeName}"/>
-                                                <Setter Property="Command" Value="{Binding DataContext.GeneralSettings.ChangeLanguageCommand,
-                                                    RelativeSource={RelativeSource AncestorType=Menu}}"/>
-                                                <Setter Property="CommandParameter" Value="{Binding Code}"/>
-                                            </Style>
-                                        </MenuItem.ItemContainerStyle>
-                                    </MenuItem>
+                                    <MenuItem Header="환경설정..."
+                                              Command="{Binding ShowSettingsCommand}"/>
                                 </MenuItem>
                                 <MenuItem Header="{loc:Localize Menu.Help, Default='_Help'}">
                                     <MenuItem Header="{loc:Localize Menu.About, Default='_About...'}"

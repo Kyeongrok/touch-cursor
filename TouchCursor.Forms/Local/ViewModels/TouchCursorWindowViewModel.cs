@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Hardcodet.Wpf.TaskbarNotification;
+using Prism.Commands;
 using Prism.Mvvm;
 using TouchCursor.Forms.UI.Views;
 using TouchCursor.Main.UI.Views;
@@ -24,6 +26,8 @@ public class TouchCursorWindowViewModel : BindableBase
 
     public SettingsWindowViewModel SettingsViewModel => _settingsViewModel;
 
+    public ICommand ShowSettingsCommand { get; }
+
     public event Action? CloseRequested;
     public event Action? HideRequested;
     public event Action? ShowRequested;
@@ -37,6 +41,8 @@ public class TouchCursorWindowViewModel : BindableBase
         _hookService = hookService;
         _mappingService = mappingService;
         _settingsViewModel = new SettingsWindowViewModel();
+
+        ShowSettingsCommand = new DelegateCommand(ExecuteShowSettings);
 
         // Create overlay window
         _overlayWindow = new ActivationOverlayWindow();
@@ -244,6 +250,11 @@ public class TouchCursorWindowViewModel : BindableBase
     {
         _isClosing = true;
         CloseRequested?.Invoke();
+    }
+
+    private void ExecuteShowSettings()
+    {
+        ShowRequested?.Invoke();
     }
 
     private void OnAboutRequested()
