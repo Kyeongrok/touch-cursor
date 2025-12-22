@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
+using TouchCursor.Support.Local.Helpers;
 
 namespace TouchCursor.Main.ViewModels;
 
@@ -19,6 +20,7 @@ public class GeneralSettingsViewModel : BindableBase
     private int _rolloverThresholdMs = 50;
     private string _selectedLanguage = "en";
     private ActivationKeyProfileViewModel? _selectedActivationKeyProfile;
+    private OverlayPosition _overlayPosition = OverlayPosition.BottomRight;
 
     #endregion
 
@@ -103,6 +105,16 @@ public class GeneralSettingsViewModel : BindableBase
         set => SetProperty(ref _selectedActivationKeyProfile, value);
     }
 
+    public OverlayPosition OverlayPosition
+    {
+        get => _overlayPosition;
+        set
+        {
+            if (SetProperty(ref _overlayPosition, value))
+                OverlayPositionChanged?.Invoke();
+        }
+    }
+
     #endregion
 
     #region Collections
@@ -126,6 +138,7 @@ public class GeneralSettingsViewModel : BindableBase
     public event Action? TrainingModeChanged;
     public event Action? RunAtStartupChanged;
     public event Action? LanguageChanged;
+    public event Action? OverlayPositionChanged;
     public event Func<ActivationKeyProfileViewModel?>? AddActivationKeyRequested;
 
     #endregion

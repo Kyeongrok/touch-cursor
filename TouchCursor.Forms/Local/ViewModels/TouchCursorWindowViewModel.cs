@@ -20,6 +20,7 @@ public class TouchCursorWindowViewModel : BindableBase
     private TaskbarIcon? _taskbarIcon;
     private ActivationOverlayWindow? _overlayWindow;
     private bool _isClosing = false;
+    private System.Threading.Timer? _activationTimer;
 
     public SettingsWindowViewModel SettingsViewModel => _settingsViewModel;
 
@@ -39,6 +40,8 @@ public class TouchCursorWindowViewModel : BindableBase
 
         // Create overlay window
         _overlayWindow = new ActivationOverlayWindow();
+        _overlayWindow.SetPosition(options.OverlayPosition);
+        _mappingService.ActivationKeyPressed += OnActivationKeyPressed;
         _mappingService.ActivationStateChanged += OnActivationStateChanged;
 
         LoadOptionsToViewModel();
@@ -48,6 +51,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _settingsViewModel.AboutRequested += OnAboutRequested;
         _settingsViewModel.GeneralSettings.EnabledChanged += OnEnabledChanged;
         _settingsViewModel.GeneralSettings.LanguageChanged += OnLanguageChanged;
+        _settingsViewModel.GeneralSettings.OverlayPositionChanged += OnOverlayPositionChanged;
         _settingsViewModel.GeneralSettings.PropertyChanged += OnGeneralSettingsPropertyChanged;
         _settingsViewModel.GeneralSettings.AddActivationKeyRequested += OnAddActivationKeyRequested;
         _settingsViewModel.EditKeyMappingRequested += OnEditKeyMappingRequested;
@@ -96,14 +100,47 @@ public class TouchCursorWindowViewModel : BindableBase
         return false; // Allow close
     }
 
-    private void OnActivationStateChanged(int activationKey, bool isActive)
+    private void OnActivationKeyPressed(int activationKey)
     {
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
             if (_overlayWindow != null)
             {
                 _overlayWindow.KeyName = GetKeyName(activationKey);
-                _overlayWindow.IsActivated = isActive;
+                _overlayWindow.State = ActivationState.Waiting;
+
+                // ActivationKeyHoldDelayMs 후에 파란색으로 변경
+                _activationTimer?.Dispose();
+                var delay = _options.ActivationKeyHoldDelayMs;
+                if (delay > 0)
+                {
+                    _activationTimer = new System.Threading.Timer(_ =>
+                    {
+                        Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            if (_overlayWindow != null && _overlayWindow.State == ActivationState.Waiting)
+                            {
+                                _overlayWindow.State = ActivationState.Activated;
+                            }
+                        });
+                    }, null, delay, System.Threading.Timeout.Infinite);
+                }
+            }
+        });
+    }
+
+    private void OnActivationStateChanged(int activationKey, bool isActive)
+    {
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            // 타이머 취소
+            _activationTimer?.Dispose();
+            _activationTimer = null;
+
+            if (_overlayWindow != null)
+            {
+                _overlayWindow.KeyName = GetKeyName(activationKey);
+                _overlayWindow.State = isActive ? ActivationState.Activated : ActivationState.None;
             }
         });
     }
@@ -123,6 +160,7 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
         gs.RolloverThresholdMs = _options.RolloverThresholdMs;
         gs.SelectedLanguage = _options.Language;
+        gs.OverlayPosition = _options.OverlayPosition;
 
         // Load activation key profiles
         gs.ActivationKeyProfiles.Clear();
@@ -189,6 +227,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.ActivationKeyHoldDelayMs = gs.HoldDelayMs;
         _options.RolloverThresholdMs = gs.RolloverThresholdMs;
         _options.Language = gs.SelectedLanguage;
+        _options.OverlayPosition = gs.OverlayPosition;
 
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
@@ -236,6 +275,13 @@ public class TouchCursorWindowViewModel : BindableBase
         var language = _settingsViewModel.GeneralSettings.SelectedLanguage;
         LocalizationService.Instance.LoadLanguage(language);
         _options.Language = language;
+    }
+
+    private void OnOverlayPositionChanged()
+    {
+        var position = _settingsViewModel.GeneralSettings.OverlayPosition;
+        _overlayWindow?.SetPosition(position);
+        _options.OverlayPosition = position;
     }
 
     private void OnGeneralSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)

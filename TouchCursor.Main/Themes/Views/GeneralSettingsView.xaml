@@ -1,7 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:views="clr-namespace:TouchCursor.Main.UI.Views"
-                    xmlns:loc="clr-namespace:TouchCursor.Main.Localization">
+                    xmlns:loc="clr-namespace:TouchCursor.Main.Localization"
+                    xmlns:helpers="clr-namespace:TouchCursor.Support.Local.Helpers;assembly=TouchCursor.Support"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <Style TargetType="{x:Type views:GeneralSettingsView}">
         <Setter Property="Background" Value="White"/>
@@ -55,6 +57,17 @@
                                                   IsChecked="{Binding CheckUpdates}" Margin="0,5"/>
                                         <CheckBox Content="{loc:Localize SettingsWindow.BeepForMistakes, Default='Beep for mistakes'}"
                                                   IsChecked="{Binding BeepForMistakes}" Margin="0,5"/>
+
+                                        <Separator Margin="0,10"/>
+
+                                        <!-- Overlay Position -->
+                                        <TextBlock Text="오버레이 위치:" Margin="0,5,0,5"/>
+                                        <ComboBox SelectedItem="{Binding OverlayPosition}" Margin="0,5,0,10">
+                                            <helpers:OverlayPosition>BottomRight</helpers:OverlayPosition>
+                                            <helpers:OverlayPosition>BottomLeft</helpers:OverlayPosition>
+                                            <helpers:OverlayPosition>TopRight</helpers:OverlayPosition>
+                                            <helpers:OverlayPosition>TopLeft</helpers:OverlayPosition>
+                                        </ComboBox>
 
                                         <Separator Margin="0,10"/>
 

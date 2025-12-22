@@ -7,6 +7,14 @@ using System.Text.Json.Serialization;
 
 namespace TouchCursor.Support.Local.Helpers;
 
+public enum OverlayPosition
+{
+    BottomRight,
+    BottomLeft,
+    TopRight,
+    TopLeft
+}
+
 public class TouchCursorOptions : ITouchCursorOptions
 {
     private const int MaxKeyCodes = 0x100;
@@ -18,6 +26,7 @@ public class TouchCursorOptions : ITouchCursorOptions
     public bool RunAtStartup { get; set; } = false;
     public bool ShowInNotificationArea { get; set; } = true;
     public bool CheckForUpdates { get; set; } = true;
+    public OverlayPosition OverlayPosition { get; set; } = OverlayPosition.BottomRight;
 
     // 활성화 키 홀드 딜레이: 활성화 키를 이 시간만큼 눌러야 커서 모드 활성화
     // 매핑된 키를 딜레이 전에 누르면 두 키 모두 일반 타이핑으로 처리됨

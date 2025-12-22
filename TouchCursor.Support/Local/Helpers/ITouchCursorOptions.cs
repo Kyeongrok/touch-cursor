@@ -26,6 +26,9 @@ public interface ITouchCursorOptions
     // 언어
     string Language { get; set; }
 
+    // 오버레이 설정
+    OverlayPosition OverlayPosition { get; set; }
+
     // 업데이트
     DateTime LastUpdateCheck { get; set; }
 

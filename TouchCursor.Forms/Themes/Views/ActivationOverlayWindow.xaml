@@ -11,9 +11,19 @@
                 <ControlTemplate TargetType="{x:Type local:ActivationOverlayWindow}">
                     <Border Background="#E0333333" CornerRadius="8" Padding="6,6">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Ellipse Width="10" Height="10" Fill="#4CAF50" Margin="0,0,8,0"/>
+                            <Ellipse x:Name="StatusIndicator" Width="10" Height="10" Fill="#4CAF50" Margin="0,0,8,0"/>
                         </StackPanel>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Waiting state: Green -->
+                        <Trigger Property="State" Value="Waiting">
+                            <Setter TargetName="StatusIndicator" Property="Fill" Value="#4CAF50"/>
+                        </Trigger>
+                        <!-- Activated state: Blue -->
+                        <Trigger Property="State" Value="Activated">
+                            <Setter TargetName="StatusIndicator" Property="Fill" Value="#2196F3"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -22,6 +22,7 @@ public class KeyMappingService : IKeyMappingService
 
     public event Action<int, bool, int>? SendKeyRequested;
     public event Action<int, bool>? ActivationStateChanged;
+    public event Action<int>? ActivationKeyPressed;
 
     private readonly Dictionary<int, int> _modifierKeys = new()
     {
@@ -104,7 +105,8 @@ public class KeyMappingService : IKeyMappingService
                 _currentActivationKey = vkCode;
                 _activationKeyUsedForMapping = false;
                 _activationKeyPressTime = DateTime.Now.Ticks;
-                // 아직 활성화된 것이 아님 - 매핑이 사용될 때 이벤트 발생
+                // 대기 상태 알림 (초록색 표시)
+                ActivationKeyPressed?.Invoke(vkCode);
                 return true;
             }
             else if (isKeyDown && _currentActivationKey != 0)
@@ -125,11 +127,9 @@ public class KeyMappingService : IKeyMappingService
                     SendKeyRequested?.Invoke(vkCode, true, 0);
                     SendKeyRequested?.Invoke(vkCode, false, 0);
                 }
-                else
-                {
-                    // 매핑이 사용된 경우에만 비활성화 이벤트 발생
-                    ActivationStateChanged?.Invoke(0, false);
-                }
+
+                // 항상 오버레이 숨기기 (매핑 사용 여부와 관계없이)
+                ActivationStateChanged?.Invoke(0, false);
 
                 _currentActivationKey = 0;
                 return true;
@@ -181,11 +181,10 @@ public class KeyMappingService : IKeyMappingService
                     }
                 }
 
-                // 첫 매핑 사용 시 활성화 이벤트 발생
+                // 매핑 사용 플래그 설정
                 if (!_activationKeyUsedForMapping)
                 {
                     _activationKeyUsedForMapping = true;
-                    ActivationStateChanged?.Invoke(_currentActivationKey, true);
                 }
                 var effectiveModifiers = modifiers & ~_modifierState;
                 SendKeyRequested?.Invoke(targetVk, true, effectiveModifiers);

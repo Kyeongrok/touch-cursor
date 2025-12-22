@@ -27,4 +27,9 @@ public interface IKeyMappingService
     /// 활성화 상태 변경 이벤트 (activationKey, isActive)
     /// </summary>
     event Action<int, bool>? ActivationStateChanged;
+
+    /// <summary>
+    /// 활성화 키 눌림 이벤트 - 아직 활성화되지 않은 대기 상태 (activationKey)
+    /// </summary>
+    event Action<int>? ActivationKeyPressed;
 }
