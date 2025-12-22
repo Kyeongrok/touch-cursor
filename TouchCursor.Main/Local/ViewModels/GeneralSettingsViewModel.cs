@@ -11,7 +11,6 @@ public class GeneralSettingsViewModel : BindableBase
     #region Fields
 
     private bool _isEnabled;
-    private bool _trainingMode;
     private bool _runAtStartup;
     private bool _showInTray = true;
     private bool _checkUpdates = true;
@@ -33,19 +32,6 @@ public class GeneralSettingsViewModel : BindableBase
         {
             if (SetProperty(ref _isEnabled, value))
                 EnabledChanged?.Invoke();
-        }
-    }
-
-    public bool TrainingMode
-    {
-        get => _trainingMode;
-        set
-        {
-            if (SetProperty(ref _trainingMode, value))
-            {
-                BeepForMistakes = value;
-                TrainingModeChanged?.Invoke();
-            }
         }
     }
 
@@ -139,7 +125,6 @@ public class GeneralSettingsViewModel : BindableBase
     #region Events
 
     public event Action? EnabledChanged;
-    public event Action? TrainingModeChanged;
     public event Action? RunAtStartupChanged;
     public event Action? LanguageChanged;
     public event Action? OverlayPositionChanged;

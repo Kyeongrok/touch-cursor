@@ -4,7 +4,6 @@ public interface ITouchCursorOptions
 {
     // 일반 설정
     bool Enabled { get; set; }
-    bool TrainingMode { get; set; }
     bool BeepForMistakes { get; set; }
     bool RunAtStartup { get; set; }
     bool ShowInNotificationArea { get; set; }

@@ -159,7 +159,6 @@ public class TouchCursorWindowViewModel : BindableBase
         var gs = _settingsViewModel.GeneralSettings;
 
         gs.IsEnabled = _options.Enabled;
-        gs.TrainingMode = _options.TrainingMode;
         gs.RunAtStartup = _options.RunAtStartup;
         gs.ShowInTray = _options.ShowInNotificationArea;
         gs.CheckUpdates = _options.CheckForUpdates;
@@ -226,7 +225,6 @@ public class TouchCursorWindowViewModel : BindableBase
         var gs = _settingsViewModel.GeneralSettings;
 
         _options.Enabled = gs.IsEnabled;
-        _options.TrainingMode = gs.TrainingMode;
         _options.RunAtStartup = gs.RunAtStartup;
         _options.ShowInNotificationArea = gs.ShowInTray;
         _options.CheckForUpdates = gs.CheckUpdates;

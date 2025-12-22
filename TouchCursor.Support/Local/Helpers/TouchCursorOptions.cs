@@ -21,7 +21,6 @@ public class TouchCursorOptions : ITouchCursorOptions
 
     // 일반 설정
     public bool Enabled { get; set; } = true;
-    public bool TrainingMode { get; set; } = false;
     public bool BeepForMistakes { get; set; } = false;
     public bool RunAtStartup { get; set; } = false;
     public bool ShowInNotificationArea { get; set; } = true;

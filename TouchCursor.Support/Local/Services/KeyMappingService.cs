@@ -189,11 +189,6 @@ public class KeyMappingService : IKeyMappingService
                 var effectiveModifiers = modifiers & ~_modifierState;
                 SendKeyRequested?.Invoke(targetVk, true, effectiveModifiers);
                 _mappedKeysHeld.Add(mappedKey);
-
-                if (_options.TrainingMode && _options.BeepForMistakes)
-                {
-                    Console.Beep(1000, 50);
-                }
             }
             else if (isKeyUp && _mappedKeysHeld.Contains(mappedKey))
             {
@@ -202,12 +197,6 @@ public class KeyMappingService : IKeyMappingService
             }
 
             return true;
-        }
-
-        // 훈련 모드 비프음
-        if (_currentActivationKey != 0 && _options.TrainingMode && _options.BeepForMistakes && isKeyDown)
-        {
-            Console.Beep(500, 100);
         }
 
         return false;

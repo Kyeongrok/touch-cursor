@@ -40,60 +40,6 @@
         </Setter>
     </Style>
 
-    <!-- Window Button Style -->
-    <Style x:Key="WindowButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="46"/>
-        <Setter Property="Height" Value="32"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Foreground" Value="#333"/>
-        <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-        <Setter Property="FontSize" Value="10"/>
-        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#E5E5E5"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#CACACB"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Close Button Style -->
-    <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowButtonStyle}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="border" Background="{TemplateBinding Background}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#E81123"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#F1707A"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <Style TargetType="{x:Type local:TouchCursorWindow}">
         <Setter Property="Width" Value="700"/>
         <Setter Property="SizeToContent" Value="Height"/>
@@ -173,19 +119,12 @@
                             <Grid Grid.Row="2" Margin="20">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Header -->
-                                <TextBlock Grid.Row="0"
-                                           Text="{loc:Localize SettingsWindow.Header, Default='Settings'}"
-                                           FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
-
                                 <!-- Tab Buttons -->
-                                <Border Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Margin="0,0,0,10">
+                                <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Margin="0,0,0,10">
                                     <StackPanel Orientation="Horizontal">
                                         <RadioButton x:Name="PART_GeneralTab"
                                                      Content="{loc:Localize SettingsWindow.TabGeneral, Default='General'}"
@@ -200,10 +139,10 @@
                                 </Border>
 
                                 <!-- Content Region -->
-                                <ContentControl Grid.Row="2" x:Name="PART_ContentRegion" Margin="0,0,0,20"/>
+                                <ContentControl Grid.Row="1" x:Name="PART_ContentRegion" Margin="0,0,0,20"/>
 
                                 <!-- Bottom Buttons -->
-                                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <Button Content="{loc:Localize SettingsWindow.ResetToDefaults, Default='Reset to Defaults'}"
                                             Width="150" Height="30" Margin="0,0,10,0"
                                             Command="{Binding ResetToDefaultsCommand}"/>
@@ -215,20 +154,6 @@
                                             Command="{Binding CancelCommand}"/>
                                 </StackPanel>
 
-                                <!-- Test TextBox -->
-                                <StackPanel Grid.Row="4" Margin="0,10,0,0">
-                                    <TextBlock Text="키 바인딩 테스트 (Space+P를 눌러보세요):"
-                                               FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                                    <TextBox Height="80"
-                                             TextWrapping="Wrap"
-                                             AcceptsReturn="True"
-                                             VerticalScrollBarVisibility="Auto"
-                                             FontFamily="Consolas"
-                                             FontSize="14"
-                                             Padding="5"
-                                             BorderBrush="#DFDFDF"
-                                             BorderThickness="1"/>
-                                </StackPanel>
                             </Grid>
                         </Grid>
                     </Border>
