@@ -25,6 +25,8 @@ public class ActivationOverlayWindow : Window
         Topmost = true;
         ShowInTaskbar = false;
         IsHitTestVisible = false;
+        Focusable = false;
+        ShowActivated = false;
 
         // Default position: bottom-right corner
         SetPosition(TouchCursor.Support.Local.Helpers.OverlayPosition.BottomRight);
