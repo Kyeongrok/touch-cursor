@@ -10,7 +10,7 @@ public interface ITouchCursorOptions
 
     // 타이밍 설정
     int ActivationKeyHoldDelayMs { get; set; }
-    int RolloverThresholdMs { get; set; }
+    bool RolloverEnabled { get; set; }
 
     // Mod Switch 설정
     bool ModSwitchEnabled { get; set; }

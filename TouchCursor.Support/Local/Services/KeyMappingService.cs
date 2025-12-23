@@ -136,6 +136,33 @@ public class KeyMappingService : IKeyMappingService
             }
         }
 
+        // 롤오버 처리 (매핑 여부와 관계없이 모든 키에 적용)
+        if (_currentActivationKey != 0 && isKeyDown)
+        {
+            var elapsedMs = (DateTime.Now.Ticks - _activationKeyPressTime) / TimeSpan.TicksPerMillisecond;
+
+            var isRolloverException = _options.RolloverExceptionKeys.TryGetValue(_currentActivationKey, out var exceptionKeys)
+                                      && exceptionKeys.Contains(vkCode);
+
+            // 홀드 딜레이 전에 키가 눌리면 롤오버 처리
+            if (!isRolloverException && _options.RolloverEnabled && _options.ActivationKeyHoldDelayMs > 0)
+            {
+                if (elapsedMs < _options.ActivationKeyHoldDelayMs)
+                {
+                    // Space 먼저, 그 다음 원래 키를 순서대로 inject
+                    SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
+                    SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
+                    SendKeyRequested?.Invoke(vkCode, true, 0);
+                    SendKeyRequested?.Invoke(vkCode, false, 0);
+                    _currentActivationKey = 0;
+                    _activationKeyPressTime = 0;
+                    _activationKeyUsedForMapping = false;
+                    ActivationStateChanged?.Invoke(0, false);
+                    return true; // 원래 키는 차단 (이미 inject했으므로)
+                }
+            }
+        }
+
         // 키 매핑 처리
         if (_currentActivationKey != 0 &&
             _options.ActivationKeyProfiles.TryGetValue(_currentActivationKey, out var keyMappings) &&
@@ -146,45 +173,11 @@ public class KeyMappingService : IKeyMappingService
 
             if (isKeyDown)
             {
-                var elapsedMs = (DateTime.Now.Ticks - _activationKeyPressTime) / TimeSpan.TicksPerMillisecond;
-
-                var isRolloverException = _options.RolloverExceptionKeys.TryGetValue(_currentActivationKey, out var exceptionKeys)
-                                          && exceptionKeys.Contains(vkCode);
-
-                // 홀드 딜레이 확인
-                if (!isRolloverException && _options.ActivationKeyHoldDelayMs > 0)
-                {
-                    if (elapsedMs < _options.ActivationKeyHoldDelayMs)
-                    {
-                        SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
-                        SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
-                        _currentActivationKey = 0;
-                        _activationKeyPressTime = 0;
-                        _activationKeyUsedForMapping = false;
-                        // 활성화된 적 없으므로 이벤트 불필요
-                        return false;
-                    }
-                }
-
-                // 롤오버 감지
-                if (!isRolloverException && _options.RolloverThresholdMs > 0)
-                {
-                    if (elapsedMs <= _options.RolloverThresholdMs)
-                    {
-                        SendKeyRequested?.Invoke(_currentActivationKey, true, 0);
-                        SendKeyRequested?.Invoke(_currentActivationKey, false, 0);
-                        _currentActivationKey = 0;
-                        _activationKeyPressTime = 0;
-                        _activationKeyUsedForMapping = false;
-                        // 활성화된 적 없으므로 이벤트 불필요
-                        return false;
-                    }
-                }
-
                 // 매핑 사용 플래그 설정
                 if (!_activationKeyUsedForMapping)
                 {
                     _activationKeyUsedForMapping = true;
+                    ActivationStateChanged?.Invoke(_currentActivationKey, true);
                 }
                 var effectiveModifiers = modifiers & ~_modifierState;
                 SendKeyRequested?.Invoke(targetVk, true, effectiveModifiers);

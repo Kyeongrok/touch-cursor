@@ -134,7 +134,7 @@ public class KeyboardHookService : IDisposable
             // Update modifier state BEFORE checking if injected (like original C++ code)
             _mappingService.UpdateModifierState(vkCode, isKeyDown, isKeyUp);
 
-            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, sendingModifiers={_sendingModifiers}");
+            Debug.WriteLine($"[HookCallback] vkCode={vkCode}, wParam={wParam}, isKeyDown={isKeyDown}, isKeyUp={isKeyUp}, sendingModifiers={_sendingModifiers}, dwExtraInfo={hookStruct.dwExtraInfo}, INJECTED_FLAG={INJECTED_FLAG}");
 
             // Ignore our own injected events
             if (hookStruct.dwExtraInfo == INJECTED_FLAG)

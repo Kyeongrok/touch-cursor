@@ -31,9 +31,9 @@ public class TouchCursorOptions : ITouchCursorOptions
     // 0으로 설정하면 비활성화 (즉시 활성화)
     public int ActivationKeyHoldDelayMs { get; set; } = 0;
 
-    // 롤오버 감지: 활성화 키 누른 후 이 시간 내에 키를 누르면
-    // 두 키 모두 일반 타이핑으로 처리
-    public int RolloverThresholdMs { get; set; } = 50;
+    // 롤오버 감지: 활성화되면 HoldDelay 전까지는 rollover로 동작
+    // space와 함께 누른 키가 일반 타이핑으로 출력됨
+    public bool RolloverEnabled { get; set; } = true;
 
     // Mod Switch 기능: 단축키로 활성화 키를 토글 (누르고 있는 것처럼 유지)
     public bool ModSwitchEnabled { get; set; } = true;

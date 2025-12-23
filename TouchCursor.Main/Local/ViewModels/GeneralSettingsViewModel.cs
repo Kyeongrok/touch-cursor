@@ -15,7 +15,7 @@ public class GeneralSettingsViewModel : BindableBase
     private bool _showInTray = true;
     private bool _beepForMistakes;
     private int _holdDelayMs;
-    private int _rolloverThresholdMs = 50;
+    private bool _rolloverEnabled = true;
     private string _selectedLanguage = "en";
     private ActivationKeyProfileViewModel? _selectedActivationKeyProfile;
     private OverlayPosition _overlayPosition = OverlayPosition.BottomRight;
@@ -66,10 +66,10 @@ public class GeneralSettingsViewModel : BindableBase
         }
     }
 
-    public int RolloverThresholdMs
+    public bool RolloverEnabled
     {
-        get => _rolloverThresholdMs;
-        set => SetProperty(ref _rolloverThresholdMs, value);
+        get => _rolloverEnabled;
+        set => SetProperty(ref _rolloverEnabled, value);
     }
 
     public string SelectedLanguage
@@ -168,7 +168,7 @@ public class GeneralSettingsViewModel : BindableBase
     public void ResetToDefaults()
     {
         HoldDelayMs = 0;
-        RolloverThresholdMs = 50;
+        RolloverEnabled = true;
         ShowInTray = true;
         BeepForMistakes = false;
     }

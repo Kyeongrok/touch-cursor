@@ -74,21 +74,11 @@
                                                        Text="{Binding HoldDelayMs, StringFormat='{}{0} ms'}"/>
                                         </Grid>
 
-                                        <!-- Rollover Threshold -->
-                                        <TextBlock Text="{loc:Localize SettingsWindow.RolloverThreshold, Default='Rollover Threshold (ms):'}" Margin="0,5,0,5"/>
-                                        <TextBlock Text="{loc:Localize SettingsWindow.RolloverThresholdDescription, Default='If a key is pressed within this time after the activation key, both are treated as normal typing.'}"
-                                                   TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" Foreground="Gray"/>
-                                        <Grid Margin="0,5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Slider Grid.Column="0" Minimum="0" Maximum="200"
-                                                    TickFrequency="10" IsSnapToTickEnabled="True"
-                                                    Value="{Binding RolloverThresholdMs}" Margin="0,0,10,0"/>
-                                            <TextBlock Grid.Column="1" Width="50" VerticalAlignment="Center"
-                                                       Text="{Binding RolloverThresholdMs, StringFormat='{}{0} ms'}"/>
-                                        </Grid>
+                                        <!-- Rollover -->
+                                        <CheckBox Content="{loc:Localize SettingsWindow.RolloverEnabled, Default='Enable Rollover'}"
+                                                  IsChecked="{Binding RolloverEnabled}" Margin="0,5"/>
+                                        <TextBlock Text="{loc:Localize SettingsWindow.RolloverEnabledDescription, Default='When enabled, keys pressed before activation (Hold Delay) are treated as normal typing with the activation key.'}"
+                                                   TextWrapping="Wrap" Margin="20,0,0,5" FontSize="11" Foreground="Gray"/>
                                     </StackPanel>
                                 </GroupBox>
 

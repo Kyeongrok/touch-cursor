@@ -163,7 +163,7 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.ShowInTray = _options.ShowInNotificationArea;
         gs.BeepForMistakes = _options.BeepForMistakes;
         gs.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
-        gs.RolloverThresholdMs = _options.RolloverThresholdMs;
+        gs.RolloverEnabled = _options.RolloverEnabled;
         gs.SelectedLanguage = _options.Language;
         gs.OverlayPosition = _options.OverlayPosition;
 
@@ -228,7 +228,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.ShowInNotificationArea = gs.ShowInTray;
         _options.BeepForMistakes = gs.BeepForMistakes;
         _options.ActivationKeyHoldDelayMs = gs.HoldDelayMs;
-        _options.RolloverThresholdMs = gs.RolloverThresholdMs;
+        _options.RolloverEnabled = gs.RolloverEnabled;
         _options.Language = gs.SelectedLanguage;
         _options.OverlayPosition = gs.OverlayPosition;
 
@@ -276,6 +276,7 @@ public class TouchCursorWindowViewModel : BindableBase
             _hookService.StopHook();
         }
         _options.Enabled = _settingsViewModel.GeneralSettings.IsEnabled;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
 
     private void OnLanguageChanged()
@@ -283,6 +284,7 @@ public class TouchCursorWindowViewModel : BindableBase
         var language = _settingsViewModel.GeneralSettings.SelectedLanguage;
         LocalizationService.Instance.LoadLanguage(language);
         _options.Language = language;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
 
     private void OnOverlayPositionChanged()
@@ -290,11 +292,13 @@ public class TouchCursorWindowViewModel : BindableBase
         var position = _settingsViewModel.GeneralSettings.OverlayPosition;
         _overlayWindow?.SetPosition(position);
         _options.OverlayPosition = position;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
 
     private void OnHoldDelayMsChanged()
     {
         _options.ActivationKeyHoldDelayMs = _settingsViewModel.GeneralSettings.HoldDelayMs;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
 
     private void OnGeneralSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -305,6 +309,22 @@ public class TouchCursorWindowViewModel : BindableBase
             {
                 LoadKeyMappings(_settingsViewModel.GeneralSettings.SelectedActivationKeyProfile.VkCode);
             }
+        }
+        else if (e.PropertyName == nameof(GeneralSettingsViewModel.RolloverEnabled))
+        {
+            _options.RolloverEnabled = _settingsViewModel.GeneralSettings.RolloverEnabled;
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        }
+        else if (e.PropertyName == nameof(GeneralSettingsViewModel.ShowInTray))
+        {
+            _options.ShowInNotificationArea = _settingsViewModel.GeneralSettings.ShowInTray;
+            _taskbarIcon!.Visibility = _options.ShowInNotificationArea ? Visibility.Visible : Visibility.Collapsed;
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        }
+        else if (e.PropertyName == nameof(GeneralSettingsViewModel.BeepForMistakes))
+        {
+            _options.BeepForMistakes = _settingsViewModel.GeneralSettings.BeepForMistakes;
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
     }
 
