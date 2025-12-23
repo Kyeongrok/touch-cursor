@@ -14,7 +14,7 @@
                             <TextBlock Text="{loc:Localize SettingsWindow.ActivationKeyProfilesDescription, Default='Manage multiple activation keys, each with their own key mappings:'}"
                                        TextWrapping="Wrap" Margin="0,0,0,10"/>
                             <ListBox x:Name="PART_ActivationKeyProfilesListBox"
-                                     Height="120" Margin="0,0,0,10"
+                                     Height="60" Margin="0,0,0,10"
                                      ItemsSource="{TemplateBinding ActivationKeyProfiles}"
                                      SelectedItem="{Binding SelectedActivationKeyProfile, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
                                 <ListBox.ItemTemplate>

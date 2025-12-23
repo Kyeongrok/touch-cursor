@@ -238,14 +238,12 @@ public class TouchCursorWindowViewModel : BindableBase
     private void OnSaveRequested()
     {
         SaveViewModelToOptions();
-        _isClosing = true;
-        CloseRequested?.Invoke();
+        HideRequested?.Invoke();
     }
 
     private void OnCancelRequested()
     {
-        _isClosing = true;
-        CloseRequested?.Invoke();
+        HideRequested?.Invoke();
     }
 
     private void ExecuteShowSettings()

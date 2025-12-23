@@ -6,7 +6,7 @@
     <Style TargetType="{x:Type units:TouchCursorTab}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#666"/>
-        <Setter Property="Padding" Value="20,10"/>
+        <Setter Property="Padding" Value="10,1"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
