@@ -5,17 +5,20 @@ using System.Windows.Media;
 
 namespace TouchCursor.Main.UI.Units;
 
+[TemplatePart(Name = PART_MenuButton, Type = typeof(Button))]
 [TemplatePart(Name = PART_HelpButton, Type = typeof(Button))]
 [TemplatePart(Name = PART_MinimizeButton, Type = typeof(Button))]
 [TemplatePart(Name = PART_MaximizeButton, Type = typeof(Button))]
 [TemplatePart(Name = PART_CloseButton, Type = typeof(Button))]
 public class TitleBar : Control
 {
+    private const string PART_MenuButton = "PART_MenuButton";
     private const string PART_HelpButton = "PART_HelpButton";
     private const string PART_MinimizeButton = "PART_MinimizeButton";
     private const string PART_MaximizeButton = "PART_MaximizeButton";
     private const string PART_CloseButton = "PART_CloseButton";
 
+    private Button? _menuButton;
     private Button? _helpButton;
     private Button? _minimizeButton;
     private Button? _maximizeButton;
@@ -80,6 +83,19 @@ public class TitleBar : Control
         set => SetValue(ShowMaximizeButtonProperty, value);
     }
 
+    public static readonly DependencyProperty DropDownMenuProperty =
+        DependencyProperty.Register(
+            nameof(DropDownMenu),
+            typeof(ContextMenu),
+            typeof(TitleBar),
+            new PropertyMetadata(null));
+
+    public ContextMenu? DropDownMenu
+    {
+        get => (ContextMenu?)GetValue(DropDownMenuProperty);
+        set => SetValue(DropDownMenuProperty, value);
+    }
+
     public static readonly DependencyProperty HelpCommandProperty =
         DependencyProperty.Register(
             nameof(HelpCommand),
@@ -110,6 +126,8 @@ public class TitleBar : Control
     {
         base.OnApplyTemplate();
 
+        if (_menuButton != null)
+            _menuButton.Click -= OnMenuClick;
         if (_helpButton != null)
             _helpButton.Click -= OnHelpClick;
         if (_minimizeButton != null)
@@ -119,11 +137,14 @@ public class TitleBar : Control
         if (_closeButton != null)
             _closeButton.Click -= OnCloseClick;
 
+        _menuButton = GetTemplateChild(PART_MenuButton) as Button;
         _helpButton = GetTemplateChild(PART_HelpButton) as Button;
         _minimizeButton = GetTemplateChild(PART_MinimizeButton) as Button;
         _maximizeButton = GetTemplateChild(PART_MaximizeButton) as Button;
         _closeButton = GetTemplateChild(PART_CloseButton) as Button;
 
+        if (_menuButton != null)
+            _menuButton.Click += OnMenuClick;
         if (_helpButton != null)
             _helpButton.Click += OnHelpClick;
         if (_minimizeButton != null)
@@ -132,6 +153,16 @@ public class TitleBar : Control
             _maximizeButton.Click += OnMaximizeClick;
         if (_closeButton != null)
             _closeButton.Click += OnCloseClick;
+    }
+
+    private void OnMenuClick(object sender, RoutedEventArgs e)
+    {
+        if (DropDownMenu != null && _menuButton != null)
+        {
+            DropDownMenu.PlacementTarget = _menuButton;
+            DropDownMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            DropDownMenu.IsOpen = true;
+        }
     }
 
     private void OnHelpClick(object sender, RoutedEventArgs e)

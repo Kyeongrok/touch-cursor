@@ -42,23 +42,46 @@ public class ActivationOverlayWindow : Window
         const int windowWidth = 40;
         const int windowHeight = 40;
 
+        var centerX = workArea.Left + (workArea.Width - windowWidth) / 2;
+        var centerY = workArea.Top + (workArea.Height - windowHeight) / 2;
+
         switch (position)
         {
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomRight:
-                Left = workArea.Right - windowWidth - margin;
-                Top = workArea.Bottom - windowHeight - margin;
-                break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomLeft:
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.TopLeft:
                 Left = workArea.Left + margin;
-                Top = workArea.Bottom - windowHeight - margin;
+                Top = workArea.Top + margin;
+                break;
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.TopCenter:
+                Left = centerX;
+                Top = workArea.Top + margin;
                 break;
             case TouchCursor.Support.Local.Helpers.OverlayPosition.TopRight:
                 Left = workArea.Right - windowWidth - margin;
                 Top = workArea.Top + margin;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.TopLeft:
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.MiddleLeft:
                 Left = workArea.Left + margin;
-                Top = workArea.Top + margin;
+                Top = centerY;
+                break;
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.MiddleCenter:
+                Left = centerX;
+                Top = centerY;
+                break;
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.MiddleRight:
+                Left = workArea.Right - windowWidth - margin;
+                Top = centerY;
+                break;
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomLeft:
+                Left = workArea.Left + margin;
+                Top = workArea.Bottom - windowHeight - margin;
+                break;
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomCenter:
+                Left = centerX;
+                Top = workArea.Bottom - windowHeight - margin;
+                break;
+            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomRight:
+                Left = workArea.Right - windowWidth - margin;
+                Top = workArea.Bottom - windowHeight - margin;
                 break;
         }
     }

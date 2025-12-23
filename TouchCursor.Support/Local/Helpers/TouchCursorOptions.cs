@@ -9,10 +9,15 @@ namespace TouchCursor.Support.Local.Helpers;
 
 public enum OverlayPosition
 {
-    BottomRight,
-    BottomLeft,
+    TopLeft,
+    TopCenter,
     TopRight,
-    TopLeft
+    MiddleLeft,
+    MiddleCenter,
+    MiddleRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight
 }
 
 public class TouchCursorOptions : ITouchCursorOptions

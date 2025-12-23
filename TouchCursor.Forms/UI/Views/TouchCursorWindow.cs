@@ -31,6 +31,8 @@ public class TouchCursorWindow : BaseTouchCursorWindow
 
     public TouchCursorWindow(TouchCursorWindowViewModel viewModel)
     {
+        AllowsTransparency = true;
+        WindowStyle = WindowStyle.None;
         ViewModel = viewModel;
         Closing += OnWindowClosing;
     }

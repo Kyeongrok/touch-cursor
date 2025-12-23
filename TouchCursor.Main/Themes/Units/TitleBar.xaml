@@ -13,18 +13,28 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type units:TitleBar}">
-                    <Grid Background="{TemplateBinding Background}">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="8,8,0,0">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Icon -->
-                        <Image Grid.Column="0"
-                               Source="{TemplateBinding Icon}"
-                               Width="16" Height="16" Margin="8,0,0,0"
-                               VerticalAlignment="Center"/>
+                        <!-- Menu Button (Chevron) and Icon -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <Button x:Name="PART_MenuButton"
+                                    Width="32" Height="32"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Content="∨"
+                                    FontSize="12"
+                                    Foreground="#666"
+                                    WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Image Source="{TemplateBinding Icon}"
+                                   Width="16" Height="16" Margin="4,0,0,0"
+                                   VerticalAlignment="Center"/>
+                        </StackPanel>
 
                         <!-- Title or Tab Content -->
                         <Grid Grid.Column="1" Margin="8,0,0,0">
@@ -55,6 +65,7 @@
                             <supportUnits:CloseButton x:Name="PART_CloseButton"/>
                         </StackPanel>
                     </Grid>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -7,6 +7,9 @@
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/MinimizeButton.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/MaximizeButton.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/CloseButton.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/OverlayPositionPicker.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ToggleSwitch.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ModernComboBox.xaml"/>
 
         <!-- Views -->
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Views/TouchCursorWindow.xaml"/>

@@ -13,25 +13,23 @@
     <Style TargetType="{x:Type local:TouchCursorWindow}">
         <Setter Property="Width" Value="700"/>
         <Setter Property="SizeToContent" Value="Height"/>
-        <Setter Property="WindowStyle" Value="None"/>
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="#DFDFDF"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
                 <WindowChrome CaptionHeight="32"
                               ResizeBorderThickness="5"
                               GlassFrameThickness="0"
-                              CornerRadius="0"
+                              CornerRadius="8"
                               UseAeroCaptionButtons="False"/>
             </Setter.Value>
         </Setter>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TouchCursorWindow}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border Background="White"
+                            BorderBrush="#DFDFDF"
+                            BorderThickness="1"
+                            CornerRadius="8">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="32"/>
@@ -43,6 +41,15 @@
                                 Icon="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon}"
                                 ShowMaximizeButton="False"
                                 HelpCommand="{Binding AboutCommand}">
+                                <mainUnits:TitleBar.DropDownMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{loc:Localize SettingsWindow.Save, Default='Save'}"
+                                                  Command="{Binding SaveCommand}"/>
+                                        <Separator/>
+                                        <MenuItem Header="{loc:Localize SettingsWindow.ResetToDefaults, Default='Reset to Defaults'}"
+                                                  Command="{Binding ResetToDefaultsCommand}"/>
+                                    </ContextMenu>
+                                </mainUnits:TitleBar.DropDownMenu>
                                 <mainUnits:TitleBar.TabContent>
                                     <StackPanel Orientation="Horizontal">
                                         <units:TouchCursorTab x:Name="PART_GeneralTab"
@@ -57,29 +64,7 @@
                             </mainUnits:TitleBar>
 
                             <!-- Main Content -->
-                            <Grid Grid.Row="1" Margin="20">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <!-- Content Region -->
-                                <ContentControl Grid.Row="0" x:Name="PART_ContentRegion" Margin="0,0,0,20"/>
-
-                                <!-- Bottom Buttons -->
-                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="{loc:Localize SettingsWindow.ResetToDefaults, Default='Reset to Defaults'}"
-                                            Width="150" Height="30" Margin="0,0,10,0"
-                                            Command="{Binding ResetToDefaultsCommand}"/>
-                                    <Button Content="{loc:Localize SettingsWindow.OK, Default='OK'}"
-                                            Width="80" Height="30" Margin="0,0,10,0"
-                                            Command="{Binding SaveCommand}"/>
-                                    <Button Content="{loc:Localize SettingsWindow.Cancel, Default='Cancel'}"
-                                            Width="80" Height="30"
-                                            Command="{Binding CancelCommand}"/>
-                                </StackPanel>
-
-                            </Grid>
+                            <ContentControl Grid.Row="1" x:Name="PART_ContentRegion" Margin="10"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>
