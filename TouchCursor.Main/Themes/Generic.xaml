@@ -3,6 +3,7 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Units/ActivationKeyProfilesControl.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Units/TitleBar.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingEditor.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/KeyMappingsView.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ActivationKeyDialog.xaml"/>

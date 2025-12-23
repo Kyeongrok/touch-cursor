@@ -26,8 +26,6 @@ public class TouchCursorWindowViewModel : BindableBase
 
     public SettingsWindowViewModel SettingsViewModel => _settingsViewModel;
 
-    public ICommand ShowSettingsCommand { get; }
-
     public event Action? CloseRequested;
     public event Action? HideRequested;
     public event Action? ShowRequested;
@@ -41,8 +39,6 @@ public class TouchCursorWindowViewModel : BindableBase
         _hookService = hookService;
         _mappingService = mappingService;
         _settingsViewModel = new SettingsWindowViewModel();
-
-        ShowSettingsCommand = new DelegateCommand(ExecuteShowSettings);
 
         // Create overlay window
         _overlayWindow = new ActivationOverlayWindow();
@@ -244,11 +240,6 @@ public class TouchCursorWindowViewModel : BindableBase
     private void OnCancelRequested()
     {
         HideRequested?.Invoke();
-    }
-
-    private void ExecuteShowSettings()
-    {
-        ShowRequested?.Invoke();
     }
 
     private void OnAboutRequested()

@@ -3,6 +3,7 @@
                     xmlns:local="clr-namespace:TouchCursor.Forms.UI.Views"
                     xmlns:base="clr-namespace:TouchCursor.Support.UI.Views;assembly=TouchCursor.Support"
                     xmlns:units="clr-namespace:TouchCursor.Support.UI.Units;assembly=TouchCursor.Support"
+                    xmlns:mainUnits="clr-namespace:TouchCursor.Main.UI.Units;assembly=TouchCursor.Main"
                     xmlns:loc="clr-namespace:TouchCursor.Support.Localization;assembly=TouchCursor.Support">
 
     <ResourceDictionary.MergedDictionaries>
@@ -34,60 +35,15 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="32"/>
-                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Custom Title Bar -->
-                            <Grid Grid.Row="0" Background="#F0F0F0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Icon -->
-                                <Image Grid.Column="0"
-                                       Source="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon}"
-                                       Width="16" Height="16" Margin="8,0,0,0"
-                                       VerticalAlignment="Center"/>
-
-                                <!-- Title -->
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Title}"
-                                           VerticalAlignment="Center" Margin="8,0,0,0"
-                                           FontSize="12" Foreground="#333"/>
-
-                                <!-- Window Buttons -->
-                                <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                    <units:MinimizeButton x:Name="PART_MinimizeButton"/>
-                                    <units:MaximizeButton x:Name="PART_MaximizeButton"/>
-                                    <units:CloseButton x:Name="PART_CloseButton"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Menu Bar -->
-                            <Menu Grid.Row="1" Background="#F5F5F5">
-                                <MenuItem Header="{loc:Localize Menu.Settings, Default='_Settings'}">
-                                    <MenuItem Header="환경설정..."
-                                              Command="{Binding ShowSettingsCommand}"/>
-                                </MenuItem>
-                                <MenuItem Header="{loc:Localize Menu.Help, Default='_Help'}">
-                                    <MenuItem Header="{loc:Localize Menu.About, Default='_About...'}"
-                                              Command="{Binding AboutCommand}"/>
-                                </MenuItem>
-                            </Menu>
-
-                            <!-- Main Content -->
-                            <Grid Grid.Row="2" Margin="20">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <!-- Tab Buttons -->
-                                <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Margin="0,0,0,10">
+                            <!-- Custom Title Bar with Tabs -->
+                            <mainUnits:TitleBar Grid.Row="0"
+                                Icon="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon}"
+                                ShowMaximizeButton="False"
+                                HelpCommand="{Binding AboutCommand}">
+                                <mainUnits:TitleBar.TabContent>
                                     <StackPanel Orientation="Horizontal">
                                         <units:TouchCursorTab x:Name="PART_GeneralTab"
                                                               Content="{loc:Localize SettingsWindow.TabGeneral, Default='General'}"
@@ -97,13 +53,21 @@
                                                               Content="{loc:Localize SettingsWindow.TabKeyMappings, Default='Key Mappings'}"
                                                               GroupName="SettingsTabs"/>
                                     </StackPanel>
-                                </Border>
+                                </mainUnits:TitleBar.TabContent>
+                            </mainUnits:TitleBar>
+
+                            <!-- Main Content -->
+                            <Grid Grid.Row="1" Margin="20">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
                                 <!-- Content Region -->
-                                <ContentControl Grid.Row="1" x:Name="PART_ContentRegion" Margin="0,0,0,20"/>
+                                <ContentControl Grid.Row="0" x:Name="PART_ContentRegion" Margin="0,0,0,20"/>
 
                                 <!-- Bottom Buttons -->
-                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <Button Content="{loc:Localize SettingsWindow.ResetToDefaults, Default='Reset to Defaults'}"
                                             Width="150" Height="30" Margin="0,0,10,0"
                                             Command="{Binding ResetToDefaultsCommand}"/>

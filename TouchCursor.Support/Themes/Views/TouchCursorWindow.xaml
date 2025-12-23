@@ -2,67 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:views="clr-namespace:TouchCursor.Support.UI.Views"
                     xmlns:units="clr-namespace:TouchCursor.Support.UI.Units">
-    <Style TargetType="{x:Type views:TouchCursorWindow}">
-        <Setter Property="WindowStyle" Value="None"/>
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="#DFDFDF"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="WindowChrome.WindowChrome">
-            <Setter.Value>
-                <WindowChrome CaptionHeight="32"
-                              ResizeBorderThickness="5"
-                              GlassFrameThickness="0"
-                              CornerRadius="0"
-                              UseAeroCaptionButtons="False"/>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type views:TouchCursorWindow}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
 
-                            <!-- Custom Title Bar -->
-                            <Grid Grid.Row="0" Background="#F0F0F0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Icon -->
-                                <Image Grid.Column="0"
-                                       Source="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Icon}"
-                                       Width="16" Height="16" Margin="8,0,0,0"
-                                       VerticalAlignment="Center"/>
-
-                                <!-- Title -->
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Title}"
-                                           VerticalAlignment="Center" Margin="8,0,0,0"
-                                           FontSize="12" Foreground="#333"/>
-
-                                <!-- Window Buttons -->
-                                <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                    <units:MinimizeButton x:Name="PART_MinimizeButton"/>
-                                    <units:MaximizeButton x:Name="PART_MaximizeButton"/>
-                                    <units:CloseButton x:Name="PART_CloseButton"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Content -->
-                            <ContentPresenter Grid.Row="1"/>
-                        </Grid>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <!-- Base style for TouchCursorWindow - can be extended by derived projects -->
 
 </ResourceDictionary>
