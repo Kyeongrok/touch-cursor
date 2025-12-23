@@ -5,10 +5,17 @@
                     xmlns:vm="clr-namespace:TouchCursor.Main.ViewModels"
                     xmlns:loc="clr-namespace:TouchCursor.Main.Localization">
 
-    <Style TargetType="{x:Type views:KeyMappingsView}">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ScrollViewer.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="{x:Type views:KeyMappings}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type views:KeyMappingsView}">
+                <ControlTemplate TargetType="{x:Type views:KeyMappings}">
+                    <ScrollViewer Style="{StaticResource ModernScrollViewer}"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -56,6 +63,7 @@
                                     Command="{Binding RemoveKeyMappingCommand}"/>
                         </StackPanel>
                     </Grid>
+                    </ScrollViewer>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

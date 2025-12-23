@@ -18,13 +18,13 @@ public class TouchCursorWindowViewModel : BindableBase
     private readonly ITouchCursorOptions _options;
     private readonly KeyboardHookService _hookService;
     private readonly IKeyMappingService _mappingService;
-    private readonly SettingsWindowViewModel _settingsViewModel;
+    private readonly KeyMappingsViewModel _keyMappingsViewModel;
     private TaskbarIcon? _taskbarIcon;
     private ActivationOverlayWindow? _overlayWindow;
     private bool _isClosing = false;
     private System.Threading.Timer? _activationTimer;
 
-    public SettingsWindowViewModel SettingsViewModel => _settingsViewModel;
+    public KeyMappingsViewModel KeyMappingsViewModel => _keyMappingsViewModel;
 
     public event Action? CloseRequested;
     public event Action? HideRequested;
@@ -38,7 +38,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _options = options;
         _hookService = hookService;
         _mappingService = mappingService;
-        _settingsViewModel = new SettingsWindowViewModel();
+        _keyMappingsViewModel = new KeyMappingsViewModel();
 
         // Create overlay window
         _overlayWindow = new ActivationOverlayWindow();
@@ -48,16 +48,17 @@ public class TouchCursorWindowViewModel : BindableBase
 
         LoadOptionsToViewModel();
 
-        _settingsViewModel.SaveRequested += OnSaveRequested;
-        _settingsViewModel.CancelRequested += OnCancelRequested;
-        _settingsViewModel.AboutRequested += OnAboutRequested;
-        _settingsViewModel.GeneralSettings.EnabledChanged += OnEnabledChanged;
-        _settingsViewModel.GeneralSettings.LanguageChanged += OnLanguageChanged;
-        _settingsViewModel.GeneralSettings.OverlayPositionChanged += OnOverlayPositionChanged;
-        _settingsViewModel.GeneralSettings.HoldDelayMsChanged += OnHoldDelayMsChanged;
-        _settingsViewModel.GeneralSettings.PropertyChanged += OnGeneralSettingsPropertyChanged;
-        _settingsViewModel.GeneralSettings.AddActivationKeyRequested += OnAddActivationKeyRequested;
-        _settingsViewModel.EditKeyMappingRequested += OnEditKeyMappingRequested;
+        _keyMappingsViewModel.SaveRequested += OnSaveRequested;
+        _keyMappingsViewModel.CancelRequested += OnCancelRequested;
+        _keyMappingsViewModel.AboutRequested += OnAboutRequested;
+        _keyMappingsViewModel.GeneralSettings.EnabledChanged += OnEnabledChanged;
+        _keyMappingsViewModel.GeneralSettings.LanguageChanged += OnLanguageChanged;
+        _keyMappingsViewModel.GeneralSettings.OverlayPositionChanged += OnOverlayPositionChanged;
+        _keyMappingsViewModel.GeneralSettings.HoldDelayMsChanged += OnHoldDelayMsChanged;
+        _keyMappingsViewModel.GeneralSettings.PropertyChanged += OnGeneralSettingsPropertyChanged;
+        _keyMappingsViewModel.GeneralSettings.AddActivationKeyRequested += OnAddActivationKeyRequested;
+        _keyMappingsViewModel.EditKeyMappingRequested += OnEditKeyMappingRequested;
+        _keyMappingsViewModel.KeyMappingsChanged += OnKeyMappingsChanged;
 
         if (_options.Enabled)
         {
@@ -152,7 +153,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void LoadOptionsToViewModel()
     {
-        var gs = _settingsViewModel.GeneralSettings;
+        var gs = _keyMappingsViewModel.GeneralSettings;
 
         gs.IsEnabled = _options.Enabled;
         gs.RunAtStartup = _options.RunAtStartup;
@@ -180,7 +181,7 @@ public class TouchCursorWindowViewModel : BindableBase
         {
             var firstProfile = gs.ActivationKeyProfiles[0];
             gs.SelectedActivationKeyProfile = firstProfile;
-            _settingsViewModel.SelectedActivationKeyForMappings = firstProfile.VkCode;
+            _keyMappingsViewModel.SelectedActivationKeyForMappings = firstProfile.VkCode;
             LoadKeyMappings(firstProfile.VkCode);
         }
 
@@ -192,7 +193,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void LoadKeyMappings(int activationKey)
     {
-        _settingsViewModel.KeyMappings.Clear();
+        _keyMappingsViewModel.KeyMappings.Clear();
 
         if (_options.ActivationKeyProfiles.TryGetValue(activationKey, out var mappings))
         {
@@ -201,7 +202,7 @@ public class TouchCursorWindowViewModel : BindableBase
                 var targetVk = mapping.Value & 0xFFFF;
                 var modifiers = mapping.Value >> 16;
 
-                _settingsViewModel.KeyMappings.Add(new KeyMappingViewModel
+                _keyMappingsViewModel.KeyMappings.Add(new KeyMappingViewModel
                 {
                     SourceVkCode = mapping.Key,
                     SourceKey = GetKeyName(mapping.Key),
@@ -217,7 +218,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void SaveViewModelToOptions()
     {
-        var gs = _settingsViewModel.GeneralSettings;
+        var gs = _keyMappingsViewModel.GeneralSettings;
 
         _options.Enabled = gs.IsEnabled;
         _options.RunAtStartup = gs.RunAtStartup;
@@ -256,7 +257,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void OnEnabledChanged()
     {
-        if (_settingsViewModel.GeneralSettings.IsEnabled)
+        if (_keyMappingsViewModel.GeneralSettings.IsEnabled)
         {
             _hookService.StartHook();
         }
@@ -264,13 +265,13 @@ public class TouchCursorWindowViewModel : BindableBase
         {
             _hookService.StopHook();
         }
-        _options.Enabled = _settingsViewModel.GeneralSettings.IsEnabled;
+        _options.Enabled = _keyMappingsViewModel.GeneralSettings.IsEnabled;
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
 
     private void OnLanguageChanged()
     {
-        var language = _settingsViewModel.GeneralSettings.SelectedLanguage;
+        var language = _keyMappingsViewModel.GeneralSettings.SelectedLanguage;
         LocalizationService.Instance.LoadLanguage(language);
         _options.Language = language;
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
@@ -278,7 +279,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void OnOverlayPositionChanged()
     {
-        var position = _settingsViewModel.GeneralSettings.OverlayPosition;
+        var position = _keyMappingsViewModel.GeneralSettings.OverlayPosition;
         _overlayWindow?.SetPosition(position);
         _options.OverlayPosition = position;
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
@@ -286,7 +287,24 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private void OnHoldDelayMsChanged()
     {
-        _options.ActivationKeyHoldDelayMs = _settingsViewModel.GeneralSettings.HoldDelayMs;
+        _options.ActivationKeyHoldDelayMs = _keyMappingsViewModel.GeneralSettings.HoldDelayMs;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+    }
+
+    private void OnKeyMappingsChanged()
+    {
+        var activationKey = _keyMappingsViewModel.GeneralSettings.SelectedActivationKeyProfile?.VkCode;
+        if (activationKey == null) return;
+
+        var mappings = new Dictionary<int, int>();
+        foreach (var mapping in _keyMappingsViewModel.KeyMappings)
+        {
+            // Combine target VK code and modifiers into single int
+            var value = mapping.TargetVkCode | (mapping.Modifiers << 16);
+            mappings[mapping.SourceVkCode] = value;
+        }
+
+        _options.ActivationKeyProfiles[activationKey.Value] = mappings;
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
 
@@ -294,25 +312,25 @@ public class TouchCursorWindowViewModel : BindableBase
     {
         if (e.PropertyName == nameof(GeneralSettingsViewModel.SelectedActivationKeyProfile))
         {
-            if (_settingsViewModel.GeneralSettings.SelectedActivationKeyProfile != null)
+            if (_keyMappingsViewModel.GeneralSettings.SelectedActivationKeyProfile != null)
             {
-                LoadKeyMappings(_settingsViewModel.GeneralSettings.SelectedActivationKeyProfile.VkCode);
+                LoadKeyMappings(_keyMappingsViewModel.GeneralSettings.SelectedActivationKeyProfile.VkCode);
             }
         }
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.RolloverEnabled))
         {
-            _options.RolloverEnabled = _settingsViewModel.GeneralSettings.RolloverEnabled;
+            _options.RolloverEnabled = _keyMappingsViewModel.GeneralSettings.RolloverEnabled;
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.ShowInTray))
         {
-            _options.ShowInNotificationArea = _settingsViewModel.GeneralSettings.ShowInTray;
+            _options.ShowInNotificationArea = _keyMappingsViewModel.GeneralSettings.ShowInTray;
             _taskbarIcon!.Visibility = _options.ShowInNotificationArea ? Visibility.Visible : Visibility.Collapsed;
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.BeepForMistakes))
         {
-            _options.BeepForMistakes = _settingsViewModel.GeneralSettings.BeepForMistakes;
+            _options.BeepForMistakes = _keyMappingsViewModel.GeneralSettings.BeepForMistakes;
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
     }
@@ -327,7 +345,7 @@ public class TouchCursorWindowViewModel : BindableBase
         if (dialog.ShowDialog() == true && dialog.SelectedKey is { } selected)
         {
             // Check if already exists
-            if (_settingsViewModel.GeneralSettings.ActivationKeyProfiles.Any(p => p.VkCode == selected.VkCode))
+            if (_keyMappingsViewModel.GeneralSettings.ActivationKeyProfiles.Any(p => p.VkCode == selected.VkCode))
             {
                 MessageBox.Show("이 키는 이미 활성화 키로 등록되어 있습니다.", "중복", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
@@ -352,8 +370,52 @@ public class TouchCursorWindowViewModel : BindableBase
 
     private KeyMappingViewModel? OnEditKeyMappingRequested(KeyMappingViewModel? existing)
     {
-        // TODO: Implement key mapping editor dialog
-        // For now, return null (cancel)
+        var viewModel = new KeyMappingEditorViewModel();
+
+        if (existing != null)
+        {
+            viewModel.SetExistingMapping(
+                existing.SourceVkCode,
+                existing.TargetVkCode,
+                existing.Modifiers << 16,  // Convert to KeyMappingEditorViewModel format
+                existing.Description);
+        }
+
+        var editor = new KeyMappingEditor { ViewModel = viewModel };
+
+        var window = new Window
+        {
+            Title = "키 매핑 편집",
+            Content = editor,
+            Width = 480,
+            Height = 580,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ResizeMode = ResizeMode.NoResize,
+            ShowInTaskbar = false,
+            Owner = Application.Current.MainWindow
+        };
+
+        bool? dialogResult = null;
+        viewModel.OkRequested += () => { dialogResult = true; window.Close(); };
+        viewModel.CancelRequested += () => { dialogResult = false; window.Close(); };
+        viewModel.ValidationFailed += (title, msg) => { MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning); return true; };
+
+        window.ShowDialog();
+
+        if (dialogResult == true)
+        {
+            var modifiers = viewModel.TargetModifiers >> 16;  // Convert back to KeyMappingViewModel format
+            return new KeyMappingViewModel
+            {
+                SourceVkCode = viewModel.SourceVkCode,
+                SourceKey = GetKeyName(viewModel.SourceVkCode),
+                TargetVkCode = viewModel.TargetVkCode,
+                Modifiers = modifiers,
+                TargetKey = GetKeyNameWithModifiers(viewModel.TargetVkCode, modifiers),
+                Description = viewModel.Description
+            };
+        }
+
         return null;
     }
 

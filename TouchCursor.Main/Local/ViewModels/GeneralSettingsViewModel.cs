@@ -175,3 +175,36 @@ public class GeneralSettingsViewModel : BindableBase
 
     #endregion
 }
+
+public class ActivationKeyProfileViewModel : BindableBase
+{
+    private int _vkCode;
+    private string _keyName = "";
+    private int _mappingCount;
+
+    public int VkCode
+    {
+        get => _vkCode;
+        set => SetProperty(ref _vkCode, value);
+    }
+
+    public string KeyName
+    {
+        get => _keyName;
+        set => SetProperty(ref _keyName, value);
+    }
+
+    public int MappingCount
+    {
+        get => _mappingCount;
+        set => SetProperty(ref _mappingCount, value);
+    }
+
+    public string DisplayText => $"{KeyName} ({MappingCount} mappings)";
+}
+
+public class LanguageItem
+{
+    public string Code { get; set; } = "";
+    public string NativeName { get; set; } = "";
+}

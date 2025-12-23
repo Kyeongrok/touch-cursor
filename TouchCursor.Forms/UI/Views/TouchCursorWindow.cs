@@ -21,7 +21,7 @@ public class TouchCursorWindow : BaseTouchCursorWindow
     private ToggleButton? _keyMappingsTab;
 
     private GeneralSettingsView? _generalSettingsView;
-    private KeyMappingsView? _keyMappingsView;
+    private KeyMappings? _keyMappingsView;
 
     static TouchCursorWindow()
     {
@@ -78,7 +78,7 @@ public class TouchCursorWindow : BaseTouchCursorWindow
 
         // Create views
         _generalSettingsView = new GeneralSettingsView();
-        _keyMappingsView = new KeyMappingsView();
+        _keyMappingsView = new KeyMappings();
 
         // Set initial content
         if (_generalTab?.IsChecked == true)
@@ -111,7 +111,7 @@ public class TouchCursorWindow : BaseTouchCursorWindow
     {
         if (_contentRegion != null && _generalSettingsView != null && ViewModel != null)
         {
-            _generalSettingsView.DataContext = ViewModel.SettingsViewModel.GeneralSettings;
+            _generalSettingsView.DataContext = ViewModel.KeyMappingsViewModel.GeneralSettings;
             _contentRegion.Content = _generalSettingsView;
         }
     }
@@ -120,7 +120,7 @@ public class TouchCursorWindow : BaseTouchCursorWindow
     {
         if (_contentRegion != null && _keyMappingsView != null && ViewModel != null)
         {
-            _keyMappingsView.DataContext = ViewModel.SettingsViewModel;
+            _keyMappingsView.DataContext = ViewModel.KeyMappingsViewModel;
             _contentRegion.Content = _keyMappingsView;
         }
     }
@@ -131,13 +131,13 @@ public class TouchCursorWindow : BaseTouchCursorWindow
         {
             if (e.NewValue is TouchCursorWindowViewModel viewModel)
             {
-                control.DataContext = viewModel.SettingsViewModel;
+                control.DataContext = viewModel.KeyMappingsViewModel;
 
                 // Update view DataContexts if already created
                 if (control._generalSettingsView != null)
-                    control._generalSettingsView.DataContext = viewModel.SettingsViewModel.GeneralSettings;
+                    control._generalSettingsView.DataContext = viewModel.KeyMappingsViewModel.GeneralSettings;
                 if (control._keyMappingsView != null)
-                    control._keyMappingsView.DataContext = viewModel.SettingsViewModel;
+                    control._keyMappingsView.DataContext = viewModel.KeyMappingsViewModel;
 
                 // Setup tray icon
                 control.SetupTrayIcon(viewModel);

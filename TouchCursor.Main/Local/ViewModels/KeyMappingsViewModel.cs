@@ -5,7 +5,7 @@ using Prism.Mvvm;
 
 namespace TouchCursor.Main.ViewModels;
 
-public class SettingsWindowViewModel : BindableBase
+public class KeyMappingsViewModel : BindableBase
 {
     #region Fields
 
@@ -22,12 +22,6 @@ public class SettingsWindowViewModel : BindableBase
     #endregion
 
     #region Properties
-
-    public int SelectedTabIndex
-    {
-        get => _selectedTabIndex;
-        set => SetProperty(ref _selectedTabIndex, value);
-    }
 
     public KeyMappingViewModel? SelectedKeyMapping
     {
@@ -71,10 +65,11 @@ public class SettingsWindowViewModel : BindableBase
     public event Action? CancelRequested;
     public event Action? AboutRequested;
     public event Func<KeyMappingViewModel?, KeyMappingViewModel?>? EditKeyMappingRequested;
+    public event Action? KeyMappingsChanged;
 
     #endregion
 
-    public SettingsWindowViewModel()
+    public KeyMappingsViewModel()
     {
         AddKeyMappingCommand = new DelegateCommand(ExecuteAddKeyMapping);
         EditKeyMappingCommand = new DelegateCommand(ExecuteEditKeyMapping, () => SelectedKeyMapping != null)
@@ -95,6 +90,7 @@ public class SettingsWindowViewModel : BindableBase
         if (newMapping != null)
         {
             KeyMappings.Add(newMapping);
+            KeyMappingsChanged?.Invoke();
         }
     }
 
@@ -110,6 +106,7 @@ public class SettingsWindowViewModel : BindableBase
                 {
                     KeyMappings[index] = editedMapping;
                     SelectedKeyMapping = editedMapping;
+                    KeyMappingsChanged?.Invoke();
                 }
             }
         }
@@ -120,6 +117,7 @@ public class SettingsWindowViewModel : BindableBase
         if (SelectedKeyMapping != null)
         {
             KeyMappings.Remove(SelectedKeyMapping);
+            KeyMappingsChanged?.Invoke();
         }
     }
 
@@ -153,33 +151,6 @@ public class SettingsWindowViewModel : BindableBase
     }
 
     #endregion
-}
-
-public class ActivationKeyProfileViewModel : BindableBase
-{
-    private int _vkCode;
-    private string _keyName = "";
-    private int _mappingCount;
-
-    public int VkCode
-    {
-        get => _vkCode;
-        set => SetProperty(ref _vkCode, value);
-    }
-
-    public string KeyName
-    {
-        get => _keyName;
-        set => SetProperty(ref _keyName, value);
-    }
-
-    public int MappingCount
-    {
-        get => _mappingCount;
-        set => SetProperty(ref _mappingCount, value);
-    }
-
-    public string DisplayText => $"{KeyName} ({MappingCount} mappings)";
 }
 
 public class KeyMappingViewModel : BindableBase
@@ -233,10 +204,4 @@ public class KeyMappingViewModel : BindableBase
         get => _ignoreRollover;
         set => SetProperty(ref _ignoreRollover, value);
     }
-}
-
-public class LanguageItem
-{
-    public string Code { get; set; } = "";
-    public string NativeName { get; set; } = "";
 }

@@ -4,6 +4,10 @@
                     xmlns:vm="clr-namespace:TouchCursor.Main.ViewModels"
                     xmlns:loc="clr-namespace:TouchCursor.Main.Localization">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ScrollViewer.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <Style TargetType="{x:Type views:KeyMappingEditor}">
         <Setter Property="Focusable" Value="True"/>
         <Setter Property="Template">
@@ -12,6 +16,9 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Style="{StaticResource ModernScrollViewer}"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
                         <Grid Margin="20">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -114,6 +121,7 @@
                                         Command="{Binding CancelCommand}"/>
                             </StackPanel>
                         </Grid>
+                        </ScrollViewer>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

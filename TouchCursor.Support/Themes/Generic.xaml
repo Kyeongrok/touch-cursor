@@ -10,6 +10,7 @@
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/OverlayPositionPicker.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ToggleSwitch.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ModernComboBox.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ScrollViewer.xaml"/>
 
         <!-- Views -->
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Views/TouchCursorWindow.xaml"/>
