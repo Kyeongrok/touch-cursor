@@ -2,43 +2,12 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:TouchCursor.Forms.UI.Views"
                     xmlns:base="clr-namespace:TouchCursor.Support.UI.Views;assembly=TouchCursor.Support"
+                    xmlns:units="clr-namespace:TouchCursor.Support.UI.Units;assembly=TouchCursor.Support"
                     xmlns:loc="clr-namespace:TouchCursor.Support.Localization;assembly=TouchCursor.Support">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Views/TouchCursorWindow.xaml"/>
     </ResourceDictionary.MergedDictionaries>
-
-    <!-- Tab Button Style -->
-    <Style x:Key="TabButtonStyle" TargetType="RadioButton">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="#666"/>
-        <Setter Property="Padding" Value="20,10"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            BorderThickness="0,0,0,2"
-                            BorderBrush="Transparent"
-                            Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#F0F0F0"/>
-                        </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Foreground" Value="#1976D2"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="#1976D2"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
 
     <Style TargetType="{x:Type local:TouchCursorWindow}">
         <Setter Property="Width" Value="700"/>
@@ -91,15 +60,9 @@
 
                                 <!-- Window Buttons -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                    <Button x:Name="PART_MinimizeButton"
-                                            Style="{StaticResource WindowButtonStyle}"
-                                            Content="&#xE921;"/>
-                                    <Button x:Name="PART_MaximizeButton"
-                                            Style="{StaticResource WindowButtonStyle}"
-                                            Content="&#xE922;"/>
-                                    <Button x:Name="PART_CloseButton"
-                                            Style="{StaticResource CloseButtonStyle}"
-                                            Content="&#xE8BB;"/>
+                                    <units:MinimizeButton x:Name="PART_MinimizeButton"/>
+                                    <units:MaximizeButton x:Name="PART_MaximizeButton"/>
+                                    <units:CloseButton x:Name="PART_CloseButton"/>
                                 </StackPanel>
                             </Grid>
 
@@ -126,15 +89,13 @@
                                 <!-- Tab Buttons -->
                                 <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Margin="0,0,0,10">
                                     <StackPanel Orientation="Horizontal">
-                                        <RadioButton x:Name="PART_GeneralTab"
-                                                     Content="{loc:Localize SettingsWindow.TabGeneral, Default='General'}"
-                                                     Style="{StaticResource TabButtonStyle}"
-                                                     GroupName="SettingsTabs"
-                                                     IsChecked="True"/>
-                                        <RadioButton x:Name="PART_KeyMappingsTab"
-                                                     Content="{loc:Localize SettingsWindow.TabKeyMappings, Default='Key Mappings'}"
-                                                     Style="{StaticResource TabButtonStyle}"
-                                                     GroupName="SettingsTabs"/>
+                                        <units:TouchCursorTab x:Name="PART_GeneralTab"
+                                                              Content="{loc:Localize SettingsWindow.TabGeneral, Default='General'}"
+                                                              GroupName="SettingsTabs"
+                                                              IsChecked="True"/>
+                                        <units:TouchCursorTab x:Name="PART_KeyMappingsTab"
+                                                              Content="{loc:Localize SettingsWindow.TabKeyMappings, Default='Key Mappings'}"
+                                                              GroupName="SettingsTabs"/>
                                     </StackPanel>
                                 </Border>
 

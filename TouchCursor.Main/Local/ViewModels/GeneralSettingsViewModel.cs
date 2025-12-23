@@ -13,7 +13,6 @@ public class GeneralSettingsViewModel : BindableBase
     private bool _isEnabled;
     private bool _runAtStartup;
     private bool _showInTray = true;
-    private bool _checkUpdates = true;
     private bool _beepForMistakes;
     private int _holdDelayMs;
     private int _rolloverThresholdMs = 50;
@@ -49,12 +48,6 @@ public class GeneralSettingsViewModel : BindableBase
     {
         get => _showInTray;
         set => SetProperty(ref _showInTray, value);
-    }
-
-    public bool CheckUpdates
-    {
-        get => _checkUpdates;
-        set => SetProperty(ref _checkUpdates, value);
     }
 
     public bool BeepForMistakes
@@ -177,7 +170,6 @@ public class GeneralSettingsViewModel : BindableBase
         HoldDelayMs = 0;
         RolloverThresholdMs = 50;
         ShowInTray = true;
-        CheckUpdates = true;
         BeepForMistakes = false;
     }
 

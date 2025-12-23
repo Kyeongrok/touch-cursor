@@ -7,7 +7,6 @@ public interface ITouchCursorOptions
     bool BeepForMistakes { get; set; }
     bool RunAtStartup { get; set; }
     bool ShowInNotificationArea { get; set; }
-    bool CheckForUpdates { get; set; }
 
     // 타이밍 설정
     int ActivationKeyHoldDelayMs { get; set; }
@@ -28,10 +27,6 @@ public interface ITouchCursorOptions
     // 오버레이 설정
     OverlayPosition OverlayPosition { get; set; }
 
-    // 업데이트
-    DateTime LastUpdateCheck { get; set; }
-
     // 메서드
     void Save(string filePath);
-    bool ShouldCheckForUpdate();
 }

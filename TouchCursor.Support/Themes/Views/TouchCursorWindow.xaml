@@ -1,61 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:views="clr-namespace:TouchCursor.Support.UI.Views">
-
-    <!-- Window Button Style -->
-    <Style x:Key="WindowButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="46"/>
-        <Setter Property="Height" Value="32"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Foreground" Value="#333"/>
-        <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-        <Setter Property="FontSize" Value="10"/>
-        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#E5E5E5"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#CACACB"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Close Button Style -->
-    <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowButtonStyle}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="border" Background="{TemplateBinding Background}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#E81123"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#F1707A"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
+                    xmlns:views="clr-namespace:TouchCursor.Support.UI.Views"
+                    xmlns:units="clr-namespace:TouchCursor.Support.UI.Units">
     <Style TargetType="{x:Type views:TouchCursorWindow}">
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="Background" Value="White"/>
@@ -104,15 +50,9 @@
 
                                 <!-- Window Buttons -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                    <Button x:Name="PART_MinimizeButton"
-                                            Style="{StaticResource WindowButtonStyle}"
-                                            Content="&#xE921;"/>
-                                    <Button x:Name="PART_MaximizeButton"
-                                            Style="{StaticResource WindowButtonStyle}"
-                                            Content="&#xE922;"/>
-                                    <Button x:Name="PART_CloseButton"
-                                            Style="{StaticResource CloseButtonStyle}"
-                                            Content="&#xE8BB;"/>
+                                    <units:MinimizeButton x:Name="PART_MinimizeButton"/>
+                                    <units:MaximizeButton x:Name="PART_MaximizeButton"/>
+                                    <units:CloseButton x:Name="PART_CloseButton"/>
                                 </StackPanel>
                             </Grid>
 

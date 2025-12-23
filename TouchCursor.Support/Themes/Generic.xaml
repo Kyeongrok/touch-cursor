@@ -2,6 +2,13 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
+        <!-- Units -->
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/TouchCursorTab.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/MinimizeButton.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/MaximizeButton.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/CloseButton.xaml"/>
+
+        <!-- Views -->
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Views/TouchCursorWindow.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 

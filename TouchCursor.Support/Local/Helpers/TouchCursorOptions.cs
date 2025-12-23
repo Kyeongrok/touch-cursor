@@ -24,7 +24,6 @@ public class TouchCursorOptions : ITouchCursorOptions
     public bool BeepForMistakes { get; set; } = false;
     public bool RunAtStartup { get; set; } = false;
     public bool ShowInNotificationArea { get; set; } = true;
-    public bool CheckForUpdates { get; set; } = true;
     public OverlayPosition OverlayPosition { get; set; } = OverlayPosition.TopLeft;
 
     // 활성화 키 홀드 딜레이: 활성화 키를 이 시간만큼 눌러야 커서 모드 활성화
@@ -89,9 +88,6 @@ public class TouchCursorOptions : ITouchCursorOptions
         }
     }
 
-    // 마지막 업데이트 확인 타임스탬프
-    public DateTime LastUpdateCheck { get; set; } = DateTime.MinValue;
-
     public TouchCursorOptions()
     {
         InitializeDefaultKeyMappings();
@@ -128,12 +124,6 @@ public class TouchCursorOptions : ITouchCursorOptions
 
             ActivationKeyProfiles[0x20] = spaceMappings; // VK_SPACE
         }
-    }
-
-    public bool ShouldCheckForUpdate()
-    {
-        if (!CheckForUpdates) return false;
-        return (DateTime.Now - LastUpdateCheck).TotalDays >= 7;
     }
 
     public void Save(string filePath)

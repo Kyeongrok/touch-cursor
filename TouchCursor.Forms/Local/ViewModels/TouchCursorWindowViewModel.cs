@@ -161,7 +161,6 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.IsEnabled = _options.Enabled;
         gs.RunAtStartup = _options.RunAtStartup;
         gs.ShowInTray = _options.ShowInNotificationArea;
-        gs.CheckUpdates = _options.CheckForUpdates;
         gs.BeepForMistakes = _options.BeepForMistakes;
         gs.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
         gs.RolloverThresholdMs = _options.RolloverThresholdMs;
@@ -227,7 +226,6 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.Enabled = gs.IsEnabled;
         _options.RunAtStartup = gs.RunAtStartup;
         _options.ShowInNotificationArea = gs.ShowInTray;
-        _options.CheckForUpdates = gs.CheckUpdates;
         _options.BeepForMistakes = gs.BeepForMistakes;
         _options.ActivationKeyHoldDelayMs = gs.HoldDelayMs;
         _options.RolloverThresholdMs = gs.RolloverThresholdMs;
