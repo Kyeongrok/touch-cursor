@@ -26,6 +26,7 @@ public interface ITouchCursorOptions
 
     // 오버레이 설정
     OverlayPosition OverlayPosition { get; set; }
+    bool ShowActivationOverlay { get; set; }
 
     // 메서드
     void Save(string filePath);

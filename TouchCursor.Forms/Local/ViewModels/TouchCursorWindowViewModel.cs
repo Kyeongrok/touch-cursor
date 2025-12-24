@@ -108,7 +108,7 @@ public class TouchCursorWindowViewModel : BindableBase
     {
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            if (_overlayWindow != null)
+            if (_overlayWindow != null && _options.ShowActivationOverlay)
             {
                 _overlayWindow.KeyName = GetKeyName(activationKey);
                 _overlayWindow.State = ActivationState.Waiting;
@@ -141,10 +141,14 @@ public class TouchCursorWindowViewModel : BindableBase
             _activationTimer?.Dispose();
             _activationTimer = null;
 
-            if (_overlayWindow != null)
+            if (_overlayWindow != null && _options.ShowActivationOverlay)
             {
                 _overlayWindow.KeyName = GetKeyName(activationKey);
                 _overlayWindow.State = isActive ? ActivationState.Activated : ActivationState.None;
+            }
+            else if (_overlayWindow != null && !_options.ShowActivationOverlay)
+            {
+                _overlayWindow.State = ActivationState.None;
             }
         });
     }
@@ -163,6 +167,7 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.RolloverEnabled = _options.RolloverEnabled;
         gs.SelectedLanguage = _options.Language;
         gs.OverlayPosition = _options.OverlayPosition;
+        gs.ShowActivationOverlay = _options.ShowActivationOverlay;
 
         // Load activation key profiles
         gs.ActivationKeyProfiles.Clear();
@@ -228,6 +233,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.RolloverEnabled = gs.RolloverEnabled;
         _options.Language = gs.SelectedLanguage;
         _options.OverlayPosition = gs.OverlayPosition;
+        _options.ShowActivationOverlay = gs.ShowActivationOverlay;
 
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
@@ -331,6 +337,11 @@ public class TouchCursorWindowViewModel : BindableBase
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.BeepForMistakes))
         {
             _options.BeepForMistakes = _keyMappingsViewModel.GeneralSettings.BeepForMistakes;
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        }
+        else if (e.PropertyName == nameof(GeneralSettingsViewModel.ShowActivationOverlay))
+        {
+            _options.ShowActivationOverlay = _keyMappingsViewModel.GeneralSettings.ShowActivationOverlay;
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
     }

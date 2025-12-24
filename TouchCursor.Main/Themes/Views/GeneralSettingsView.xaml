@@ -24,6 +24,8 @@
                                                     IsChecked="{Binding RunAtStartup}" Margin="0,4"/>
                                 <units:ToggleSwitch Content="{loc:Localize SettingsWindow.ShowInTray, Default='Show in system tray'}"
                                                     IsChecked="{Binding ShowInTray}" Margin="0,4"/>
+                                <units:ToggleSwitch Content="{loc:Localize SettingsWindow.ShowActivationOverlay, Default='Show activation overlay'}"
+                                                    IsChecked="{Binding ShowActivationOverlay}" Margin="0,4"/>
 
                                 <Separator Margin="0,8"/>
 

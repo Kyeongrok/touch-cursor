@@ -19,6 +19,7 @@ public class GeneralSettingsViewModel : BindableBase
     private string _selectedLanguage = "en";
     private ActivationKeyProfileViewModel? _selectedActivationKeyProfile;
     private OverlayPosition _overlayPosition = OverlayPosition.BottomRight;
+    private bool _showActivationOverlay = true;
 
     #endregion
 
@@ -98,6 +99,12 @@ public class GeneralSettingsViewModel : BindableBase
         }
     }
 
+    public bool ShowActivationOverlay
+    {
+        get => _showActivationOverlay;
+        set => SetProperty(ref _showActivationOverlay, value);
+    }
+
     #endregion
 
     #region Collections
@@ -171,6 +178,7 @@ public class GeneralSettingsViewModel : BindableBase
         RolloverEnabled = true;
         ShowInTray = true;
         BeepForMistakes = false;
+        ShowActivationOverlay = true;
     }
 
     #endregion
