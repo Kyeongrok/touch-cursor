@@ -2,6 +2,9 @@
 
 **Version 2.2.0** - C++ 원본 TouchCursor 프로젝트를 .NET 8 WPF로 포팅한 버전입니다.
 
+<img width="1403" height="761" alt="image" src="https://github.com/user-attachments/assets/37991c63-b0cf-45f6-b891-728c4c981474" />
+
+
 ## 개요
 
 TouchCursor는 키보드의 **Space 키를 활용 키로 사용**하여 홈 포지션을 유지하면서 화살표 키, Home/End, Page Up/Down 등을 사용할 수 있게 해주는 유틸리티입니다.
