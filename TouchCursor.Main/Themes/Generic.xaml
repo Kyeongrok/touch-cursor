@@ -9,6 +9,9 @@
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ActivationKeyDialog.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ActivationKeyDialogWindow.xaml"/>
         <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/GeneralSettingsView.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ExceptionAppsView.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ProcessSelectorDialog.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Main;component/Themes/Views/ProcessSelectorDialogWindow.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

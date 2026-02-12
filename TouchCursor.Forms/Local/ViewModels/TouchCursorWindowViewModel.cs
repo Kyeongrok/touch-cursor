@@ -59,6 +59,8 @@ public class TouchCursorWindowViewModel : BindableBase
         _keyMappingsViewModel.GeneralSettings.AddActivationKeyRequested += OnAddActivationKeyRequested;
         _keyMappingsViewModel.EditKeyMappingRequested += OnEditKeyMappingRequested;
         _keyMappingsViewModel.KeyMappingsChanged += OnKeyMappingsChanged;
+        _keyMappingsViewModel.ExceptionApps.AddProcessRequested += OnAddProcessRequested;
+        _keyMappingsViewModel.ExceptionApps.ExcludedProcessesChanged += OnExcludedProcessesChanged;
 
         if (_options.Enabled)
         {
@@ -194,6 +196,14 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.AvailableLanguages.Clear();
         gs.AvailableLanguages.Add(new LanguageItem { Code = "en", NativeName = "English" });
         gs.AvailableLanguages.Add(new LanguageItem { Code = "ko", NativeName = "한국어" });
+
+        // Load excluded process names
+        var ea = _keyMappingsViewModel.ExceptionApps;
+        ea.ExcludedProcessNames.Clear();
+        foreach (var name in _options.ExcludedProcessNames)
+        {
+            ea.ExcludedProcessNames.Add(name);
+        }
     }
 
     private void LoadKeyMappings(int activationKey)
@@ -234,6 +244,8 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.Language = gs.SelectedLanguage;
         _options.OverlayPosition = gs.OverlayPosition;
         _options.ShowActivationOverlay = gs.ShowActivationOverlay;
+
+        _options.ExcludedProcessNames = _keyMappingsViewModel.ExceptionApps.ExcludedProcessNames.ToList();
 
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
     }
@@ -350,7 +362,8 @@ public class TouchCursorWindowViewModel : BindableBase
     {
         var dialog = new ActivationKeyDialogWindow
         {
-            Owner = Application.Current.MainWindow
+            Owner = Application.Current.MainWindow,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 
         if (dialog.ShowDialog() == true && dialog.SelectedKey is { } selected)
@@ -469,5 +482,35 @@ public class TouchCursorWindowViewModel : BindableBase
         if ((modifiers & 0x0004) != 0) result += "Alt+";
         if ((modifiers & 0x0008) != 0) result += "Win+";
         return result + GetKeyName(vkCode);
+    }
+
+    private string? OnAddProcessRequested()
+    {
+        try
+        {
+            var dialog = new ProcessSelectorDialogWindow
+            {
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.SelectedProcessName;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        return null;
+    }
+
+    private void OnExcludedProcessesChanged()
+    {
+        _options.ExcludedProcessNames = _keyMappingsViewModel.ExceptionApps.ExcludedProcessNames.ToList();
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        _hookService.ClearForegroundCache();
     }
 }

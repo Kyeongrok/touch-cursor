@@ -96,6 +96,10 @@ public class KeyboardHookService : IDisposable
     private bool _sendingModifiers = false;
     private readonly ITouchCursorOptions _options;
 
+    // 포그라운드 프로세스 제외 캐시
+    private IntPtr _lastForegroundWindow = IntPtr.Zero;
+    private bool _lastExclusionResult = false;
+
     public KeyboardHookService(IKeyMappingService mappingService, ITouchCursorOptions options)
     {
         _mappingService = mappingService;
@@ -138,6 +142,12 @@ public class KeyboardHookService : IDisposable
 
             // Ignore our own injected events
             if (hookStruct.dwExtraInfo == INJECTED_FLAG)
+            {
+                return CallNextHookEx(_hookID, nCode, wParam, lParam);
+            }
+
+            // 포그라운드 프로세스가 제외 목록에 있으면 키 처리를 건너뜀
+            if (IsForegroundProcessExcluded())
             {
                 return CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
@@ -243,6 +253,43 @@ public class KeyboardHookService : IDisposable
                 dwExtraInfo = INJECTED_FLAG
             }
         };
+    }
+
+    private bool IsForegroundProcessExcluded()
+    {
+        if (_options.ExcludedProcessNames.Count == 0)
+            return false;
+
+        var hwnd = GetForegroundWindow();
+        if (hwnd == _lastForegroundWindow)
+            return _lastExclusionResult;
+
+        _lastForegroundWindow = hwnd;
+        _lastExclusionResult = false;
+
+        try
+        {
+            GetWindowThreadProcessId(hwnd, out var processId);
+            if (processId != 0)
+            {
+                using var process = Process.GetProcessById((int)processId);
+                var processName = process.ProcessName;
+                _lastExclusionResult = _options.ExcludedProcessNames
+                    .Any(name => string.Equals(name, processName, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+        catch
+        {
+            // 프로세스 접근 실패 시 제외하지 않음
+        }
+
+        return _lastExclusionResult;
+    }
+
+    public void ClearForegroundCache()
+    {
+        _lastForegroundWindow = IntPtr.Zero;
+        _lastExclusionResult = false;
     }
 
     public void Dispose()

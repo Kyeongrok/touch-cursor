@@ -10,18 +10,22 @@ namespace TouchCursor.Forms.UI.Views;
 [TemplatePart(Name = PART_ContentRegion, Type = typeof(ContentControl))]
 [TemplatePart(Name = PART_GeneralTab, Type = typeof(ToggleButton))]
 [TemplatePart(Name = PART_KeyMappingsTab, Type = typeof(ToggleButton))]
+[TemplatePart(Name = PART_ExceptionAppsTab, Type = typeof(ToggleButton))]
 public class TouchCursorWindow : BaseTouchCursorWindow
 {
     private const string PART_ContentRegion = "PART_ContentRegion";
     private const string PART_GeneralTab = "PART_GeneralTab";
     private const string PART_KeyMappingsTab = "PART_KeyMappingsTab";
+    private const string PART_ExceptionAppsTab = "PART_ExceptionAppsTab";
 
     private ContentControl? _contentRegion;
     private ToggleButton? _generalTab;
     private ToggleButton? _keyMappingsTab;
+    private ToggleButton? _exceptionAppsTab;
 
     private GeneralSettingsView? _generalSettingsView;
     private KeyMappings? _keyMappingsView;
+    private ExceptionAppsView? _exceptionAppsView;
 
     static TouchCursorWindow()
     {
@@ -64,21 +68,27 @@ public class TouchCursorWindow : BaseTouchCursorWindow
             _generalTab.Checked -= OnGeneralTabChecked;
         if (_keyMappingsTab != null)
             _keyMappingsTab.Checked -= OnKeyMappingsTabChecked;
+        if (_exceptionAppsTab != null)
+            _exceptionAppsTab.Checked -= OnExceptionAppsTabChecked;
 
         // Get template parts
         _contentRegion = GetTemplateChild(PART_ContentRegion) as ContentControl;
         _generalTab = GetTemplateChild(PART_GeneralTab) as ToggleButton;
         _keyMappingsTab = GetTemplateChild(PART_KeyMappingsTab) as ToggleButton;
+        _exceptionAppsTab = GetTemplateChild(PART_ExceptionAppsTab) as ToggleButton;
 
         // Subscribe new events
         if (_generalTab != null)
             _generalTab.Checked += OnGeneralTabChecked;
         if (_keyMappingsTab != null)
             _keyMappingsTab.Checked += OnKeyMappingsTabChecked;
+        if (_exceptionAppsTab != null)
+            _exceptionAppsTab.Checked += OnExceptionAppsTabChecked;
 
         // Create views
         _generalSettingsView = new GeneralSettingsView();
         _keyMappingsView = new KeyMappings();
+        _exceptionAppsView = new ExceptionAppsView();
 
         // Set initial content
         if (_generalTab?.IsChecked == true)
@@ -88,6 +98,10 @@ public class TouchCursorWindow : BaseTouchCursorWindow
         else if (_keyMappingsTab?.IsChecked == true)
         {
             ShowKeyMappings();
+        }
+        else if (_exceptionAppsTab?.IsChecked == true)
+        {
+            ShowExceptionApps();
         }
         else
         {
@@ -105,6 +119,11 @@ public class TouchCursorWindow : BaseTouchCursorWindow
     private void OnKeyMappingsTabChecked(object sender, RoutedEventArgs e)
     {
         ShowKeyMappings();
+    }
+
+    private void OnExceptionAppsTabChecked(object sender, RoutedEventArgs e)
+    {
+        ShowExceptionApps();
     }
 
     private void ShowGeneralSettings()
@@ -125,6 +144,15 @@ public class TouchCursorWindow : BaseTouchCursorWindow
         }
     }
 
+    private void ShowExceptionApps()
+    {
+        if (_contentRegion != null && _exceptionAppsView != null && ViewModel != null)
+        {
+            _exceptionAppsView.DataContext = ViewModel.KeyMappingsViewModel.ExceptionApps;
+            _contentRegion.Content = _exceptionAppsView;
+        }
+    }
+
     private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is TouchCursorWindow control)
@@ -138,6 +166,8 @@ public class TouchCursorWindow : BaseTouchCursorWindow
                     control._generalSettingsView.DataContext = viewModel.KeyMappingsViewModel.GeneralSettings;
                 if (control._keyMappingsView != null)
                     control._keyMappingsView.DataContext = viewModel.KeyMappingsViewModel;
+                if (control._exceptionAppsView != null)
+                    control._exceptionAppsView.DataContext = viewModel.KeyMappingsViewModel.ExceptionApps;
 
                 // Setup tray icon
                 control.SetupTrayIcon(viewModel);

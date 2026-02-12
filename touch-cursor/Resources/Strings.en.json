@@ -133,6 +133,15 @@
     "MoveWordRight": "Move cursor one word right",
     "CustomMapping": "Custom mapping"
   },
+  "ExceptionApps": {
+    "Description": "When an excluded application is in the foreground, TouchCursor will be disabled.",
+    "ExcludedApps": "Excluded Applications:",
+    "AddApp": "Add...",
+    "RemoveApp": "Remove",
+    "SelectProcess": "Select Process",
+    "ProcessName": "Process Name",
+    "WindowTitle": "Window Title"
+  },
   "Messages": {
     "Error": "Error",
     "Info": "Info",

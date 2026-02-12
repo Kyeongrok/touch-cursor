@@ -133,6 +133,15 @@
     "MoveWordRight": "한 단어 오른쪽으로 이동",
     "CustomMapping": "사용자 정의 매핑"
   },
+  "ExceptionApps": {
+    "Description": "제외된 앱이 포그라운드에 있으면 터치커서가 비활성화됩니다.",
+    "ExcludedApps": "제외된 앱:",
+    "AddApp": "추가...",
+    "RemoveApp": "제거",
+    "SelectProcess": "프로세스 선택",
+    "ProcessName": "프로세스 이름",
+    "WindowTitle": "창 제목"
+  },
   "Messages": {
     "Error": "오류",
     "Info": "정보",

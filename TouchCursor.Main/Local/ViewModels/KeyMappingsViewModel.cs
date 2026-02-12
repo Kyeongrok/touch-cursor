@@ -18,6 +18,7 @@ public class KeyMappingsViewModel : BindableBase
     #region Sub ViewModels
 
     public GeneralSettingsViewModel GeneralSettings { get; } = new();
+    public ExceptionAppsViewModel ExceptionApps { get; } = new();
 
     #endregion
 

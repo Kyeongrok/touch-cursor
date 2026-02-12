@@ -59,6 +59,9 @@
                                         <units:TouchCursorTab x:Name="PART_KeyMappingsTab"
                                                               Content="{loc:Localize SettingsWindow.TabKeyMappings, Default='Key Mappings'}"
                                                               GroupName="SettingsTabs"/>
+                                        <units:TouchCursorTab x:Name="PART_ExceptionAppsTab"
+                                                              Content="{loc:Localize SettingsWindow.TabProgramLists, Default='Program Lists'}"
+                                                              GroupName="SettingsTabs"/>
                                     </StackPanel>
                                 </mainUnits:TitleBar.TabContent>
                             </mainUnits:TitleBar>

@@ -2,17 +2,17 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:views="clr-namespace:TouchCursor.Main.UI.Views">
 
-    <Style TargetType="{x:Type views:ActivationKeyDialogWindow}">
-        <Setter Property="Title" Value="프로파일 추가..."/>
-        <Setter Property="Width" Value="350"/>
-        <Setter Property="Height" Value="180"/>
+    <Style TargetType="{x:Type views:ProcessSelectorDialogWindow}">
+        <Setter Property="Title" Value="Select Process"/>
+        <Setter Property="Width" Value="500"/>
+        <Setter Property="Height" Value="450"/>
         <Setter Property="ResizeMode" Value="NoResize"/>
         <Setter Property="ShowInTaskbar" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type views:ActivationKeyDialogWindow}">
+                <ControlTemplate TargetType="{x:Type views:ProcessSelectorDialogWindow}">
                     <Border Background="White">
-                        <views:ActivationKeyDialog x:Name="PART_DialogContent"/>
+                        <views:ProcessSelectorDialog x:Name="PART_DialogContent"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

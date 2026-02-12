@@ -53,6 +53,9 @@ public class TouchCursorOptions : ITouchCursorOptions
     // ActivationKey -> 항상 커서 모드를 활성화하는 소스 키 HashSet
     public Dictionary<int, HashSet<int>> RolloverExceptionKeys { get; set; } = new();
 
+    // 예외 앱: 포그라운드일 때 TouchCursor를 비활성화할 프로세스 이름 목록
+    public List<string> ExcludedProcessNames { get; set; } = new();
+
     // 레거시: 단일 활성화 키 (하위 호환성)
     [JsonIgnore]
     public int ActivationKey

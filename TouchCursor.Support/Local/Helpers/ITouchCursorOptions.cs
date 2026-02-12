@@ -21,6 +21,9 @@ public interface ITouchCursorOptions
     Dictionary<int, Dictionary<int, int>> ActivationKeyProfiles { get; set; }
     Dictionary<int, HashSet<int>> RolloverExceptionKeys { get; set; }
 
+    // 예외 앱
+    List<string> ExcludedProcessNames { get; set; }
+
     // 언어
     string Language { get; set; }
 
