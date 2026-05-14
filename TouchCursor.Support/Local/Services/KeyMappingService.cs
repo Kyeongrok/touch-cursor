@@ -63,7 +63,7 @@ public class KeyMappingService : IKeyMappingService
         // 활성화 키 처리
         if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
         {
-            if (isKeyDown && _currentActivationKey == 0)
+            if (isKeyDown && _currentActivationKey == 0 && _modifierState == 0)
             {
                 _currentActivationKey = vkCode;
                 _activationKeyUsedForMapping = false;
