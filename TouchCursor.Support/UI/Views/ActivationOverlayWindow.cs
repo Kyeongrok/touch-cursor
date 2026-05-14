@@ -1,7 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
+using TouchCursor.Support.Local.Helpers;
 
-namespace TouchCursor.Forms.UI.Views;
+namespace TouchCursor.Support.UI.Views;
 
 public enum ActivationState
 {
@@ -31,11 +32,10 @@ public class ActivationOverlayWindow : Window
         Height = 40;
         SizeToContent = SizeToContent.Manual;
 
-        // Default position: top-left corner
-        SetPosition(TouchCursor.Support.Local.Helpers.OverlayPosition.TopLeft);
+        SetPosition(OverlayPosition.TopLeft);
     }
 
-    public void SetPosition(TouchCursor.Support.Local.Helpers.OverlayPosition position)
+    public void SetPosition(OverlayPosition position)
     {
         var workArea = SystemParameters.WorkArea;
         const int margin = 20;
@@ -47,39 +47,39 @@ public class ActivationOverlayWindow : Window
 
         switch (position)
         {
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.TopLeft:
+            case OverlayPosition.TopLeft:
                 Left = workArea.Left + margin;
                 Top = workArea.Top + margin;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.TopCenter:
+            case OverlayPosition.TopCenter:
                 Left = centerX;
                 Top = workArea.Top + margin;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.TopRight:
+            case OverlayPosition.TopRight:
                 Left = workArea.Right - windowWidth - margin;
                 Top = workArea.Top + margin;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.MiddleLeft:
+            case OverlayPosition.MiddleLeft:
                 Left = workArea.Left + margin;
                 Top = centerY;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.MiddleCenter:
+            case OverlayPosition.MiddleCenter:
                 Left = centerX;
                 Top = centerY;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.MiddleRight:
+            case OverlayPosition.MiddleRight:
                 Left = workArea.Right - windowWidth - margin;
                 Top = centerY;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomLeft:
+            case OverlayPosition.BottomLeft:
                 Left = workArea.Left + margin;
                 Top = workArea.Bottom - windowHeight - margin;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomCenter:
+            case OverlayPosition.BottomCenter:
                 Left = centerX;
                 Top = workArea.Bottom - windowHeight - margin;
                 break;
-            case TouchCursor.Support.Local.Helpers.OverlayPosition.BottomRight:
+            case OverlayPosition.BottomRight:
                 Left = workArea.Right - windowWidth - margin;
                 Top = workArea.Bottom - windowHeight - margin;
                 break;
@@ -110,19 +110,13 @@ public class ActivationOverlayWindow : Window
     {
         if (d is ActivationOverlayWindow window)
         {
-            var state = (ActivationState)e.NewValue;
-            if (state == ActivationState.None)
-            {
+            if ((ActivationState)e.NewValue == ActivationState.None)
                 window.Hide();
-            }
             else
-            {
                 window.Show();
-            }
         }
     }
 
-    // Legacy property for compatibility
     public static readonly DependencyProperty IsActivatedProperty =
         DependencyProperty.Register(nameof(IsActivated), typeof(bool),
             typeof(ActivationOverlayWindow), new PropertyMetadata(false, OnIsActivatedChanged));
@@ -137,14 +131,7 @@ public class ActivationOverlayWindow : Window
     {
         if (d is ActivationOverlayWindow window)
         {
-            if ((bool)e.NewValue)
-            {
-                window.State = ActivationState.Activated;
-            }
-            else
-            {
-                window.State = ActivationState.None;
-            }
+            window.State = (bool)e.NewValue ? ActivationState.Activated : ActivationState.None;
         }
     }
 }

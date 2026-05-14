@@ -14,6 +14,7 @@
 
         <!-- Views -->
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Views/TouchCursorWindow.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Views/ActivationOverlayWindow.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>
