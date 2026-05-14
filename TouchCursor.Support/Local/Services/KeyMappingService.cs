@@ -16,10 +16,6 @@ public class KeyMappingService : IKeyMappingService
     private bool _activationKeyUsedForMapping = false;
     private long _activationKeyPressTime = 0;
 
-    // Mod Switch 상태
-    private bool _modSwitchToggled = false;
-    private int _toggledActivationKey = 0;
-
     public event Action<int, bool, int>? SendKeyRequested;
     public event Action<int, bool>? ActivationStateChanged;
     public event Action<int>? ActivationKeyPressed;
@@ -61,44 +57,11 @@ public class KeyMappingService : IKeyMappingService
 
     public bool ProcessKey(int vkCode, bool isKeyDown, bool isKeyUp)
     {
-        // Mod Switch 토글 단축키 감지
-        if (_options.ModSwitchEnabled && isKeyDown &&
-            vkCode == _options.ModSwitchToggleKey &&
-            (_modifierState & _options.ModSwitchToggleModifiers) == _options.ModSwitchToggleModifiers)
-        {
-            _modSwitchToggled = !_modSwitchToggled;
-
-            if (_modSwitchToggled)
-            {
-                _toggledActivationKey = _options.ActivationKeyProfiles.Keys.FirstOrDefault(0x20);
-                _currentActivationKey = _toggledActivationKey;
-                _activationKeyUsedForMapping = false;
-                _activationKeyPressTime = DateTime.Now.Ticks;
-                ActivationStateChanged?.Invoke(_currentActivationKey, true);
-                Console.Beep(1200, 100);
-            }
-            else
-            {
-                foreach (var heldKey in _mappedKeysHeld)
-                {
-                    var targetVk = heldKey & 0xFFFF;
-                    SendKeyRequested?.Invoke(targetVk, false, 0);
-                }
-                _mappedKeysHeld.Clear();
-                _currentActivationKey = 0;
-                _toggledActivationKey = 0;
-                ActivationStateChanged?.Invoke(0, false);
-                Console.Beep(800, 100);
-            }
-
-            return true;
-        }
-
         if (!_options.Enabled)
             return false;
 
         // 활성화 키 처리
-        if (!_modSwitchToggled && _options.ActivationKeyProfiles.ContainsKey(vkCode))
+        if (_options.ActivationKeyProfiles.ContainsKey(vkCode))
         {
             if (isKeyDown && _currentActivationKey == 0)
             {
@@ -202,9 +165,5 @@ public class KeyMappingService : IKeyMappingService
         _modifierState = 0;
         _activationKeyUsedForMapping = false;
         _activationKeyPressTime = 0;
-        _modSwitchToggled = false;
-        _toggledActivationKey = 0;
     }
-
-    public bool IsModSwitchToggled => _modSwitchToggled;
 }

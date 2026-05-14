@@ -5,6 +5,7 @@ using System.Windows.Input;
 using Hardcodet.Wpf.TaskbarNotification;
 using Prism.Commands;
 using Prism.Mvvm;
+using TouchCursor.Forms.Local.Services;
 using TouchCursor.Forms.UI.Views;
 using TouchCursor.Main.UI.Views;
 using TouchCursor.Main.ViewModels;
@@ -19,6 +20,7 @@ public class TouchCursorWindowViewModel : BindableBase
     private readonly KeyboardHookService _hookService;
     private readonly IKeyMappingService _mappingService;
     private readonly KeyMappingsViewModel _keyMappingsViewModel;
+    private readonly UpdateService _updateService;
     private TaskbarIcon? _taskbarIcon;
     private ActivationOverlayWindow? _overlayWindow;
     private bool _isClosing = false;
@@ -39,6 +41,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _hookService = hookService;
         _mappingService = mappingService;
         _keyMappingsViewModel = new KeyMappingsViewModel();
+        _updateService = new UpdateService();
 
         // Create overlay window
         _overlayWindow = new ActivationOverlayWindow();
@@ -271,6 +274,23 @@ public class TouchCursorWindowViewModel : BindableBase
             "About TouchCursor",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
+    }
+
+    public async Task CheckForUpdateAsync()
+    {
+        var newVersion = await _updateService.CheckForUpdateAsync();
+        if (newVersion == null) return;
+
+        await _updateService.DownloadUpdateAsync();
+
+        var result = MessageBox.Show(
+            $"버전 {newVersion}으로 업데이트할 준비가 됐습니다.\n지금 재시작하시겠습니까?",
+            "업데이트 완료",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information);
+
+        if (result == MessageBoxResult.Yes)
+            _updateService.ApplyUpdateAndRestart();
     }
 
     private void OnEnabledChanged()

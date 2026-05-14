@@ -12,11 +12,6 @@ public interface ITouchCursorOptions
     int ActivationKeyHoldDelayMs { get; set; }
     bool RolloverEnabled { get; set; }
 
-    // Mod Switch 설정
-    bool ModSwitchEnabled { get; set; }
-    int ModSwitchToggleKey { get; set; }
-    int ModSwitchToggleModifiers { get; set; }
-
     // 키 매핑
     Dictionary<int, Dictionary<int, int>> ActivationKeyProfiles { get; set; }
     Dictionary<int, HashSet<int>> RolloverExceptionKeys { get; set; }

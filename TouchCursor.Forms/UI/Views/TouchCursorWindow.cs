@@ -39,6 +39,16 @@ public class TouchCursorWindow : BaseTouchCursorWindow
         WindowStyle = WindowStyle.None;
         ViewModel = viewModel;
         Closing += OnWindowClosing;
+        Loaded += OnWindowLoaded;
+    }
+
+    private void OnWindowLoaded(object sender, RoutedEventArgs e)
+    {
+        Dispatcher.InvokeAsync(async () =>
+        {
+            if (ViewModel != null)
+                await ViewModel.CheckForUpdateAsync();
+        });
     }
 
     private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
