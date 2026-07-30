@@ -117,6 +117,7 @@ public class TouchCursorWindowViewModel : BindableBase
             if (_overlayWindow != null && _options.ShowActivationOverlay)
             {
                 _overlayWindow.KeyName = GetKeyName(activationKey);
+                _overlayWindow.IsCapsLockOn = Keyboard.IsKeyToggled(Key.CapsLock);
                 _overlayWindow.State = ActivationState.Waiting;
 
                 // ActivationKeyHoldDelayMs 후에 파란색으로 변경
@@ -150,6 +151,7 @@ public class TouchCursorWindowViewModel : BindableBase
             if (_overlayWindow != null && _options.ShowActivationOverlay)
             {
                 _overlayWindow.KeyName = GetKeyName(activationKey);
+                _overlayWindow.IsCapsLockOn = Keyboard.IsKeyToggled(Key.CapsLock);
                 _overlayWindow.State = isActive ? ActivationState.Activated : ActivationState.None;
             }
             else if (_overlayWindow != null && !_options.ShowActivationOverlay)

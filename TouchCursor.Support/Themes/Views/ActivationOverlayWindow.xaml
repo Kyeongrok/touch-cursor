@@ -11,15 +11,18 @@
                 <ControlTemplate TargetType="{x:Type local:ActivationOverlayWindow}">
                     <Border Background="#E0333333" CornerRadius="8" Padding="6,6">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Ellipse x:Name="StatusIndicator" Width="10" Height="10" Fill="#4CAF50" Margin="0,0,0,0"/>
+                            <Border x:Name="StatusIndicator" Width="10" Height="10" CornerRadius="5" Background="#4CAF50" Margin="0,0,0,0"/>
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="State" Value="Waiting">
-                            <Setter TargetName="StatusIndicator" Property="Fill" Value="#4CAF50"/>
+                            <Setter TargetName="StatusIndicator" Property="Background" Value="#4CAF50"/>
                         </Trigger>
                         <Trigger Property="State" Value="Activated">
-                            <Setter TargetName="StatusIndicator" Property="Fill" Value="#2196F3"/>
+                            <Setter TargetName="StatusIndicator" Property="Background" Value="#2196F3"/>
+                        </Trigger>
+                        <Trigger Property="IsCapsLockOn" Value="True">
+                            <Setter TargetName="StatusIndicator" Property="CornerRadius" Value="0"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

@@ -117,6 +117,16 @@ public class ActivationOverlayWindow : Window
         }
     }
 
+    public static readonly DependencyProperty IsCapsLockOnProperty =
+        DependencyProperty.Register(nameof(IsCapsLockOn), typeof(bool),
+            typeof(ActivationOverlayWindow), new PropertyMetadata(false));
+
+    public bool IsCapsLockOn
+    {
+        get => (bool)GetValue(IsCapsLockOnProperty);
+        set => SetValue(IsCapsLockOnProperty, value);
+    }
+
     public static readonly DependencyProperty IsActivatedProperty =
         DependencyProperty.Register(nameof(IsActivated), typeof(bool),
             typeof(ActivationOverlayWindow), new PropertyMetadata(false, OnIsActivatedChanged));
