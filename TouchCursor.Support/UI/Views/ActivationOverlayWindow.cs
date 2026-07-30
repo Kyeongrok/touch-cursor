@@ -127,6 +127,16 @@ public class ActivationOverlayWindow : Window
         set => SetValue(IsCapsLockOnProperty, value);
     }
 
+    public static readonly DependencyProperty IsKoreanImeOnProperty =
+        DependencyProperty.Register(nameof(IsKoreanImeOn), typeof(bool),
+            typeof(ActivationOverlayWindow), new PropertyMetadata(false));
+
+    public bool IsKoreanImeOn
+    {
+        get => (bool)GetValue(IsKoreanImeOnProperty);
+        set => SetValue(IsKoreanImeOnProperty, value);
+    }
+
     public static readonly DependencyProperty IsActivatedProperty =
         DependencyProperty.Register(nameof(IsActivated), typeof(bool),
             typeof(ActivationOverlayWindow), new PropertyMetadata(false, OnIsActivatedChanged));

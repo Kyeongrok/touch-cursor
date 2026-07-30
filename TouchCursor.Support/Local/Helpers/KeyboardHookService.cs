@@ -56,6 +56,46 @@ public class KeyboardHookService : IDisposable
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
+    [DllImport("user32.dll")]
+    private static extern bool GetGUIThreadInfo(uint idThread, ref GUITHREADINFO lpgui);
+
+    [DllImport("imm32.dll")]
+    private static extern IntPtr ImmGetContext(IntPtr hWnd);
+
+    [DllImport("imm32.dll")]
+    private static extern bool ImmReleaseContext(IntPtr hWnd, IntPtr hIMC);
+
+    [DllImport("imm32.dll")]
+    private static extern bool ImmGetConversionStatus(IntPtr hIMC, out int lpfdwConversion, out int lpfdwSentence);
+
+    [DllImport("imm32.dll")]
+    private static extern bool ImmGetOpenStatus(IntPtr hIMC);
+
+    private const int IME_CMODE_NATIVE = 0x0001;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct GUITHREADINFO
+    {
+        public int cbSize;
+        public uint flags;
+        public IntPtr hwndActive;
+        public IntPtr hwndFocus;
+        public IntPtr hwndCapture;
+        public IntPtr hwndMenuOwner;
+        public IntPtr hwndMoveSize;
+        public IntPtr hwndCaret;
+        public RECT rcCaret;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     private struct KBDLLHOOKSTRUCT
     {
@@ -284,6 +324,38 @@ public class KeyboardHookService : IDisposable
         }
 
         return _lastExclusionResult;
+    }
+
+    public bool IsKoreanImeActive()
+    {
+        var foregroundWindow = GetForegroundWindow();
+        if (foregroundWindow == IntPtr.Zero)
+            return false;
+
+        var focusedWindow = foregroundWindow;
+        var threadId = GetWindowThreadProcessId(foregroundWindow, out _);
+        var guiThreadInfo = new GUITHREADINFO { cbSize = Marshal.SizeOf<GUITHREADINFO>() };
+        if (GetGUIThreadInfo(threadId, ref guiThreadInfo) && guiThreadInfo.hwndFocus != IntPtr.Zero)
+        {
+            focusedWindow = guiThreadInfo.hwndFocus;
+        }
+
+        var himc = ImmGetContext(focusedWindow);
+        if (himc == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            if (!ImmGetOpenStatus(himc))
+                return false;
+
+            return ImmGetConversionStatus(himc, out var conversion, out _)
+                   && (conversion & IME_CMODE_NATIVE) != 0;
+        }
+        finally
+        {
+            ImmReleaseContext(focusedWindow, himc);
+        }
     }
 
     public void ClearForegroundCache()
