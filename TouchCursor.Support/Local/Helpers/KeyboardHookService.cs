@@ -1,4 +1,4 @@
-// Copyright © 2025. Ported to C# from original C++ TouchCursor by Martin Stone.
+﻿// Copyright © 2025. Ported to C# from original C++ TouchCursor by Martin Stone.
 // Original project licensed under GNU GPL v3.
 
 using System.Diagnostics;
@@ -71,7 +71,21 @@ public class KeyboardHookService : IDisposable
     [DllImport("imm32.dll")]
     private static extern bool ImmGetOpenStatus(IntPtr hIMC);
 
+    [DllImport("imm32.dll")]
+    private static extern IntPtr ImmGetDefaultIMEWnd(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam,
+                                                    uint flags, uint timeoutMs, out IntPtr result);
+
     private const int IME_CMODE_NATIVE = 0x0001;
+
+    // 다른 프로세스의 IME 상태를 물어보기 위한 메시지
+    private const uint WM_IME_CONTROL = 0x0283;
+    private const int IMC_GETCONVERSIONMODE = 0x0001;
+    private const int IMC_GETOPENSTATUS = 0x0005;
+    private const uint SMTO_ABORTIFHUNG = 0x0002;
+    private const uint IME_QUERY_TIMEOUT_MS = 50;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct GUITHREADINFO
@@ -340,6 +354,12 @@ public class KeyboardHookService : IDisposable
             focusedWindow = guiThreadInfo.hwndFocus;
         }
 
+        // ImmGetContext는 같은 프로세스의 창에서만 유효한 HIMC를 돌려준다.
+        // 다른 앱의 창에서는 항상 0이 나오므로, 먼저 IME 창에 메시지를 보내 물어본다.
+        if (TryGetImeStateByMessage(focusedWindow, out var isNative))
+            return isNative;
+
+        // 폴백: 자기 프로세스 창인 경우
         var himc = ImmGetContext(focusedWindow);
         if (himc == IntPtr.Zero)
             return false;
@@ -356,6 +376,46 @@ public class KeyboardHookService : IDisposable
         {
             ImmReleaseContext(focusedWindow, himc);
         }
+    }
+
+    /// <summary>
+    /// 대상 창의 기본 IME 창에 WM_IME_CONTROL을 보내 한/영 상태를 읽는다.
+    /// 프로세스 경계를 넘어서도 동작한다. 상태를 못 읽으면 false를 반환한다.
+    /// </summary>
+    private static bool TryGetImeStateByMessage(IntPtr targetWindow, out bool isNativeMode)
+    {
+        isNativeMode = false;
+
+        var imeWindow = ImmGetDefaultIMEWnd(targetWindow);
+        if (imeWindow == IntPtr.Zero)
+            return false;
+
+        // IME가 꺼져 있으면 변환 모드와 무관하게 영문 입력이다.
+        if (!TryQueryIme(imeWindow, IMC_GETOPENSTATUS, out var openStatus))
+            return false;
+
+        if (openStatus == 0)
+            return true; // 조회 성공, 한글 아님
+
+        if (!TryQueryIme(imeWindow, IMC_GETCONVERSIONMODE, out var conversionMode))
+            return false;
+
+        isNativeMode = (conversionMode & IME_CMODE_NATIVE) != 0;
+        return true;
+    }
+
+    /// <summary>응답 없는 앱에서 UI 스레드가 멈추지 않도록 타임아웃을 두고 질의한다.</summary>
+    private static bool TryQueryIme(IntPtr imeWindow, int command, out int result)
+    {
+        result = 0;
+
+        var sent = SendMessageTimeout(imeWindow, WM_IME_CONTROL, new IntPtr(command), IntPtr.Zero,
+                                      SMTO_ABORTIFHUNG, IME_QUERY_TIMEOUT_MS, out var queryResult);
+        if (sent == IntPtr.Zero)
+            return false;
+
+        result = queryResult.ToInt32();
+        return true;
     }
 
     public void ClearForegroundCache()

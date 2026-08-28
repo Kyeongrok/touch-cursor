@@ -5,6 +5,24 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2026-08-28
+
+### Fixed
+- **다른 앱에서 IME 상태가 항상 영문(A)으로만 표시되던 문제**
+  - `ImmGetContext`는 호출한 프로세스 소유의 창에만 유효한 HIMC를 반환한다.
+    다른 앱의 창에서는 0이 나와 곧바로 `false`가 되어, TouchCursor 자기 창을
+    포커스했을 때만 한/영이 전환되고 실제 사용 상황에서는 항상 `A`로 표시됨
+  - `ImmGetDefaultIMEWnd`로 대상 스레드의 IME 창을 얻어 `WM_IME_CONTROL`
+    (`IMC_GETOPENSTATUS` / `IMC_GETCONVERSIONMODE`) 메시지로 조회하도록 변경.
+    메시지 방식이라 프로세스 경계를 넘어서 동작한다
+  - 응답 없는 앱 때문에 UI 스레드가 멈추지 않도록
+    `SendMessageTimeout(SMTO_ABORTIFHUNG, 50ms)` 사용
+  - 메시지 조회에 실패하면 기존 `ImmGetContext` 경로로 폴백
+
+### Technical Details
+- 변경: `TouchCursor.Support/Local/Helpers/KeyboardHookService.cs`
+  - `IsKoreanImeActive()`, `TryGetImeStateByMessage()`, `TryQueryIme()`
+
 ## [2.4.1] - 2026-08-28
 
 ### Changed
