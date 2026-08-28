@@ -56,6 +56,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _keyMappingsViewModel.CancelRequested += OnCancelRequested;
         _keyMappingsViewModel.AboutRequested += OnAboutRequested;
         _keyMappingsViewModel.GeneralSettings.EnabledChanged += OnEnabledChanged;
+        _keyMappingsViewModel.GeneralSettings.StartupRegistrationMessage += OnStartupRegistrationMessage;
         _keyMappingsViewModel.GeneralSettings.LanguageChanged += OnLanguageChanged;
         _keyMappingsViewModel.GeneralSettings.OverlayPositionChanged += OnOverlayPositionChanged;
         _keyMappingsViewModel.GeneralSettings.HoldDelayMsChanged += OnHoldDelayMsChanged;
@@ -170,7 +171,7 @@ public class TouchCursorWindowViewModel : BindableBase
         var gs = _keyMappingsViewModel.GeneralSettings;
 
         gs.IsEnabled = _options.Enabled;
-        gs.RunAtStartup = _options.RunAtStartup;
+        gs.RefreshStartupRegistrationState();
         gs.ShowInTray = _options.ShowInNotificationArea;
         gs.BeepForMistakes = _options.BeepForMistakes;
         gs.HoldDelayMs = _options.ActivationKeyHoldDelayMs;
@@ -244,7 +245,7 @@ public class TouchCursorWindowViewModel : BindableBase
         var gs = _keyMappingsViewModel.GeneralSettings;
 
         _options.Enabled = gs.IsEnabled;
-        _options.RunAtStartup = gs.RunAtStartup;
+        _options.RunAtStartup = gs.IsStartupRegistered;
         _options.ShowInNotificationArea = gs.ShowInTray;
         _options.BeepForMistakes = gs.BeepForMistakes;
         _options.ActivationKeyHoldDelayMs = gs.HoldDelayMs;
@@ -310,6 +311,19 @@ public class TouchCursorWindowViewModel : BindableBase
         }
         _options.Enabled = _keyMappingsViewModel.GeneralSettings.IsEnabled;
         _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+    }
+
+    private void OnStartupRegistrationMessage(string message, bool success)
+    {
+        // 등록 상태를 옵션에도 반영해 즉시 저장한다.
+        _options.RunAtStartup = _keyMappingsViewModel.GeneralSettings.IsStartupRegistered;
+        _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+
+        MessageBox.Show(
+            message,
+            "TouchCursor",
+            MessageBoxButton.OK,
+            success ? MessageBoxImage.Information : MessageBoxImage.Warning);
     }
 
     private void OnLanguageChanged()

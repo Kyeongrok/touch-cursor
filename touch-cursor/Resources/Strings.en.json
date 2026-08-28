@@ -1,4 +1,4 @@
-{
+﻿{
   "AppTitle": "TouchCursor",
   "MainWindow": {
     "Title": "TouchCursor",
@@ -42,11 +42,16 @@
     "EnableTouchCursor": "Enable TouchCursor",
     "EnableModSwitch": "Enable Mod Switch (Alt+Space toggle)",
     "RunAtStartup": "Run at Windows startup",
+    "RegisterStartup": "Create startup shortcut",
+    "UnregisterStartup": "Unregister",
+    "OpenStartupFolder": "Open startup folder",
     "ShowInTray": "Show icon in notification area",
     "CheckUpdates": "Automatically check for updates",
     "RolloverEnabled": "Enable Rollover",
     "RolloverEnabledDescription": "When enabled, keys pressed before activation (Hold Delay) are treated as normal typing with the activation key.",
     "Language": "Language",
+    "OverlayPosition": "Overlay position:",
+    "ActivationKeyPrompt": "Select the activation key for the new profile:",
     "LanguageDescription": "Select your preferred language:",
     "About": "About",
     "AboutTitle": "TouchCursor for Windows",

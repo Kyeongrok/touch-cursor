@@ -1,9 +1,39 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to TouchCursor for Windows will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.4.0] - 2026-08-28
+
+### Added
+- **시작프로그램 등록 버튼**: 동작하지 않던 "Run at Windows startup" 토글을 버튼으로 교체
+  - `바로가기 만들고 시작프로그램에 등록` - `IShellLink` COM으로 `.lnk` 바로가기를 직접 생성
+  - `등록 해제` - 바로가기 삭제 (등록된 상태에서만 활성)
+  - `시작프로그램 폴더 열기` - 탐색기로 열기, 등록된 경우 해당 `.lnk`가 선택된 상태로 열림
+  - 등록 위치: `%AppData%\Microsoft\Windows\Start Menu\Programs\Startup\TouchCursor.lnk`
+  - 현재 등록 상태와 경로를 화면에 표시하고, 일반 설정 탭을 열 때마다 실제 폴더를 다시 확인
+
+### Fixed
+- **언어 전환이 UI에 반영되지 않던 문제**
+  - `LocalizeExtension`이 XAML 로드 시점의 상수 문자열을 반환해 이후 언어 변경이 화면에 전달되지 않음
+    → `INotifyPropertyChanged` 기반 `LocalizedString` 바인딩을 반환하도록 변경
+  - 앱 시작 시 저장된 언어를 로드하지 않아 항상 영어로 뜨던 문제 (`App.RegisterTypes`에서 로드)
+  - XAML에 한국어로 하드코딩되어 있던 라벨 3곳을 리소스 키로 교체
+    (`언어 / Language:`, `오버레이 위치:`, 활성화 키 선택 안내 문구)
+
+### Technical Details
+- 신규: `TouchCursor.Support/Local/Services/StartupShortcutService.cs`
+- 변경:
+  - `TouchCursor.Support/Local/Services/LocalizationService.cs` (`LocalizedString`, 약한 참조 구독자 관리)
+  - `TouchCursor.Main/Local/Localization/LocalizeExtension.cs`, `TouchCursor.Support/Local/Localization/LocalizeExtension.cs`
+  - `TouchCursor.Main/Local/ViewModels/GeneralSettingsViewModel.cs`
+  - `TouchCursor.Main/Themes/Views/GeneralSettingsView.xaml`, `ActivationKeyDialog.xaml`
+  - `TouchCursor.Forms/Local/ViewModels/TouchCursorWindowViewModel.cs`, `UI/Views/TouchCursorWindow.cs`
+  - `touch-cursor/App.cs`, `Resources/Strings.{en,ko}.json`
+
+> 참고: 2.3.0 ~ 2.3.4 릴리즈는 CHANGELOG에 기록되지 않았습니다.
 
 ## [2.2.0] - 2025-10-26
 

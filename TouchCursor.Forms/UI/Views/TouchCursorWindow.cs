@@ -140,6 +140,8 @@ public class TouchCursorWindow : BaseTouchCursorWindow
     {
         if (_contentRegion != null && _generalSettingsView != null && ViewModel != null)
         {
+            // 시작프로그램 폴더가 외부에서 바뀌었을 수 있으므로 탭을 열 때마다 다시 확인한다.
+            ViewModel.KeyMappingsViewModel.GeneralSettings.RefreshStartupRegistrationState();
             _generalSettingsView.DataContext = ViewModel.KeyMappingsViewModel.GeneralSettings;
             _contentRegion.Content = _generalSettingsView;
         }

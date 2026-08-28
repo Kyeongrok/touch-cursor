@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using TouchCursor.Forms.UI.Views;
 using TouchCursor.Forms.ViewModels;
 using TouchCursor.Support.Local.Helpers;
@@ -17,6 +17,10 @@ partial class App : PrismApplication
     {
         // Options
         var options = TouchCursorOptions.Load(TouchCursorOptions.GetDefaultConfigPath());
+
+        // 저장된 언어를 UI가 만들어지기 전에 로드한다. (없으면 항상 영어로 뜬다)
+        LocalizationService.Instance.LoadLanguage(options.Language);
+
         containerRegistry.RegisterInstance<ITouchCursorOptions>(options);
         containerRegistry.RegisterInstance(options);
 
