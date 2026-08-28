@@ -5,6 +5,18 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2026-08-28
+
+### Changed
+- **활성화 오버레이 표시등에 IME 상태를 글자로 표시**
+  - 한글 입력 상태면 `한`, 영문 입력 상태면 `A`
+  - 표시등 크기 18px → 22px (글자가 들어갈 공간 확보, 오버레이 창 크기 40x40은 유지)
+  - 기존 표시는 그대로 유지: 대기 초록 / 활성 파랑, CapsLock 시 사각형, 한글 IME 시 금색 테두리
+
+### Technical Details
+- 변경: `TouchCursor.Support/Themes/Views/ActivationOverlayWindow.xaml`
+- IME 상태는 기존 `KeyboardHookService.IsKoreanImeActive()` / `ActivationOverlayWindow.IsKoreanImeOn`을 그대로 사용
+
 ## [2.4.0] - 2026-08-28
 
 ### Added
