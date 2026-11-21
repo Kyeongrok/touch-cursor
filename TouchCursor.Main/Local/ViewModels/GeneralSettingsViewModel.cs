@@ -21,6 +21,7 @@ public class GeneralSettingsViewModel : BindableBase
     private ActivationKeyProfileViewModel? _selectedActivationKeyProfile;
     private OverlayPosition _overlayPosition = OverlayPosition.BottomRight;
     private bool _showActivationOverlay = true;
+    private bool _zedCursorColorEnabled;
 
     #endregion
 
@@ -112,6 +113,12 @@ public class GeneralSettingsViewModel : BindableBase
     {
         get => _showActivationOverlay;
         set => SetProperty(ref _showActivationOverlay, value);
+    }
+
+    public bool ZedCursorColorEnabled
+    {
+        get => _zedCursorColorEnabled;
+        set => SetProperty(ref _zedCursorColorEnabled, value);
     }
 
     #endregion

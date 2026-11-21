@@ -46,6 +46,7 @@
     "UnregisterStartup": "Unregister",
     "OpenStartupFolder": "Open startup folder",
     "ShowInTray": "Show icon in notification area",
+    "ZedCursorColor": "Zed cursor color by IME (English: green, Korean: red)",
     "CheckUpdates": "Automatically check for updates",
     "RolloverEnabled": "Enable Rollover",
     "RolloverEnabledDescription": "When enabled, keys pressed before activation (Hold Delay) are treated as normal typing with the activation key.",

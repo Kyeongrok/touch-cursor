@@ -32,6 +32,11 @@ public class TouchCursorOptions : ITouchCursorOptions
     public OverlayPosition OverlayPosition { get; set; } = OverlayPosition.TopLeft;
     public bool ShowActivationOverlay { get; set; } = true;
 
+    // Zed 커서 색: Zed 가 앞에 있을 때 한/영에 따라 settings.json 의 커서 색을 바꾼다.
+    public bool ZedCursorColorEnabled { get; set; } = false;
+    public string ZedCursorColorEnglish { get; set; } = "#7ee787";
+    public string ZedCursorColorKorean { get; set; } = "#ff9696";
+
     // 활성화 키 홀드 딜레이: 활성화 키를 이 시간만큼 눌러야 커서 모드 활성화
     // 매핑된 키를 딜레이 전에 누르면 두 키 모두 일반 타이핑으로 처리됨
     // 0으로 설정하면 비활성화 (즉시 활성화)

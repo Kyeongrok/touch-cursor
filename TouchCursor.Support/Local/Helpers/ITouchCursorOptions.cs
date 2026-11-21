@@ -26,6 +26,11 @@ public interface ITouchCursorOptions
     OverlayPosition OverlayPosition { get; set; }
     bool ShowActivationOverlay { get; set; }
 
+    // Zed 커서 색 (한/영)
+    bool ZedCursorColorEnabled { get; set; }
+    string ZedCursorColorEnglish { get; set; }
+    string ZedCursorColorKorean { get; set; }
+
     // 메서드
     void Save(string filePath);
 }

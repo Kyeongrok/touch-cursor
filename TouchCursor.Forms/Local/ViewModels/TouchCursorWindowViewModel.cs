@@ -26,6 +26,7 @@ public class TouchCursorWindowViewModel : BindableBase
     private ActivationOverlayWindow? _overlayWindow;
     private bool _isClosing = false;
     private System.Threading.Timer? _activationTimer;
+    private readonly ZedCursorColorService _zedCursorColor;
 
     public KeyMappingsViewModel KeyMappingsViewModel => _keyMappingsViewModel;
 
@@ -49,6 +50,14 @@ public class TouchCursorWindowViewModel : BindableBase
         _overlayWindow.SetPosition(options.OverlayPosition);
         _mappingService.ActivationKeyPressed += OnActivationKeyPressed;
         _mappingService.ActivationStateChanged += OnActivationStateChanged;
+
+        _zedCursorColor = new ZedCursorColorService(_hookService.IsKoreanImeActive)
+        {
+            EnglishColor = options.ZedCursorColorEnglish,
+            KoreanColor = options.ZedCursorColorKorean,
+        };
+        if (options.ZedCursorColorEnabled)
+            _zedCursorColor.Start();
 
         LoadOptionsToViewModel();
 
@@ -107,6 +116,7 @@ public class TouchCursorWindowViewModel : BindableBase
 
         _taskbarIcon?.Dispose();
         _overlayWindow?.Close();
+        _zedCursorColor.Dispose();
         _hookService.Dispose();
         return false; // Allow close
     }
@@ -179,6 +189,7 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.SelectedLanguage = _options.Language;
         gs.OverlayPosition = _options.OverlayPosition;
         gs.ShowActivationOverlay = _options.ShowActivationOverlay;
+        gs.ZedCursorColorEnabled = _options.ZedCursorColorEnabled;
 
         // Load activation key profiles
         gs.ActivationKeyProfiles.Clear();
@@ -253,6 +264,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.Language = gs.SelectedLanguage;
         _options.OverlayPosition = gs.OverlayPosition;
         _options.ShowActivationOverlay = gs.ShowActivationOverlay;
+        _options.ZedCursorColorEnabled = gs.ZedCursorColorEnabled;
 
         _options.ExcludedProcessNames = _keyMappingsViewModel.ExceptionApps.ExcludedProcessNames.ToList();
 
@@ -393,6 +405,18 @@ public class TouchCursorWindowViewModel : BindableBase
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.ShowActivationOverlay))
         {
             _options.ShowActivationOverlay = _keyMappingsViewModel.GeneralSettings.ShowActivationOverlay;
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        }
+        else if (e.PropertyName == nameof(GeneralSettingsViewModel.ZedCursorColorEnabled))
+        {
+            var enabled = _keyMappingsViewModel.GeneralSettings.ZedCursorColorEnabled;
+            if (enabled == _options.ZedCursorColorEnabled)
+                return;
+            _options.ZedCursorColorEnabled = enabled;
+            if (enabled)
+                _zedCursorColor.Start();
+            else
+                _zedCursorColor.Stop();
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
     }

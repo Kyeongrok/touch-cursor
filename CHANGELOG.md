@@ -5,6 +5,21 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-11-22
+
+### Added
+- **Zed 커서 색을 한/영 상태에 따라 바꾸기** (일반 설정 토글, 기본 꺼짐)
+  - Zed 가 앞에 있을 때 0.2초마다 IME 상태를 읽어, 바뀌면 `%APPDATA%\Zed\settings.json` 의
+    `"experimental.theme_overrides"` → `players[0].cursor` 를 고쳐 쓴다. Zed 가 설정을 다시 읽어 바로 반영된다
+  - 영문 `#7ee787`(초록), 한글 `#ff9696`(빨강). `config.json` 의 `ZedCursorColorEnglish` / `ZedCursorColorKorean` 으로 바꿀 수 있다
+  - 상태가 바뀔 때만 쓰고, 같은 색이면 쓰지 않는다
+  - settings.json 이 심볼릭 링크(dotfiles 동기화)이거나 주석이 있으면 건드리지 않는다
+  - 토글을 끄면 넣었던 커서 색(과 빈 껍데기)만 지운다
+
+### Technical Details
+- 추가: `TouchCursor.Support/Local/Services/ZedCursorColorService.cs`
+- 변경: `TouchCursorOptions`, `GeneralSettingsViewModel`, `GeneralSettingsView.xaml`, `TouchCursorWindowViewModel`, `Strings.*.json`
+
 ## [2.4.2] - 2026-08-28
 
 ### Fixed
