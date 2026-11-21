@@ -5,6 +5,22 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-11-22
+
+### Added
+- **WezTerm 커서 색도 한/영 상태에 따라 바꾸기** (기존 "커서 색" 토글이 Zed, WezTerm 둘 다 맡는다)
+  - WezTerm 이 앞에 있을 때 한/영이 바뀌면 `%APPDATA%\TouchCursor\wezterm-cursor.txt` 에 색을 쓴다
+  - `~/.wezterm.lua` 가 이 파일을 읽어 `colors.cursor_bg` 로 쓰고, `add_to_config_reload_watch_list` 로 감시한다
+  - 토글을 끄면 파일을 비워 원래 커서 색으로 돌아간다
+
+### Changed
+- 시작프로그램 버튼 3개를 앱 스타일에 맞게 바꿈(모서리 4, ModernComboBox 와 같은 색). 등록 버튼은 강조색
+- 빠져 있던 번역 추가: 활성화 오버레이 표시, 활성화 키 홀드 지연, 저장
+
+### Technical Details
+- `ZedCursorColorService` → `ImeCursorColorService` (앱별로 마지막 상태를 따로 기억)
+- 추가: `TouchCursor.Support/Themes/Units/ModernButton.xaml` (`ModernButtonStyle`, `ModernPrimaryButtonStyle`)
+
 ## [2.6.0] - 2026-11-22
 
 ### Added

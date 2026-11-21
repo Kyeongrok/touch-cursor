@@ -26,7 +26,7 @@ public class TouchCursorWindowViewModel : BindableBase
     private ActivationOverlayWindow? _overlayWindow;
     private bool _isClosing = false;
     private System.Threading.Timer? _activationTimer;
-    private readonly ZedCursorColorService _zedCursorColor;
+    private readonly ImeCursorColorService _zedCursorColor;
 
     public KeyMappingsViewModel KeyMappingsViewModel => _keyMappingsViewModel;
 
@@ -51,7 +51,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _mappingService.ActivationKeyPressed += OnActivationKeyPressed;
         _mappingService.ActivationStateChanged += OnActivationStateChanged;
 
-        _zedCursorColor = new ZedCursorColorService(_hookService.IsKoreanImeActive)
+        _zedCursorColor = new ImeCursorColorService(_hookService.IsKoreanImeActive)
         {
             EnglishColor = options.ZedCursorColorEnglish,
             KoreanColor = options.ZedCursorColorKorean,
@@ -182,7 +182,7 @@ public class TouchCursorWindowViewModel : BindableBase
             return;
         Application.Current.Dispatcher.BeginInvoke(() =>
         {
-            var name = ZedCursorColorService.ForegroundProcessName();
+            var name = ImeCursorColorService.ForegroundProcessName();
             if (name != null && _options.EscToEnglishProcessNames.Any(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase)))
                 _hookService.SwitchImeToEnglish();
         });

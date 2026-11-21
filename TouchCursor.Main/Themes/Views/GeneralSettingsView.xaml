@@ -6,6 +6,7 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ModernComboBox.xaml"/>
+        <ResourceDictionary Source="/TouchCursor.Support;component/Themes/Units/ModernButton.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
     <Style TargetType="{x:Type views:GeneralSettingsView}">
@@ -27,13 +28,13 @@
                                 <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
                                     <Button Content="{loc:Localize SettingsWindow.RegisterStartup, Default='Register at startup'}"
                                             Command="{Binding RegisterStartupCommand}"
-                                            MinWidth="150" Height="28" Margin="0,0,8,0"/>
+                                            Style="{StaticResource ModernPrimaryButtonStyle}" Margin="0,0,8,0"/>
                                     <Button Content="{loc:Localize SettingsWindow.UnregisterStartup, Default='Unregister'}"
                                             Command="{Binding UnregisterStartupCommand}"
-                                            MinWidth="90" Height="28" Margin="0,0,8,0"/>
+                                            Style="{StaticResource ModernButtonStyle}" Margin="0,0,8,0"/>
                                     <Button Content="{loc:Localize SettingsWindow.OpenStartupFolder, Default='Open folder'}"
                                             Command="{Binding OpenStartupFolderCommand}"
-                                            MinWidth="140" Height="28"/>
+                                            Style="{StaticResource ModernButtonStyle}"/>
                                 </StackPanel>
                                 <TextBlock Text="{Binding StartupStatusText}"
                                            TextWrapping="Wrap" Margin="0,0,0,4" FontSize="11" Foreground="Gray"/>
@@ -42,7 +43,7 @@
                                                     IsChecked="{Binding ShowInTray}" Margin="0,4"/>
                                 <units:ToggleSwitch Content="{loc:Localize SettingsWindow.ShowActivationOverlay, Default='Show activation overlay'}"
                                                     IsChecked="{Binding ShowActivationOverlay}" Margin="0,4"/>
-                                <units:ToggleSwitch Content="{loc:Localize SettingsWindow.ZedCursorColor, Default='Zed cursor color by IME (English/Korean)'}"
+                                <units:ToggleSwitch Content="{loc:Localize SettingsWindow.ZedCursorColor, Default='Cursor color by IME in Zed, WezTerm'}"
                                                     IsChecked="{Binding ZedCursorColorEnabled}" Margin="0,4"/>
                                 <units:ToggleSwitch Content="{loc:Localize SettingsWindow.EscToEnglish, Default='Switch to English on Esc (Zed, WezTerm)'}"
                                                     IsChecked="{Binding EscToEnglish}" Margin="0,4"/>
