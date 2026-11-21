@@ -37,6 +37,10 @@ public class TouchCursorOptions : ITouchCursorOptions
     public string ZedCursorColorEnglish { get; set; } = "#7ee787";
     public string ZedCursorColorKorean { get; set; } = "#ff9696";
 
+    // 아래 앱이 앞에 있을 때 Esc 를 누르면 입력을 영문으로 바꾼다(Vim 노멀 모드용).
+    public bool EscToEnglish { get; set; } = false;
+    public List<string> EscToEnglishProcessNames { get; set; } = new() { "zed", "wezterm-gui" };
+
     // 활성화 키 홀드 딜레이: 활성화 키를 이 시간만큼 눌러야 커서 모드 활성화
     // 매핑된 키를 딜레이 전에 누르면 두 키 모두 일반 타이핑으로 처리됨
     // 0으로 설정하면 비활성화 (즉시 활성화)

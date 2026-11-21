@@ -87,21 +87,30 @@ public sealed class ZedCursorColorService : IDisposable
             return _lastForegroundIsZed;
 
         _lastForeground = hwnd;
-        _lastForegroundIsZed = false;
+        _lastForegroundIsZed = IsZedWindow(hwnd);
+        return _lastForegroundIsZed;
+    }
+
+    /// <summary>지금 앞에 있는 창의 프로세스 이름(확장자 없이). 못 읽으면 null.</summary>
+    public static string? ForegroundProcessName() => ProcessNameOf(GetForegroundWindow());
+
+    private static bool IsZedWindow(IntPtr hwnd) =>
+        string.Equals(ProcessNameOf(hwnd), ZedProcessName, StringComparison.OrdinalIgnoreCase);
+
+    private static string? ProcessNameOf(IntPtr hwnd)
+    {
         try
         {
             GetWindowThreadProcessId(hwnd, out var processId);
-            if (processId != 0)
-            {
-                using var process = Process.GetProcessById((int)processId);
-                _lastForegroundIsZed = string.Equals(process.ProcessName, ZedProcessName, StringComparison.OrdinalIgnoreCase);
-            }
+            if (processId == 0)
+                return null;
+            using var process = Process.GetProcessById((int)processId);
+            return process.ProcessName;
         }
         catch
         {
-            // 프로세스를 못 읽으면 Zed 가 아닌 것으로 본다.
+            return null; // 프로세스를 못 읽으면 대상이 아닌 것으로 본다.
         }
-        return _lastForegroundIsZed;
     }
 
     // ── settings.json 고치기 ─────────────────────────────

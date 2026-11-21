@@ -22,6 +22,7 @@ public class GeneralSettingsViewModel : BindableBase
     private OverlayPosition _overlayPosition = OverlayPosition.BottomRight;
     private bool _showActivationOverlay = true;
     private bool _zedCursorColorEnabled;
+    private bool _escToEnglish;
 
     #endregion
 
@@ -119,6 +120,12 @@ public class GeneralSettingsViewModel : BindableBase
     {
         get => _zedCursorColorEnabled;
         set => SetProperty(ref _zedCursorColorEnabled, value);
+    }
+
+    public bool EscToEnglish
+    {
+        get => _escToEnglish;
+        set => SetProperty(ref _escToEnglish, value);
     }
 
     #endregion

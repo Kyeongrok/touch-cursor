@@ -58,6 +58,7 @@ public class TouchCursorWindowViewModel : BindableBase
         };
         if (options.ZedCursorColorEnabled)
             _zedCursorColor.Start();
+        _hookService.EscapePressed += OnEscapePressed;
 
         LoadOptionsToViewModel();
 
@@ -174,6 +175,19 @@ public class TouchCursorWindowViewModel : BindableBase
         });
     }
 
+    /// <summary>훅 스레드에서 불린다. 대상 앱(Zed, WezTerm 등)이 앞에 있으면 UI 스레드에서 영문으로 바꾼다.</summary>
+    private void OnEscapePressed()
+    {
+        if (!_options.EscToEnglish)
+            return;
+        Application.Current.Dispatcher.BeginInvoke(() =>
+        {
+            var name = ZedCursorColorService.ForegroundProcessName();
+            if (name != null && _options.EscToEnglishProcessNames.Any(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase)))
+                _hookService.SwitchImeToEnglish();
+        });
+    }
+
     public bool ShouldHideOnMinimize => _options.ShowInNotificationArea;
 
     private void LoadOptionsToViewModel()
@@ -190,6 +204,7 @@ public class TouchCursorWindowViewModel : BindableBase
         gs.OverlayPosition = _options.OverlayPosition;
         gs.ShowActivationOverlay = _options.ShowActivationOverlay;
         gs.ZedCursorColorEnabled = _options.ZedCursorColorEnabled;
+        gs.EscToEnglish = _options.EscToEnglish;
 
         // Load activation key profiles
         gs.ActivationKeyProfiles.Clear();
@@ -265,6 +280,7 @@ public class TouchCursorWindowViewModel : BindableBase
         _options.OverlayPosition = gs.OverlayPosition;
         _options.ShowActivationOverlay = gs.ShowActivationOverlay;
         _options.ZedCursorColorEnabled = gs.ZedCursorColorEnabled;
+        _options.EscToEnglish = gs.EscToEnglish;
 
         _options.ExcludedProcessNames = _keyMappingsViewModel.ExceptionApps.ExcludedProcessNames.ToList();
 
@@ -405,6 +421,11 @@ public class TouchCursorWindowViewModel : BindableBase
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.ShowActivationOverlay))
         {
             _options.ShowActivationOverlay = _keyMappingsViewModel.GeneralSettings.ShowActivationOverlay;
+            _options.Save(TouchCursorOptions.GetDefaultConfigPath());
+        }
+        else if (e.PropertyName == nameof(GeneralSettingsViewModel.EscToEnglish))
+        {
+            _options.EscToEnglish = _keyMappingsViewModel.GeneralSettings.EscToEnglish;
             _options.Save(TouchCursorOptions.GetDefaultConfigPath());
         }
         else if (e.PropertyName == nameof(GeneralSettingsViewModel.ZedCursorColorEnabled))

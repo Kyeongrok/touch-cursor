@@ -5,6 +5,19 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-11-22
+
+### Added
+- **Esc 누르면 영문으로 바꾸기** (일반 설정 토글, 기본 꺼짐)
+  - Zed, WezTerm(`wezterm-gui`) 이 앞에 있을 때 Esc 를 누르면 한글 입력을 영문으로 바꾼다.
+    Vim 노멀 모드로 나올 때 한글 때문에 명령이 안 먹는 일을 막는다
+  - 키는 막지 않고 그대로 앱에 보낸다. 전환은 UI 스레드에서 해서 키보드 훅을 붙잡지 않는다
+  - 대상 앱은 `config.json` 의 `EscToEnglishProcessNames` 로 바꿀 수 있다
+
+### Technical Details
+- `KeyboardHookService`: `EscapePressed` 이벤트, `SwitchImeToEnglish()` (WM_IME_CONTROL / IMC_SETCONVERSIONMODE)
+- `ZedCursorColorService.ForegroundProcessName()`
+
 ## [2.5.0] - 2026-11-22
 
 ### Added

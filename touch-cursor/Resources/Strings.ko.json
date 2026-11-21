@@ -47,6 +47,7 @@
     "OpenStartupFolder": "시작프로그램 폴더 열기",
     "ShowInTray": "알림 영역에 아이콘 표시",
     "ZedCursorColor": "Zed 커서 색을 한/영에 따라 바꾸기 (영문 초록, 한글 빨강)",
+    "EscToEnglish": "Esc 누르면 영문으로 바꾸기 (Zed, WezTerm)",
     "CheckUpdates": "자동으로 업데이트 확인",
     "RolloverEnabled": "롤오버 활성화",
     "RolloverEnabledDescription": "활성화 시, 홀드 딜레이 전에 누른 키는 활성화 키와 함께 일반 타이핑으로 처리됩니다.",

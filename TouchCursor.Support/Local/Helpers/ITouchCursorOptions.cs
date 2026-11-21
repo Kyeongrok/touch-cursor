@@ -30,6 +30,8 @@ public interface ITouchCursorOptions
     bool ZedCursorColorEnabled { get; set; }
     string ZedCursorColorEnglish { get; set; }
     string ZedCursorColorKorean { get; set; }
+    bool EscToEnglish { get; set; }
+    List<string> EscToEnglishProcessNames { get; set; }
 
     // 메서드
     void Save(string filePath);

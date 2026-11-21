@@ -44,6 +44,8 @@
                                                     IsChecked="{Binding ShowActivationOverlay}" Margin="0,4"/>
                                 <units:ToggleSwitch Content="{loc:Localize SettingsWindow.ZedCursorColor, Default='Zed cursor color by IME (English/Korean)'}"
                                                     IsChecked="{Binding ZedCursorColorEnabled}" Margin="0,4"/>
+                                <units:ToggleSwitch Content="{loc:Localize SettingsWindow.EscToEnglish, Default='Switch to English on Esc (Zed, WezTerm)'}"
+                                                    IsChecked="{Binding EscToEnglish}" Margin="0,4"/>
 
                                 <Separator Margin="0,8"/>
 

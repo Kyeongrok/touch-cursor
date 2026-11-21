@@ -154,6 +154,12 @@ public class KeyboardHookService : IDisposable
     private IntPtr _lastForegroundWindow = IntPtr.Zero;
     private bool _lastExclusionResult = false;
 
+    private const int VK_ESCAPE = 0x1B;
+    private const int IMC_SETCONVERSIONMODE = 0x0002;
+
+    /// <summary>Esc 를 눌렀을 때(키 다운). 훅 스레드에서 불리므로 오래 걸리는 일은 넘겨서 한다.</summary>
+    public event Action? EscapePressed;
+
     public KeyboardHookService(IKeyMappingService mappingService, ITouchCursorOptions options)
     {
         _mappingService = mappingService;
@@ -198,6 +204,12 @@ public class KeyboardHookService : IDisposable
             if (hookStruct.dwExtraInfo == INJECTED_FLAG)
             {
                 return CallNextHookEx(_hookID, nCode, wParam, lParam);
+            }
+
+            // Esc 는 막지 않고 알리기만 한다(받는 쪽이 UI 스레드에서 처리해 훅을 붙잡지 않는다).
+            if (isKeyDown && vkCode == VK_ESCAPE)
+            {
+                EscapePressed?.Invoke();
             }
 
             // 포그라운드 프로세스가 제외 목록에 있으면 키 처리를 건너뜀
@@ -376,6 +388,37 @@ public class KeyboardHookService : IDisposable
         {
             ImmReleaseContext(focusedWindow, himc);
         }
+    }
+
+    /// <summary>
+    /// 앞에 있는 창의 입력을 영문으로 바꾼다. 이미 영문이면 아무것도 하지 않는다.
+    /// 다른 프로세스의 창이라도 IME 창에 WM_IME_CONTROL 을 보내면 바뀐다.
+    /// </summary>
+    public void SwitchImeToEnglish()
+    {
+        var foregroundWindow = GetForegroundWindow();
+        if (foregroundWindow == IntPtr.Zero)
+            return;
+
+        var focusedWindow = foregroundWindow;
+        var threadId = GetWindowThreadProcessId(foregroundWindow, out _);
+        var guiThreadInfo = new GUITHREADINFO { cbSize = Marshal.SizeOf<GUITHREADINFO>() };
+        if (GetGUIThreadInfo(threadId, ref guiThreadInfo) && guiThreadInfo.hwndFocus != IntPtr.Zero)
+        {
+            focusedWindow = guiThreadInfo.hwndFocus;
+        }
+
+        var imeWindow = ImmGetDefaultIMEWnd(focusedWindow);
+        if (imeWindow == IntPtr.Zero)
+            return;
+
+        if (!TryQueryIme(imeWindow, IMC_GETCONVERSIONMODE, out var conversionMode)
+            || (conversionMode & IME_CMODE_NATIVE) == 0)
+            return;
+
+        SendMessageTimeout(imeWindow, WM_IME_CONTROL, new IntPtr(IMC_SETCONVERSIONMODE),
+                           new IntPtr(conversionMode & ~IME_CMODE_NATIVE),
+                           SMTO_ABORTIFHUNG, IME_QUERY_TIMEOUT_MS, out _);
     }
 
     /// <summary>
