@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -42,6 +43,31 @@ public class TitleBar : Control
     {
         get => (string)GetValue(TitleProperty);
         set => SetValue(TitleProperty, value);
+    }
+
+    /// <summary>실행 파일의 버전, 예: "v2.7.0". 못 읽으면 빈 문자열. VersionProperty 보다 먼저 초기화돼야 한다.</summary>
+    public static string AppVersion { get; } = EntryAssemblyVersion();
+
+    public static readonly DependencyProperty VersionProperty =
+        DependencyProperty.Register(
+            nameof(Version),
+            typeof(string),
+            typeof(TitleBar),
+            new PropertyMetadata(AppVersion));
+
+    /// <summary>타이틀바 오른쪽에 보이는 버전. 기본값은 실행 파일의 버전(csproj 의 Version).</summary>
+    public string Version
+    {
+        get => (string)GetValue(VersionProperty);
+        set => SetValue(VersionProperty, value);
+    }
+
+    private static string EntryAssemblyVersion()
+    {
+        var assembly = Assembly.GetEntryAssembly();
+        var version = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                      ?? assembly?.GetName().Version?.ToString(3);
+        return string.IsNullOrEmpty(version) ? string.Empty : "v" + version.Split('+')[0];
     }
 
     public static readonly DependencyProperty IconProperty =

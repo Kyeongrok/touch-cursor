@@ -302,7 +302,7 @@ public class TouchCursorWindowViewModel : BindableBase
     {
         MessageBox.Show(
             "TouchCursor\n" +
-            "Version 1.0\n\n" +
+            $"Version {TouchCursor.Main.UI.Units.TitleBar.AppVersion.TrimStart('v')}\n\n" +
             "Based on original TouchCursor by Martin Stone\n" +
             "Licensed under GNU GPL v3",
             "About TouchCursor",

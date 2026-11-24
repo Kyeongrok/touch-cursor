@@ -5,6 +5,17 @@ All notable changes to TouchCursor for Windows will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.1] - 2026-11-24
+
+### Added
+- 타이틀바 오른쪽(`?` 버튼 왼쪽)에 현재 버전 표시 (예: `v2.7.1`)
+
+### Fixed
+- About 창에 버전이 늘 "Version 1.0" 으로 나오던 것을 실제 버전으로 표시
+
+### Technical Details
+- `TitleBar.Version` DP, `TitleBar.AppVersion` (실행 파일의 InformationalVersion)
+
 ## [2.7.0] - 2026-11-22
 
 ### Added

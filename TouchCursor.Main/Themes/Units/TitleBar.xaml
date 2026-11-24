@@ -49,6 +49,10 @@
 
                         <!-- Window Buttons -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <TextBlock Text="{TemplateBinding Version}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,4,0"
+                                       FontSize="11" Foreground="#999"/>
                             <Button x:Name="PART_HelpButton"
                                     Width="46" Height="32"
                                     Background="Transparent"
